@@ -211,27 +211,50 @@ class Registry_rule:
 
     def collect_option_default(self, option, parent):
         op = str(option.get())
-        print(op)
         if op.isnumeric():
+            op = int(op)
             if op == 0:
                 messagebox.showerror('Erro na definição do padrão', 'Selecione uma das opções para seguir',
                                      parent=parent)
-            if op == 0.5:
+            if op == 1:
                 self.choose_s = 5
                 self.choose_d = 2
-            elif op == 0.7:
+                messagebox.showinfo('Sucesso!', 'Escolha registrada, siga para definir o mês e ano da regra.',
+                                    parent=parent)
+                option.set(0)
+            elif op == 2:
                 self.choose_s = 6
                 self.choose_d = 1
+                messagebox.showinfo('Sucesso!', 'Escolha registrada, siga para definir o mês e ano da regra.',
+                                    parent=parent)
+                option.set(0)
             else:
                 self.choose_s = 7
                 self.choose_d = 0
+                messagebox.showinfo('Sucesso!', 'Escolha registrada, siga para definir o mês e ano da regra.',
+                                    parent=parent)
+                option.set(0)
 
-    def collect_option_style(self, option1, option2, parent):
+    def collect_option_style(self, option1, option2, parent, field1, field2):
         op1 = str(option1.get())
         op2 = str(option2.get())
         if op1.isnumeric() and op2.isnumeric():
-            self.choose_s = op1
-            self.choose_d = op2
+            op1, op2 = int(op1), int(op2)
+            if (op1 + op2) == 7:
+                self.choose_s = op1
+                self.choose_d = op2
+                messagebox.showinfo('Sucesso!', 'Escolhas registradas, siga para definir o mês e ano da regra.',
+                                    parent=parent)
+                field1.delete(0, END)
+                field2.delete(0, END)
+            else:
+                messagebox.showerror('Escolha inválida', 'A somatória dos dias de estudo e de folga devem totalizar 7.',
+                                     parent=parent)
+                field1.delete(0, END)
+                field2.delete(0, END)
+
         else:
-            messagebox.showerror('Erro na definição', 'Opção enviada contém letras ou outros caracteres não permitidos',
+            messagebox.showerror('Erro na definição', 'Opção enviada contém caracteres não permitidos ou esta vazia.',
                                  parent=parent)
+            field1.delete(0, END)
+            field2.delete(0, END)

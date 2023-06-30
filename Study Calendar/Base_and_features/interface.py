@@ -543,13 +543,13 @@ class Rule_window:
 
     def radio_combo(self):
         padrao1 = Radiobutton(self.frame_rules, text='5x2 (ExF)', bg=colors(5), fg=colors(2), font=('Calibri', 10, 'bold'),
-                              variable=self.var, value=0.5)
+                              variable=self.var, value=1)
         padrao1.place(relx=0.15, rely=0.23)
         padrao2 = Radiobutton(self.frame_rules, text='6x1 (ExF)', bg=colors(5), fg=colors(2), font=('Calibri', 10, 'bold'),
-                              variable=self.var, value=0.7)
+                              variable=self.var, value=2)
         padrao2.place(relx=0.15, rely=0.29)
         padrao3 = Radiobutton(self.frame_rules, text='7x0 (ExF)', bg=colors(5), fg=colors(2), font=('Calibri', 10, 'bold'),
-                              variable=self.var, value=0.9)
+                              variable=self.var, value=3)
         padrao3.place(relx=0.15, rely=0.35)
 
         #combos_rule
@@ -586,7 +586,7 @@ class Rule_window:
                               font=('Calibri', 9, 'bold'), command=lambda: rr.collect_option_default(self.var, self.window))
         button_rule1.place(relx=0.20, rely=0.43)
         button_rule2 = Button(self.frame_rules, text='Aplicar criação', bg=colors(2), fg=colors(5),
-                              font=('Calibri', 9, 'bold'), command=lambda: rr.collect_option_style(self.text, self.text1, self.window))
+                              font=('Calibri', 9, 'bold'), command=lambda: rr.collect_option_style(self.text, self.text1, self.window, entry_rule1, entry_rule2))
         button_rule2.place(relx=0.20, rely=0.70)
         button_rule3 = Button(self.frame_rules, text='Registrar escolhas', bg=colors(2), fg=colors(5),
                               font=('Calibri', 9, 'bold'), command=Scale_off_window)
@@ -607,20 +607,57 @@ class Scale_off_window:
         self.frame1 = None
         self.screen()
         self.frame()
+        self.choose_scale()
+        self.label()
         self.window.mainloop()
 
     def screen(self):
         self.window.title('Escala de folga')
         self.window.configure(background=colors(1))
-        self.window.geometry('300x300+400+50')
+        self.window.geometry('400x400+400+50')
         self.window.resizable(False, False)
-        self.window.maxsize(width=300, height=300)
-        self.window.minsize(width=300, height=300)
+        self.window.maxsize(width=400, height=400)
+        self.window.minsize(width=400, height=400)
         self.window.iconbitmap('images/girl.ico')
 
     def frame(self):
         self.frame1 = Frame(self.window, bg=colors(2))
         self.frame1.place(relx=0.04, rely=0.04, relwidth=0.92, relheight=0.92)
+
+    def choose_scale(self):
+        variables, checkbox = [], []
+        move_button = 0.04
+        days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom']
+        move_days = 0
+        for item in range(0, 7):
+            variables.append(IntVar(master=self.window))
+        for check in range(0, 7):
+            checkbox.append(check)
+            checkbox[check] = Checkbutton(self.window, text=days[move_days], variable=variables[check],
+                                          onvalue=check + 1, offvalue=0, font=('Calibri', 10, 'bold'), bg=colors(2),
+                                          fg=colors(4))
+            checkbox[check].place(relx=move_button, rely=0.30)
+            move_button += 0.13
+            move_days += 1
+        move_days = 0
+        move_button = 0.04
+        for check in range(0, 7):
+            checkbox.append(check)
+            checkbox[check + 7] = Checkbutton(self.window, text=days[move_days], variable=variables[check],
+                                              onvalue=check + 1, offvalue=0, font=('Calibri', 10, 'bold'), bg=colors(2),
+                                              fg=colors(4))
+            checkbox[check + 7].place(relx=move_button, rely=0.70)
+            move_button += 0.13
+            move_days += 1
+
+    def label(self):
+        label1 = Label(self.frame1, text='Escolha os dias de estudo e folga', bg=colors(2), fg=colors(1),
+                       font=('calibri', 13, 'bold'))
+        label1.place(relx=0.15, rely=0.05, relwidth=0.70)
+        label2 = Label(self.frame1, text='Dias de estudo', bg=colors(2), fg=colors(1), font=('calibri', 12, 'bold'))
+        label2.place(relx=0.25, rely=0.20, relwidth=0.50)
+        label2 = Label(self.frame1, text='Dias de folga', bg=colors(2), fg=colors(1), font=('calibri', 12, 'bold'))
+        label2.place(relx=0.25, rely=0.50, relwidth=0.50)
 
 
 a = Main_window()
