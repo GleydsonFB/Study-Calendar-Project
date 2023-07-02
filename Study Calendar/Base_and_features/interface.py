@@ -11,6 +11,7 @@ base.connect()
 base.table_create()
 dates = Issue_date()
 rr = Registry_rule()
+cs = Choose_scale()
 
 
 class Main_window:
@@ -604,60 +605,40 @@ class Scale_off_window:
     def __init__(self):
         window6 = Toplevel()
         self.window = window6
-        self.frame1 = None
+        self.frame1, self.variables, self.checkbox = None, [], []
+        self.button1, self.button2, self.label2 = None, None, None
         self.screen()
         self.frame()
-        self.choose_scale()
         self.label()
+        cs.scale_default(self.window)
+        self.button()
         self.window.mainloop()
 
     def screen(self):
         self.window.title('Escala de folga')
         self.window.configure(background=colors(1))
-        self.window.geometry('400x400+400+50')
+        self.window.geometry('400x200+400+50')
         self.window.resizable(False, False)
-        self.window.maxsize(width=400, height=400)
-        self.window.minsize(width=400, height=400)
+        self.window.maxsize(width=400, height=200)
+        self.window.minsize(width=400, height=200)
         self.window.iconbitmap('images/girl.ico')
 
     def frame(self):
         self.frame1 = Frame(self.window, bg=colors(2))
         self.frame1.place(relx=0.04, rely=0.04, relwidth=0.92, relheight=0.92)
 
-    def choose_scale(self):
-        variables, checkbox = [], []
-        move_button = 0.04
-        days = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom']
-        move_days = 0
-        for item in range(0, 7):
-            variables.append(IntVar(master=self.window))
-        for check in range(0, 7):
-            checkbox.append(check)
-            checkbox[check] = Checkbutton(self.window, text=days[move_days], variable=variables[check],
-                                          onvalue=check + 1, offvalue=0, font=('Calibri', 10, 'bold'), bg=colors(2),
-                                          fg=colors(4))
-            checkbox[check].place(relx=move_button, rely=0.30)
-            move_button += 0.13
-            move_days += 1
-        move_days = 0
-        move_button = 0.04
-        for check in range(0, 7):
-            checkbox.append(check)
-            checkbox[check + 7] = Checkbutton(self.window, text=days[move_days], variable=variables[check],
-                                              onvalue=check + 1, offvalue=0, font=('Calibri', 10, 'bold'), bg=colors(2),
-                                              fg=colors(4))
-            checkbox[check + 7].place(relx=move_button, rely=0.70)
-            move_button += 0.13
-            move_days += 1
-
     def label(self):
         label1 = Label(self.frame1, text='Escolha os dias de estudo e folga', bg=colors(2), fg=colors(1),
                        font=('calibri', 13, 'bold'))
         label1.place(relx=0.15, rely=0.05, relwidth=0.70)
-        label2 = Label(self.frame1, text='Dias de estudo', bg=colors(2), fg=colors(1), font=('calibri', 12, 'bold'))
-        label2.place(relx=0.25, rely=0.20, relwidth=0.50)
-        label2 = Label(self.frame1, text='Dias de folga', bg=colors(2), fg=colors(1), font=('calibri', 12, 'bold'))
-        label2.place(relx=0.25, rely=0.50, relwidth=0.50)
+        self.label2 = Label(self.frame1, text='Dias de estudo', bg=colors(2), fg=colors(1), font=('calibri', 12, 'bold'))
+        self.label2.place(relx=0.25, rely=0.30, relwidth=0.50)
+
+    def button(self):
+        self.button1 = Button(self.frame1, text='Definir', bg=colors(2), fg=colors(1), font=('calibri', 11, 'bold'),
+                              command=lambda: cs.set_study(self.window, rr.return_choose()[1], rr.return_choose()[0],
+                                                           self.label2, self.button1))
+        self.button1.place(relx=0.40, rely=0.70, relwidth=0.20)
 
 
 a = Main_window()
