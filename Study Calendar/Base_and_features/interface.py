@@ -590,7 +590,7 @@ class Rule_window:
                               font=('Calibri', 9, 'bold'), command=lambda: rr.collect_option_style(self.text, self.text1, self.window, entry_rule1, entry_rule2))
         button_rule2.place(relx=0.20, rely=0.70)
         button_rule3 = Button(self.frame_rules, text='Registrar escolhas', bg=colors(2), fg=colors(5),
-                              font=('Calibri', 9, 'bold'), command=Scale_off_window)
+                              font=('Calibri', 9, 'bold'), command=lambda: rr.open_scale(self.window, Scale_off_window, self.month, self.year))
         button_rule3.place(relx=0.18, rely=0.92)
 
         #content for condition frame
@@ -636,8 +636,8 @@ class Scale_off_window:
 
     def button(self):
         self.button1 = Button(self.frame1, text='Definir', bg=colors(2), fg=colors(1), font=('calibri', 11, 'bold'),
-                              command=lambda: cs.set_study(self.window, rr.return_choose()[1], rr.return_choose()[0],
-                                                           self.label2, self.button1))
+                              command=lambda: cs.set_study(self.window, rr.return_choose()[0], rr.return_choose()[1],
+                                                           rr.return_choose()[2], rr.return_choose()[3]))
         self.button1.place(relx=0.40, rely=0.70, relwidth=0.20)
 
 

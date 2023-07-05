@@ -108,6 +108,7 @@ def max_comment(limit, arg, field, parent, days, months, years):
         messagebox.showinfo('Sucesso!', 'comentário inserido no dia desejado!', parent=parent)
         field.delete(1.0, END)
 
+
 def show_tree(treeview):
     bd.connect()
     total = bd.simple_select('CATEGORY', 'id_cat')
@@ -208,6 +209,7 @@ class Complementar_tree:
 class Registry_rule:
     def __init__(self):
         self.choose_s, self.choose_d = None, None
+        self.year, self.month = None, None
 
     def collect_option_default(self, option, parent):
         op = str(option.get())
@@ -260,15 +262,31 @@ class Registry_rule:
             field2.delete(0, END)
 
     def return_choose(self):
-        return self.choose_d, self.choose_s
+        return self.choose_s, self.choose_d, self.month, self.year
+
+    def open_scale(self, parent, new_window, mon, yea):
+        self.month = mon.get()
+        self.year = yea.get()
+        if self.choose_s == 7:
+            messagebox.showinfo('Escala definida!', 'Tudo certo agora, aproveite seus estudos (7 dias direto é para pessoas estudiosas mesmo hein!)',
+                                parent=parent)
+            week = [1, 1, 1, 1, 1, 1, 1]
+            bd.connect()
+            bd.insert_week(self.choose_s, 0, self.month, self.year, week)
+            self.choose_s = None
+            bd.disconnect()
+            self.month, self.year = None, None
+        elif self.choose_s is None or self.choose_d is None:
+            messagebox.showerror('Erro', 'Escolha primeiro a quantia de dias para estudo e folga', parent=parent)
+        else:
+            new_window()
 
 
 class Choose_scale:
     def __init__(self):
-        self.study, self.off, self.check = [], [], []
+        self.study, self.check = [], []
         self.variables, self.days = [], ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom']
-        self.check_place, self.check_use = [], []
-        self.button, self.button1 = None, None
+        self.week = []
 
     def scale_default(self, parent):
         move_button = 0.04
@@ -281,48 +299,27 @@ class Choose_scale:
                                             onvalue=check + 1, offvalue=0, font=('Calibri', 10, 'bold'), bg=colors(2),
                                             fg=colors(4))
             self.check[check].place(relx=move_button, rely=0.50)
-            self.check_place.append(move_button)
             move_button += 0.13
             move_days += 1
-        move_days = 0
-        move_button = 0.04
 
-    def set_offs(self, choose_d, parent, label):
-        if choose_d < len(self.off) or choose_d > len(self.off):
-            messagebox.showerror('Erro na escolha', 'Quantidade de folgas escolhas é diferente do defino antes.',
-                                 parent=parent)
-            self.off = []
-        else:
-            messagebox.showinfo('Dias registrados', 'Escolhas definidas com sucesso!', parent=parent)
-            self.button1.place_forget()
-            self.button.place(relx=0.40, rely=0.70, relwidth=0.20)
-            self.off = []
-            for place in range(0, len(self.check_use)):
-                self.check[self.check_use[place]].place(relx=self.check_place[self.check_use[place]], rely=0.50)
-            for variable in range(0, len(self.variables)):
-                self.variables[variable].set(0)
-            label.config(text='Dias de estudo')
-
-    def set_study(self, parent, choose_s, choose_d, label, button):
+    def set_study(self, parent, choose_s, choose_d, choose_m, choose_y):
         for variable in range(0, len(self.variables)):
             if self.variables[variable].get() == 0:
-                self.off.append(self.variables[variable].get())
+                self.week.append(0)
             else:
+                self.week.append(1)
                 self.study.append(self.variables[variable].get())
         if choose_s < len(self.study) or choose_s > len(self.study):
             messagebox.showerror('Erro na escolha', 'Quantidade dias definidos é diferente do definido na janela anterior.',
                                  parent=parent)
-            self.study, self.off = [], []
-        else:
-            messagebox.showinfo('Dias registrados', 'Agora escolha os dias de folga, respeitando o informando na janela de regras.',
-                                parent=parent)
-            label.config(text='Dias de folga')
-            for checkbox in range(0, len(self.study)):
-                self.check[self.study[checkbox] - 1].place_forget()
-                self.check_use.append(self.study[checkbox] - 1)
-            self.button = button
-            self.button.place_forget()
-            self.button1 = Button(parent, text='Escolher folgas', bg=colors(2), fg=colors(1), font=('calibri', 11, 'bold'),
-                                  command=lambda: self.set_offs(choose_d, parent, label))
-            self.button1.place(relx=0.375, rely=0.70, relwidth=0.25)
             self.study = []
+        else:
+            messagebox.showinfo('Dias registrados', 'O(s) dia(s) de folga é(são) o(s) não escolhido(s).',
+                                parent=parent)
+            bd.connect()
+            bd.insert_week(choose_s, choose_d, choose_m, choose_y, self.week)
+            bd.disconnect()
+            parent.destroy()
+            self.study = []
+            for variable in range(0, len(self.variables)):
+                self.variables[variable].set(0)

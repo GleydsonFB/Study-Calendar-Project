@@ -54,18 +54,24 @@ class Database:
                            'cate_ref INT NOT NULL,'
                            'FOREIGN KEY (cate_ref) REFERENCES category(id_cat));')
 
-        self.mouse.execute('CREATE TABLE IF NOT EXISTS totalOff('
-                           'id_off integer NOT NULL PRIMARY KEY AUTOINCREMENT,'
-                           'day_off INT NOT NULL,'
-                           'month INT NOT NULL,'
-                           'YEAR INT NOT NULL);')
+        self.mouse.execute('CREATE TABLE IF NOT EXISTS week('
+                           'id_wek integer NOT NULL PRIMARY KEY AUTOINCREMENT,'
+                           'seg INT NOT NULL,'
+                           'ter INT NOT NULL,'
+                           'qua INT NOT NULL,'
+                           'qui INT NOT NULL,'
+                           'sex INT NOT NULL,'
+                           'sab INT NOT NULL,'
+                           'dom INT NOT NULL)')
 
         self.mouse.execute('CREATE TABLE IF NOT EXISTS scale('
                            'id_sca integer NOT NULL PRIMARY KEY AUTOINCREMENT,'
                            'work INT NOT NULL,'
                            'off INT NOT NULL,'
                            'month INT NOT NULL,'
-                           'year INT NOT NULL)')
+                           'year INT NOT NULL,'
+                           'week INT,'
+                           'FOREIGN KEY(week) REFERENCES week(id_wek));')
 
     def simple_select(self, table, name_col):
         sql = f'SELECT {name_col} FROM {table};'
@@ -138,7 +144,12 @@ class Database:
         self.mouse.execute(sql)
         self.con.commit()
 
-    def insert_rule(self, study_day, day_off, month, year):
-        sql = f'INSERT INTO scale (work, off, month, year) VALUES ("{study_day}", "{day_off}", "{month}", "{year}");'
+    def insert_week(self, study_day, day_off, month, year, week):
+        sql = 'INSERT INTO week(seg, ter, qua, qui, sex, sab, dom) VALUES ("{}", "{}", "{}", "{}", "{}", "{}", "{}")'\
+            .format(week[0], week[1], week[2], week[3], week[4], week[5], week[6])
         self.mouse.execute(sql)
+        id_week = self.mouse.lastrowid
+        self.con.commit()
+        sql1 = f'INSERT INTO scale (work, off, month, year, week) VALUES ("{study_day}", "{day_off}", "{month}", "{year}", "{id_week}");'
+        self.mouse.execute(sql1)
         self.con.commit()
