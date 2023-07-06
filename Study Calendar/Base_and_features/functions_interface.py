@@ -323,3 +323,33 @@ class Choose_scale:
             self.study = []
             for variable in range(0, len(self.variables)):
                 self.variables[variable].set(0)
+
+
+def registry_condition(parent, mon, yea, eff, field, cat):
+    if cat == '':
+        messagebox.showerror('Erro no cadastro da condição',
+                             'Não foi informada uma categoria para aplicar a efetividade.',
+                             parent=parent)
+    elif eff == '':
+        messagebox.showerror('Erro no cadastro da condição',
+                             f'Não foi passado um valor para a efetividade da categoria {cat}.',
+                             parent=parent)
+        field.delete(0, END)
+    else:
+        v_eff = str(eff)
+        v_eff = v_eff.replace(',', '.')
+        try:
+            verify = float(v_eff)
+        except:
+            messagebox.showerror('Erro no cadastro da condição',
+                                 'Valor inserido no campo de efetividade não é um número inteiro ou real.',
+                                 parent=parent)
+            field.delete(0, END)
+        else:
+            bd.connect()
+            bd.insert_effectivity(v_eff, cat, mon.get(), yea.get())
+            bd.disconnect()
+            messagebox.showinfo('Sucesso!',
+                                f'Efetividade de {v_eff}% para a categoria {cat.upper()} durante o período do mês {mon.get()} de {yea.get()} inserida com sucesso!',
+                                parent=parent)
+            field.delete(0, END)

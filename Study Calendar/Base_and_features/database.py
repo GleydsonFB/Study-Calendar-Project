@@ -20,9 +20,17 @@ class Database:
                            'color VARCHAR(255)'
                            ');')
 
+        self.mouse.execute('CREATE TABLE IF NOT EXISTS effectivity('
+                           'id_eff integer NOT NULL PRIMARY KEY AUTOINCREMENT,'
+                           'efficiency FLOAT NOT NULL,'
+                           'id_cat INT NOT NULL,'
+                           'month TEXT NOT NULL,'
+                           'year INT NOT NULL,'
+                           'FOREIGN KEY(id_cat) REFERENCES category(id_cat));')
+
         self.mouse.execute('CREATE TABLE IF NOT EXISTS dayOff('
                            'id_day integer NOT NULL PRIMARY KEY AUTOINCREMENT,'
-                           'month INT NOT NULL,'
+                           'month TEXT NOT NULL,'
                            'day INT NOT NULL,'
                            'year INT NOT NULL);')
 
@@ -30,14 +38,14 @@ class Database:
                            'id_com integer NOT NULL PRIMARY KEY AUTOINCREMENT,'
                            'description VARCHAR(255),'
                            'day INT NOT NULL,'
-                           'month INT NOT NULL,'
+                           'month TEXT NOT NULL,'
                            'year INT NOT NULL);')
 
         self.mouse.execute('CREATE TABLE IF NOT EXISTS calendar('
                            'id_cal integer NOT NULL PRIMARY KEY AUTOINCREMENT,'
                            'time INT NOT NULL,'
                            'day INT NOT NULL,'
-                           'month INT NOT NULL,'
+                           'month TEXT NOT NULL,'
                            'year INT NOT NULL,'
                            'cat_ref INT,'
                            'offd_ref INT,'
@@ -49,7 +57,7 @@ class Database:
         self.mouse.execute('CREATE TABLE IF NOT EXISTS goal('
                            'id_goa integer NOT NULL PRIMARY KEY AUTOINCREMENT,'
                            'objective INT NOT NULL,'
-                           'month INT NOT NULL,'
+                           'month TEXT NOT NULL,'
                            'year INT NOT NULL,'
                            'cate_ref INT NOT NULL,'
                            'FOREIGN KEY (cate_ref) REFERENCES category(id_cat));')
@@ -68,7 +76,7 @@ class Database:
                            'id_sca integer NOT NULL PRIMARY KEY AUTOINCREMENT,'
                            'work INT NOT NULL,'
                            'off INT NOT NULL,'
-                           'month INT NOT NULL,'
+                           'month TEXT NOT NULL,'
                            'year INT NOT NULL,'
                            'week INT,'
                            'FOREIGN KEY(week) REFERENCES week(id_wek));')
@@ -151,5 +159,15 @@ class Database:
         id_week = self.mouse.lastrowid
         self.con.commit()
         sql1 = f'INSERT INTO scale (work, off, month, year, week) VALUES ("{study_day}", "{day_off}", "{month}", "{year}", "{id_week}");'
+        self.mouse.execute(sql1)
+        self.con.commit()
+
+    def insert_effectivity(self, eff, cat, month, year):
+        sql = f'SELECT id_cat FROM category WHERE name = "{cat}";'
+        self.mouse.execute(sql)
+        id_cat = 0
+        for ids in self.mouse:
+            id_cat = ids[0]
+        sql1 = f'INSERT INTO effectivity(efficiency, id_cat, month, year) VALUES ({eff}, {id_cat}, "{month}", {year});'
         self.mouse.execute(sql1)
         self.con.commit()

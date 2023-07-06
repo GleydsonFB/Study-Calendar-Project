@@ -206,9 +206,9 @@ class Category_window:
 
     def tree_view(self):
         style = ttk.Style()
-        style.theme_use('classic')
+        style.theme_use('clam')
         style.configure("Treeview.Heading", background=colors(5), foreground=colors(1))
-        style.configure('Treeview', foreground='black', fieldbackground=colors(1), font=('calibri', 12, 'bold'))
+        style.configure('Treeview', fieldbackground=colors(1), font=('calibri', 12, 'bold'))
         style.map('Treeview', background=[('selected', colors(3))])
         style.configure('Scrollbar')
         self.listt = ttk.Treeview(self.frame1, height=3, columns=('Nome da categoria', 'vazio'), selectmode='browse',
@@ -396,7 +396,7 @@ class Remove_elem_window:
 
     def tree_view(self):
         style = ttk.Style()
-        style.theme_use('classic')
+        style.theme_use('clam')
         style.configure("Treeview.Heading", background=colors(3), foreground=colors(1))
         style.configure('Treeview', fieldbackground=colors(5), font=('calibri', 12, 'bold'))
         style.map('Treeview', background=[('selected', colors(1))])
@@ -597,7 +597,8 @@ class Rule_window:
         entry_condition1 = Entry(self.frame_conditions, bg=colors(1), fg=colors(5), textvariable=self.effectivity)
         entry_condition1.place(relx=0.45, rely=0.57, relwidth=0.10)
         button_condition = Button(self.frame_conditions, text='Capturar efetividade', bg=colors(2), fg=colors(5),
-                                  font=('Calibri', 9, 'bold'))
+                                  font=('Calibri', 9, 'bold'), command=lambda: registry_condition(self.window, self.monthc, self.yearc, self.effectivity.get(), entry_condition1,
+                                                                                                  self.category.get()))
         button_condition.place(relx=0.25, rely=0.90)
 
 
