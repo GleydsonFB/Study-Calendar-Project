@@ -12,6 +12,7 @@ base.table_create()
 dates = Issue_date()
 rr = Registry_rule()
 cs = Choose_scale()
+dm = Days_month()
 
 
 class Main_window:
@@ -85,7 +86,7 @@ class Schedule_window:
         self.screen()
         self.frame()
         self.label()
-        self.days_month()
+        dm.day_month_system(self.frame2, self.frame1, self.window)
         self.button()
         self.window.mainloop()
 
@@ -140,42 +141,14 @@ class Schedule_window:
         #custom buttons
         button3 = Button(self.window, image=self.bt_left, bg=colors(2), borderwidth=0)
         button3.place(relx=0.045, rely=0.042)
-        button4 = Button(self.window, image=self.bt_right, bg=colors(2), borderwidth=0)
+        button4 = Button(self.window, image=self.bt_right, bg=colors(2), borderwidth=0, command=lambda: dm.change_month(combo))
         button4.place(relx=0.925, rely=0.042)
 
-    def days_month(self):
-        self.all_days, self.number_day, self.name_day = [], [], []
-        control, relx, rely = 0, 0.02, 0.02
-        max_width = 100
-        for days in range(1, dates.date_month()[1] + 1):
-            self.number_day.append(days)
-            self.name_day.append(days)
-        for number in range(len(self.number_day)):
-            self.all_days.append(number)
-            self.all_days[number] = Frame(self.frame2, bd=1, bg=colors(4))
-        while True:
-            if control >= len(self.all_days):
-                break
-            else:
-                if max_width >= 2:
-                    self.name_day[control] = Label(self.frame2, text=f'Dia {self.number_day[control]}', fg=colors(5),
-                                                   bg=colors(3),
-                                                   font=('Calibri', 10, 'bold'))
-                    self.name_day[control].place(relx=relx + 0.035, rely=rely - 0.015, relheight=0.02)
-                    self.all_days[control].place(relx=relx, rely=rely + 0.015, relwidth=0.10, relheight=0.20)
-                    max_width -= 14
-                    relx += 0.12
-                    control += 1
-                else:
-                    max_width = 100
-                    rely += 0.24
-                    relx = 0.02
-
-            #combo days for day offs
-            list_day = dates.day_registry()
-            combo1 = ttk.Combobox(self.frame1, values=list_day, state='readonly', background=colors(5))
-            combo1.set(list_day[dates.date_month()[2] - 1])
-            combo1.place(relx=0.85, rely=0.95, relwidth=0.03)
+        # combo days for day offs
+        list_day = dates.day_registry()
+        combo = ttk.Combobox(self.frame1, values=list_day, state='readonly', background=colors(5))
+        combo.set(list_day[dates.date_month()[2] - 1])
+        combo.place(relx=0.85, rely=0.95, relwidth=0.03)
 
 
 class Category_window:

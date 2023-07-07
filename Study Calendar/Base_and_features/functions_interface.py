@@ -3,6 +3,7 @@ from tkinter import messagebox
 from tkinter import *
 from tkinter import colorchooser
 from database import *
+from tkinter import ttk
 
 date = datetime.datetime.now()
 month = date.month
@@ -156,11 +157,13 @@ def insert_goal(arg, field, parent, months, years, category):
         else:
             insert = bd.insert_goal(ctg, months, years, cat[0])
             if insert == 1:
-                messagebox.showinfo('Sucesso!', f'meta para a categoria {category} no mês {months} de {years} foi definida como'
-                                                f' sendo {ctg} minuto(s).', parent=parent)
+                messagebox.showinfo('Sucesso!',
+                                    f'meta para a categoria {category} no mês {months} de {years} foi definida como'
+                                    f' sendo {ctg} minuto(s).', parent=parent)
                 bd.disconnect()
             else:
-                messagebox.showerror('Erro no registro de meta', 'As informações preenchidas no campo de minutos estão inválidas.'
+                messagebox.showerror('Erro no registro de meta',
+                                     'As informações preenchidas no campo de minutos estão inválidas.'
                                      , parent=parent)
                 field.delete(0, END)
                 bd.disconnect()
@@ -268,7 +271,8 @@ class Registry_rule:
         self.month = mon.get()
         self.year = yea.get()
         if self.choose_s == 7:
-            messagebox.showinfo('Escala definida!', 'Tudo certo agora, aproveite seus estudos (7 dias direto é para pessoas estudiosas mesmo hein!)',
+            messagebox.showinfo('Escala definida!',
+                                'Tudo certo agora, aproveite seus estudos (7 dias direto é para pessoas estudiosas mesmo hein!)',
                                 parent=parent)
             week = [1, 1, 1, 1, 1, 1, 1]
             bd.connect()
@@ -310,7 +314,8 @@ class Choose_scale:
                 self.week.append(1)
                 self.study.append(self.variables[variable].get())
         if choose_s < len(self.study) or choose_s > len(self.study):
-            messagebox.showerror('Erro na escolha', 'Quantidade dias definidos é diferente do definido na janela anterior.',
+            messagebox.showerror('Erro na escolha',
+                                 'Quantidade dias definidos é diferente do definido na janela anterior.',
                                  parent=parent)
             self.study = []
         else:
@@ -346,10 +351,60 @@ def registry_condition(parent, mon, yea, eff, field, cat):
                                  parent=parent)
             field.delete(0, END)
         else:
-            bd.connect()
-            bd.insert_effectivity(v_eff, cat, mon.get(), yea.get())
-            bd.disconnect()
-            messagebox.showinfo('Sucesso!',
-                                f'Efetividade de {v_eff}% para a categoria {cat.upper()} durante o período do mês {mon.get()} de {yea.get()} inserida com sucesso!',
-                                parent=parent)
-            field.delete(0, END)
+            v_eff = float(v_eff)
+            if v_eff < 0:
+                messagebox.showerror('Erro no registro da efetividade',
+                                     'Valor passado é negativo, não sendo possível o uso.',
+                                     parent=parent)
+                field.delete(0, END)
+            else:
+                bd.connect()
+                bd.insert_effectivity(v_eff, cat, mon.get(), yea.get())
+                bd.disconnect()
+                messagebox.showinfo('Sucesso!',
+                                    f'Efetividade de {v_eff}% para a categoria {cat.upper()} durante o período do mês {mon.get()} de {yea.get()} inserida com sucesso!',
+                                    parent=parent)
+                field.delete(0, END)
+
+
+dates = Issue_date()
+
+
+class Days_month:
+    def __init__(self):
+        self.all_days, self.number_day, self.name_day = [], [], []
+        self.test = 0
+
+    def day_month_system(self, frame, frame1, window):
+        self.all_days, self.number_day, self.name_day = [], [], []
+        control, relx, rely = 0, 0.02, 0.02
+        max_width = 100
+        for days in range(1, dates.date_month()[1] + 1):
+            self.number_day.append(days)
+            self.name_day.append(days)
+        for number in range(len(self.number_day)):
+            self.all_days.append(number)
+            self.all_days[number] = Frame(frame, bd=1, bg=colors(4))
+        while True:
+            if control >= len(self.all_days):
+                break
+            else:
+                if max_width >= 2:
+                    self.name_day[control] = Label(frame, text=f'Dia {self.number_day[control]}', fg=colors(5),
+                                                   bg=colors(3),
+                                                   font=('Calibri', 10, 'bold'))
+                    self.name_day[control].place(relx=relx + 0.035, rely=rely - 0.015, relheight=0.02)
+                    self.all_days[control].place(relx=relx, rely=rely + 0.015, relwidth=0.10, relheight=0.20)
+                    max_width -= 14
+                    relx += 0.12
+                    control += 1
+                else:
+                    max_width = 100
+                    rely += 0.24
+                    relx = 0.02
+
+    def change_month(self, combo):
+        combo.place_forget()
+
+    def clear_month(self):
+        self.__init__()
