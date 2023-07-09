@@ -15,14 +15,21 @@ bd = Database()
 class Issue_date:
     def __init__(self):
         self.months = month
+        self.future, self.back, self.name_month_back, self.name_month_future = 0, 0, 0, 0
+        self.year_back, self.year_future, self.year_now = 0, 0, year
+        self.change_or_not = False
 
-    def date_month(self, *back_time):
-        if len(back_time) == 0:
+    def date_month(self, back_time=0, advance_time=0, change_or_not=False):
+        self.change_or_not = change_or_not
+        if back_time == 0 and advance_time == 0:
             match self.months:
                 case 1:
                     return 'janeiro', 31, day
                 case 2:
-                    return 'fevereiro', 28, day
+                    if (self.year_now % 4 == 0 and self.year_now % 100 != 0) or self.year_now % 4 == 0:
+                        return 'fevereiro', 29, day
+                    else:
+                        return 'fevereiro', 28, day
                 case 3:
                     return 'março', 31, day
                 case 4:
@@ -43,39 +50,98 @@ class Issue_date:
                     return 'novembro', 30, day
                 case 12:
                     return 'dezembro', 31, day
+        elif back_time >= 1 and advance_time == 0:
+            if self.change_or_not is True:
+                self.back += back_time
+                choose_now = self.months + self.future - self.back
+            else:
+                self.name_month_back += back_time
+                choose_now = self.months + self.name_month_future - self.name_month_back
+            if 12 >= choose_now >= 1:
+                match choose_now:
+                    case 1:
+                        return 'janeiro', 31, day
+                    case 2:
+                        if (self.year_now % 4 == 0 and self.year_now % 100 != 0) or self.year_now % 4 == 0:
+                            return 'fevereiro', 29, day
+                        else:
+                            return 'fevereiro', 28, day
+                    case 3:
+                        return 'março', 31, day
+                    case 4:
+                        return 'abril', 30, day
+                    case 5:
+                        return 'maio', 31, day
+                    case 6:
+                        return 'junho', 30, day
+                    case 7:
+                        return 'julho', 31, day
+                    case 8:
+                        return 'agosto', 31, day
+                    case 9:
+                        return 'setembro', 30, day
+                    case 10:
+                        return 'outubro', 31, day
+                    case 11:
+                        return 'novembro', 30, day
+                    case 12:
+                        return 'dezembro', 31, day
+            else:
+                self.months = 12
+                self.back, self.name_month_back = -1, 0
+                self.year_back -= 1
+                self.year_now = self.year_now + self.year_future - self.year_back
+                return 'dezembro', 31, day
         else:
-            self.months -= back_time
-            match self.months:
-                case 1:
-                    return 'janeiro', 31, day
-                case 2:
-                    return 'fevereiro', 28, day
-                case 3:
-                    return 'março', 31, day
-                case 4:
-                    return 'abril', 30, day
-                case 5:
-                    return 'maio', 31, day
-                case 6:
-                    return 'junho', 30, day
-                case 7:
-                    return 'julho', 31, day
-                case 8:
-                    return 'agosto', 31, day
-                case 9:
-                    return 'setembro', 30, day
-                case 10:
-                    return 'outubro', 31, day
-                case 11:
-                    return 'novembro', 30, day
-                case 12:
-                    return 'dezembro', 31, day
+            if change_or_not is True:
+                self.future += advance_time
+                choose_now = self.months + self.future - self.back
+            else:
+                self.name_month_future += advance_time
+                choose_now = self.months + self.name_month_future - self.name_month_back
+            if 12 >= choose_now >= 1:
+                match choose_now:
+                    case 1:
+                        return 'janeiro', 31, day
+                    case 2:
+                        if (self.year_now % 4 == 0 and self.year_now % 100 != 0) or self.year_now % 4 == 0:
+                            return 'fevereiro', 29, day
+                        else:
+                            return 'fevereiro', 28, day
+                    case 3:
+                        return 'março', 31, day
+                    case 4:
+                        return 'abril', 30, day
+                    case 5:
+                        return 'maio', 31, day
+                    case 6:
+                        return 'junho', 30, day
+                    case 7:
+                        return 'julho', 31, day
+                    case 8:
+                        return 'agosto', 31, day
+                    case 9:
+                        return 'setembro', 30, day
+                    case 10:
+                        return 'outubro', 31, day
+                    case 11:
+                        return 'novembro', 30, day
+                    case 12:
+                        return 'dezembro', 31, day
+            else:
+                self.months = 1
+                self.future, self.name_month_future = -1, 0
+                self.year_future += 1
+                return 'janeiro', 31, day
 
     def day_registry(self):
         list_day = []
         for days in range(1, self.date_month()[1] + 1):
             list_day.append(str(days))
         return list_day
+
+    def reset_all(self):
+        self.__init__()
 
 
 def colors(scale):
@@ -374,6 +440,7 @@ class Days_month:
     def __init__(self):
         self.all_days, self.number_day, self.name_day = [], [], []
         self.test = 0
+        self.advance_right = 0
 
     def day_month_system(self, frame, frame1, window):
         self.all_days, self.number_day, self.name_day = [], [], []
@@ -402,9 +469,72 @@ class Days_month:
                     max_width = 100
                     rely += 0.24
                     relx = 0.02
+        dates.reset_all()
 
-    def change_month(self, combo):
+    def change_month_back(self, combo, label, frame):
         combo.place_forget()
+        changing = 1
+        for number in range(0, len(self.all_days)):
+            self.all_days[number].place_forget()
+            self.name_day[number].place_forget()
+        self.all_days, self.number_day, self.name_day = [], [], []
+        control, relx, rely = 0, 0.02, 0.02
+        max_width = 100
+        label.config(text=f'Agenda de {dates.date_month(back_time=changing)[0]}/{dates.year_now}!')
+        for days in range(1, dates.date_month(back_time=changing, change_or_not=True)[1] + 1):
+            self.number_day.append(days)
+            self.name_day.append(days)
+        for number in range(len(self.number_day)):
+            self.all_days.append(number)
+            self.all_days[number] = Frame(frame, bd=1, bg=colors(4))
+        while True:
+            if control >= len(self.all_days):
+                break
+            else:
+                if max_width >= 2:
+                    self.name_day[control] = Label(frame, text=f'Dia {self.number_day[control]}', fg=colors(5),
+                                                   bg=colors(3),
+                                                   font=('Calibri', 10, 'bold'))
+                    self.name_day[control].place(relx=relx + 0.035, rely=rely - 0.015, relheight=0.02)
+                    self.all_days[control].place(relx=relx, rely=rely + 0.015, relwidth=0.10, relheight=0.20)
+                    max_width -= 14
+                    relx += 0.12
+                    control += 1
+                else:
+                    max_width = 100
+                    rely += 0.24
+                    relx = 0.02
 
-    def clear_month(self):
-        self.__init__()
+    def change_month_future(self, combo, label, frame):
+        combo.place_forget()
+        changing = 1
+        for number in range(0, len(self.all_days)):
+            self.all_days[number].place_forget()
+            self.name_day[number].place_forget()
+        self.all_days, self.number_day, self.name_day = [], [], []
+        control, relx, rely = 0, 0.02, 0.02
+        max_width = 100
+        label.config(text=f'Agenda de {dates.date_month(advance_time=changing)[0]}/{dates.year_now}!')
+        for days in range(1, dates.date_month(advance_time=changing, change_or_not=True)[1] + 1):
+            self.number_day.append(days)
+            self.name_day.append(days)
+        for number in range(len(self.number_day)):
+            self.all_days.append(number)
+            self.all_days[number] = Frame(frame, bd=1, bg=colors(4))
+        while True:
+            if control >= len(self.all_days):
+                break
+            else:
+                if max_width >= 2:
+                    self.name_day[control] = Label(frame, text=f'Dia {self.number_day[control]}', fg=colors(5),
+                                                   bg=colors(3),
+                                                   font=('Calibri', 10, 'bold'))
+                    self.name_day[control].place(relx=relx + 0.035, rely=rely - 0.015, relheight=0.02)
+                    self.all_days[control].place(relx=relx, rely=rely + 0.015, relwidth=0.10, relheight=0.20)
+                    max_width -= 14
+                    relx += 0.12
+                    control += 1
+                else:
+                    max_width = 100
+                    rely += 0.24
+                    relx = 0.02

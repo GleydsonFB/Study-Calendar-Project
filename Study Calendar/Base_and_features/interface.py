@@ -139,9 +139,9 @@ class Schedule_window:
         button6.place(relx=0.03, rely=0.945, relwidth=0.10)
 
         #custom buttons
-        button3 = Button(self.window, image=self.bt_left, bg=colors(2), borderwidth=0)
+        button3 = Button(self.window, image=self.bt_left, bg=colors(2), borderwidth=0, command=lambda: dm.change_month_back(combo, self.label1, self.frame2))
         button3.place(relx=0.045, rely=0.042)
-        button4 = Button(self.window, image=self.bt_right, bg=colors(2), borderwidth=0, command=lambda: dm.change_month(combo))
+        button4 = Button(self.window, image=self.bt_right, bg=colors(2), borderwidth=0, command=lambda: dm.change_month_future(combo, self.label1, self.frame2))
         button4.place(relx=0.925, rely=0.042)
 
         # combo days for day offs
