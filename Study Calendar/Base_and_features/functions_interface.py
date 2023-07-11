@@ -16,7 +16,7 @@ class Issue_date:
     def __init__(self):
         self.months = month
         self.future, self.back, self.name_month_back, self.name_month_future = 0, 0, 0, 0
-        self.year_back, self.year_future, self.year_now = 0, 0, year
+        self.year = year
         self.change_or_not = False
 
     def date_month(self, back_time=0, advance_time=0, change_or_not=False):
@@ -26,7 +26,7 @@ class Issue_date:
                 case 1:
                     return 'janeiro', 31, day
                 case 2:
-                    if (self.year_now % 4 == 0 and self.year_now % 100 != 0) or self.year_now % 4 == 0:
+                    if (self.year % 4 == 0 and self.year % 100 != 0) or self.year % 4 == 0:
                         return 'fevereiro', 29, day
                     else:
                         return 'fevereiro', 28, day
@@ -62,7 +62,7 @@ class Issue_date:
                     case 1:
                         return 'janeiro', 31, day
                     case 2:
-                        if (self.year_now % 4 == 0 and self.year_now % 100 != 0) or self.year_now % 4 == 0:
+                        if (self.year % 4 == 0 and self.year % 100 != 0) or self.year % 4 == 0:
                             return 'fevereiro', 29, day
                         else:
                             return 'fevereiro', 28, day
@@ -87,10 +87,12 @@ class Issue_date:
                     case 12:
                         return 'dezembro', 31, day
             else:
+                if choose_now >= 13:
+                    self.year += 1
+                elif choose_now <= 0:
+                    self.year -= 1
                 self.months = 12
-                self.back, self.name_month_back = -1, 0
-                self.year_back -= 1
-                self.year_now = self.year_now + self.year_future - self.year_back
+                self.back, self.name_month_back, self.future, self.name_month_future = -1, 0, 0, 0
                 return 'dezembro', 31, day
         else:
             if change_or_not is True:
@@ -104,7 +106,7 @@ class Issue_date:
                     case 1:
                         return 'janeiro', 31, day
                     case 2:
-                        if (self.year_now % 4 == 0 and self.year_now % 100 != 0) or self.year_now % 4 == 0:
+                        if (self.year % 4 == 0 and self.year % 100 != 0) or self.year % 4 == 0:
                             return 'fevereiro', 29, day
                         else:
                             return 'fevereiro', 28, day
@@ -129,9 +131,12 @@ class Issue_date:
                     case 12:
                         return 'dezembro', 31, day
             else:
+                if choose_now >= 13:
+                    self.year += 1
+                elif choose_now <= 1:
+                    self.year -= 1
                 self.months = 1
-                self.future, self.name_month_future = -1, 0
-                self.year_future += 1
+                self.future, self.name_month_future, self.back, self.name_month_back = -1, 0, 0, 0
                 return 'janeiro', 31, day
 
     def day_registry(self):
@@ -442,7 +447,7 @@ class Days_month:
         self.test = 0
         self.advance_right = 0
 
-    def day_month_system(self, frame, frame1, window):
+    def day_month_system(self, frame):
         self.all_days, self.number_day, self.name_day = [], [], []
         control, relx, rely = 0, 0.02, 0.02
         max_width = 100
@@ -471,8 +476,7 @@ class Days_month:
                     relx = 0.02
         dates.reset_all()
 
-    def change_month_back(self, combo, label, frame):
-        combo.place_forget()
+    def change_month_back(self, hidden_object, label, frame):
         changing = 1
         for number in range(0, len(self.all_days)):
             self.all_days[number].place_forget()
@@ -480,7 +484,7 @@ class Days_month:
         self.all_days, self.number_day, self.name_day = [], [], []
         control, relx, rely = 0, 0.02, 0.02
         max_width = 100
-        label.config(text=f'Agenda de {dates.date_month(back_time=changing)[0]}/{dates.year_now}!')
+        label.config(text=f'Agenda de {dates.date_month(back_time=changing)[0]}/{dates.year}!')
         for days in range(1, dates.date_month(back_time=changing, change_or_not=True)[1] + 1):
             self.number_day.append(days)
             self.name_day.append(days)
@@ -504,9 +508,18 @@ class Days_month:
                     max_width = 100
                     rely += 0.24
                     relx = 0.02
+        if dates.year == year and (dates.months + dates.future - dates.back) == month:
+            hidden_object[0].place(relx=0.85, rely=0.95, relwidth=0.03)
+            hidden_object[1].place(relx=0.03, rely=0.945, relwidth=0.10)
+            hidden_object[2].place(relx=0.89, rely=0.945, relwidth=0.08)
+            hidden_object[3].place(relx=0.50, rely=0.945, relwidth=0.10)
+            hidden_object[4].place(relx=0.40, rely=0.945, relwidth=0.10)
+            hidden_object[5].place(relx=0.70, rely=0.945)
+        else:
+            for item in range(0, len(hidden_object)):
+                hidden_object[item].place_forget()
 
-    def change_month_future(self, combo, label, frame):
-        combo.place_forget()
+    def change_month_future(self, hidden_object, label, frame):
         changing = 1
         for number in range(0, len(self.all_days)):
             self.all_days[number].place_forget()
@@ -514,7 +527,7 @@ class Days_month:
         self.all_days, self.number_day, self.name_day = [], [], []
         control, relx, rely = 0, 0.02, 0.02
         max_width = 100
-        label.config(text=f'Agenda de {dates.date_month(advance_time=changing)[0]}/{dates.year_now}!')
+        label.config(text=f'Agenda de {dates.date_month(advance_time=changing)[0]}/{dates.year}!')
         for days in range(1, dates.date_month(advance_time=changing, change_or_not=True)[1] + 1):
             self.number_day.append(days)
             self.name_day.append(days)
@@ -538,3 +551,13 @@ class Days_month:
                     max_width = 100
                     rely += 0.24
                     relx = 0.02
+        if dates.year == year and (dates.months + dates.future - dates.back) == month:
+            hidden_object[0].place(relx=0.85, rely=0.95, relwidth=0.03)
+            hidden_object[1].place(relx=0.03, rely=0.945, relwidth=0.10)
+            hidden_object[2].place(relx=0.89, rely=0.945, relwidth=0.08)
+            hidden_object[3].place(relx=0.50, rely=0.945, relwidth=0.10)
+            hidden_object[4].place(relx=0.40, rely=0.945, relwidth=0.10)
+            hidden_object[5].place(relx=0.70, rely=0.945)
+        else:
+            for item in range(0, len(hidden_object)):
+                hidden_object[item].place_forget()

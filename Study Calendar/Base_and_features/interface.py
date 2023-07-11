@@ -80,13 +80,13 @@ class Schedule_window:
     def __init__(self):
         self.all_days, self.number_day, self.name_day = None, None, None
         self.frame1, self.label1, self.frame2 = None, None, None
-        self.bt_left, self.bt_right = None, None
+        self.bt_left, self.bt_right, self.label2 = None, None, None
         window1 = Toplevel()
         self.window = window1
         self.screen()
         self.frame()
         self.label()
-        dm.day_month_system(self.frame2, self.frame1, self.window)
+        dm.day_month_system(self.frame2)
         self.button()
         self.window.mainloop()
 
@@ -111,9 +111,9 @@ class Schedule_window:
                             font=('Calibri', 15, 'bold'),
                             bg=colors(2))
         self.label1.place(relx=0.35, relwidth=0.30)
-        label2 = Label(self.frame1, text='Registre uma folga para o dia', fg=colors(5), font=('Calibri', 11, 'bold'),
-                       bg=colors(2))
-        label2.place(relx=0.70, rely=0.945)
+        self.label2 = Label(self.frame1, text='Registre uma folga para o dia', fg=colors(5), font=('Calibri', 11, 'bold'),
+                            bg=colors(2))
+        self.label2.place(relx=0.70, rely=0.945)
 
     def button(self):
         #images for buttons
@@ -139,9 +139,11 @@ class Schedule_window:
         button6.place(relx=0.03, rely=0.945, relwidth=0.10)
 
         #custom buttons
-        button3 = Button(self.window, image=self.bt_left, bg=colors(2), borderwidth=0, command=lambda: dm.change_month_back(combo, self.label1, self.frame2))
+        button3 = Button(self.window, image=self.bt_left, bg=colors(2), borderwidth=0,
+                         command=lambda: dm.change_month_back((combo, button6, button5, button2, button1, self.label2), self.label1, self.frame2))
         button3.place(relx=0.045, rely=0.042)
-        button4 = Button(self.window, image=self.bt_right, bg=colors(2), borderwidth=0, command=lambda: dm.change_month_future(combo, self.label1, self.frame2))
+        button4 = Button(self.window, image=self.bt_right, bg=colors(2), borderwidth=0,
+                         command=lambda: dm.change_month_future((combo, button6, button5, button2, button1, self.label2), self.label1, self.frame2))
         button4.place(relx=0.925, rely=0.042)
 
         # combo days for day offs
