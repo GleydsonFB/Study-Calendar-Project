@@ -152,6 +152,15 @@ class Database:
         self.mouse.execute(sql)
         self.con.commit()
 
+    def view_day_comment(self, month, year):
+        sql = f'SELECT day FROM commentary WHERE month = "{month}" AND year = "{year}";'
+        self.mouse.execute(sql)
+        days = []
+        for day in self.mouse:
+            days.append(day[0])
+        days.sort()
+        return days, len(days)
+
     def insert_week(self, study_day, day_off, month, year, week):
         sql = 'INSERT INTO week(seg, ter, qua, qui, sex, sab, dom) VALUES ("{}", "{}", "{}", "{}", "{}", "{}", "{}")'\
             .format(week[0], week[1], week[2], week[3], week[4], week[5], week[6])

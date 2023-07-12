@@ -4,6 +4,8 @@ from tkinter import *
 from tkinter import colorchooser
 from database import *
 from tkinter import ttk
+from PIL import Image, ImageTk
+
 
 date = datetime.datetime.now()
 month = date.month
@@ -444,13 +446,26 @@ dates = Issue_date()
 class Days_month:
     def __init__(self):
         self.all_days, self.number_day, self.name_day = [], [], []
-        self.test = 0
+        self.com_button = []
         self.advance_right = 0
+        self.img_view = None
 
     def day_month_system(self, frame):
-        self.all_days, self.number_day, self.name_day = [], [], []
+        self.all_days, self.number_day, self.name_day, self.com_button = [], [], [], []
         control, relx, rely = 0, 0.02, 0.02
         max_width = 100
+        control_button, aux_button = 0, 0
+        bd.connect()
+        verify_com = bd.view_day_comment(dates.date_month()[0], year)
+        bd.disconnect()
+        img = Image.open('images/comentary_ico.png')
+        img_res = img.resize((10, 10))
+        self.img_view = ImageTk.PhotoImage(img_res)
+        if verify_com[1] == 0:
+            pass
+        else:
+            for item in range(0, verify_com[1]):
+                self.com_button.append(Button(frame, image=self.img_view, bg=colors(3), borderwidth=0))
         for days in range(1, dates.date_month()[1] + 1):
             self.number_day.append(days)
             self.name_day.append(days)
@@ -467,6 +482,10 @@ class Days_month:
                                                    font=('Calibri', 10, 'bold'))
                     self.name_day[control].place(relx=relx + 0.035, rely=rely - 0.015, relheight=0.02)
                     self.all_days[control].place(relx=relx, rely=rely + 0.015, relwidth=0.10, relheight=0.20)
+                    if aux_button < verify_com[1] and verify_com[1] > 0:
+                        if self.number_day[control] == verify_com[0][aux_button]:
+                            self.com_button[aux_button].place(relx=relx + 0.070, rely=rely - 0.015)
+                            aux_button += 1
                     max_width -= 14
                     relx += 0.12
                     control += 1
