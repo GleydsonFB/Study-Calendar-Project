@@ -6,7 +6,6 @@ from database import *
 from tkinter import ttk
 from PIL import Image, ImageTk
 
-
 date = datetime.datetime.now()
 month = date.month
 year = date.year
@@ -440,6 +439,45 @@ def registry_condition(parent, mon, yea, eff, field, cat):
                 field.delete(0, END)
 
 
+class Comment_show_window:
+    def __init__(self):
+        self.window, self.frame1 = None, None
+
+    def screen(self):
+        self.window.title('Comentários')
+        self.window.configure(background=colors(1))
+        self.window.geometry('300x300+400+50')
+        self.window.resizable(False, False)
+        self.window.maxsize(width=300, height=300)
+        self.window.minsize(width=300, height=300)
+        self.window.iconbitmap('images/girl.ico')
+
+    def frame(self):
+        self.frame1 = Frame(self.window, bg=colors(2))
+        self.frame1.place(relx=0.04, rely=0.04, relwidth=0.92, relheight=0.92)
+
+    def label(self):
+        label1 = Label(self.frame1, text='Comentários do dia', font=('Calibri', 11, 'bold'), bg=colors(2),
+                       fg=colors(1))
+        label1.place(relx=0.25, rely=0.03, relwidth=0.50)
+
+    def editable_label(self, content):
+        label = []
+        rely = 0.10
+        for item in range(0, len(content)):
+            label.append(Label(self.frame1, text=content[item], font=('Calibri', 9), bg=colors(3), fg=colors(1)))
+            label[item].place(relx=0.04, rely=rely, relheight=0.20)
+            rely += 0.30
+
+    def open_window(self, description):
+        self.window = Tk()
+        self.screen()
+        self.frame()
+        self.label()
+        self.window.mainloop()
+
+
+window_aux = Comment_show_window()
 dates = Issue_date()
 
 
@@ -455,6 +493,7 @@ class Days_month:
         control, relx, rely = 0, 0.02, 0.02
         max_width = 100
         control_button, aux_button = 0, 0
+        description = []
         bd.connect()
         verify_com = bd.view_day_comment(dates.date_month()[0], year)
         bd.disconnect()
@@ -484,6 +523,13 @@ class Days_month:
                     self.all_days[control].place(relx=relx, rely=rely + 0.015, relwidth=0.10, relheight=0.20)
                     if aux_button < verify_com[1] and verify_com[1] > 0:
                         if self.number_day[control] == verify_com[0][aux_button]:
+                            bd.connect()
+                            desc = bd.view_content_comment(self.number_day[control], dates.date_month()[0], dates.year)
+                            bd.disconnect()
+                            for item in range(0, len(desc)):
+                                description.append(window_aux.editable_label(desc))
+                                self.com_button[aux_button].config(
+                                    command=lambda: window_aux.open_window(description[item]))
                             self.com_button[aux_button].place(relx=relx + 0.070, rely=rely - 0.015)
                             aux_button += 1
                     max_width -= 14

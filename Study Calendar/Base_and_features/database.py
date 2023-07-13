@@ -153,13 +153,21 @@ class Database:
         self.con.commit()
 
     def view_day_comment(self, month, year):
-        sql = f'SELECT day FROM commentary WHERE month = "{month}" AND year = "{year}";'
+        sql = f'SELECT day FROM commentary WHERE month = "{month}" AND year = {year};'
         self.mouse.execute(sql)
         days = []
         for day in self.mouse:
             days.append(day[0])
         days.sort()
         return days, len(days)
+
+    def view_content_comment(self, day, month, year):
+        sql = f'SELECT description FROM commentary WHERE day = {day} AND month = "{month}" AND year = {year};'
+        self.mouse.execute(sql)
+        desc = []
+        for item in self.mouse:
+            desc.append(item[0])
+        return desc
 
     def insert_week(self, study_day, day_off, month, year, week):
         sql = 'INSERT INTO week(seg, ter, qua, qui, sex, sab, dom) VALUES ("{}", "{}", "{}", "{}", "{}", "{}", "{}")'\
