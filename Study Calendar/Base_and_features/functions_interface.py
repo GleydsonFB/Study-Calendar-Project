@@ -1,9 +1,9 @@
 import datetime
+import functools
 from tkinter import messagebox
 from tkinter import *
 from tkinter import colorchooser
 from database import *
-from tkinter import ttk
 from PIL import Image, ImageTk
 
 date = datetime.datetime.now()
@@ -462,18 +462,20 @@ class Comment_show_window:
         label1.place(relx=0.25, rely=0.03, relwidth=0.50)
 
     def editable_label(self, content):
-        label = []
-        rely = 0.10
-        for item in range(0, len(content)):
-            label.append(Label(self.frame1, text=content[item], font=('Calibri', 9), bg=colors(3), fg=colors(1)))
-            label[item].place(relx=0.04, rely=rely, relheight=0.20)
-            rely += 0.30
-
-    def open_window(self, description):
-        self.window = Tk()
+        self.window = Toplevel()
         self.screen()
         self.frame()
         self.label()
+        rely = 0.15
+        label_add = []
+        if len(content) > 1:
+            for item in range(0, len(content)):
+                label_add.append(Label(self.frame1, text=content[item], bg=colors(3), fg=colors(1), font=('Calibri', 9), borderwidth=2, relief='groove'))
+                label_add[item].place(relx=0.04, rely=rely, relheight=0.20)
+                rely += 0.30
+        else:
+            label_add.append(Label(self.frame1, text=content, bg=colors(3), fg=colors(1), font=('Calibri', 9), borderwidth=2, relief='groove'))
+            label_add[0].place(relx=0.04, rely=rely, relheight=0.20)
         self.window.mainloop()
 
 
@@ -487,13 +489,13 @@ class Days_month:
         self.com_button = []
         self.advance_right = 0
         self.img_view = None
+        self.window = None
 
     def day_month_system(self, frame):
         self.all_days, self.number_day, self.name_day, self.com_button = [], [], [], []
         control, relx, rely = 0, 0.02, 0.02
         max_width = 100
-        control_button, aux_button = 0, 0
-        description = []
+        aux_button = 0
         bd.connect()
         verify_com = bd.view_day_comment(dates.date_month()[0], year)
         bd.disconnect()
@@ -504,7 +506,10 @@ class Days_month:
             pass
         else:
             for item in range(0, verify_com[1]):
-                self.com_button.append(Button(frame, image=self.img_view, bg=colors(3), borderwidth=0))
+                bd.connect()
+                desc = bd.view_content_comment(verify_com[0][item], dates.date_month()[0], dates.year)
+                bd.disconnect()
+                self.com_button.append(Button(frame, image=self.img_view, bg=colors(3), borderwidth=0, command=lambda c=desc: window_aux.editable_label(c)))
         for days in range(1, dates.date_month()[1] + 1):
             self.number_day.append(days)
             self.name_day.append(days)
@@ -523,13 +528,6 @@ class Days_month:
                     self.all_days[control].place(relx=relx, rely=rely + 0.015, relwidth=0.10, relheight=0.20)
                     if aux_button < verify_com[1] and verify_com[1] > 0:
                         if self.number_day[control] == verify_com[0][aux_button]:
-                            bd.connect()
-                            desc = bd.view_content_comment(self.number_day[control], dates.date_month()[0], dates.year)
-                            bd.disconnect()
-                            for item in range(0, len(desc)):
-                                description.append(window_aux.editable_label(desc))
-                                self.com_button[aux_button].config(
-                                    command=lambda: window_aux.open_window(description[item]))
                             self.com_button[aux_button].place(relx=relx + 0.070, rely=rely - 0.015)
                             aux_button += 1
                     max_width -= 14
