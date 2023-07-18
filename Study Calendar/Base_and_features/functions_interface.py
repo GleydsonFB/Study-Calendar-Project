@@ -441,7 +441,8 @@ def registry_condition(parent, mon, yea, eff, field, cat):
 
 class Comment_show_window:
     def __init__(self):
-        self.window, self.frame1 = None, None
+        self.window, self.frame1, self.scroll = None, None, None
+        self.label1 = None
 
     def screen(self):
         self.window.title('Comentários')
@@ -456,26 +457,36 @@ class Comment_show_window:
         self.frame1 = Frame(self.window, bg=colors(2))
         self.frame1.place(relx=0.04, rely=0.04, relwidth=0.92, relheight=0.92)
 
+    def scroll_bar(self):
+        self.scroll = Scrollbar(self.frame1, orient=VERTICAL)
+        self.scroll.pack(side=RIGHT, fill=Y)
+
     def label(self):
-        label1 = Label(self.frame1, text='Comentários do dia', font=('Calibri', 11, 'bold'), bg=colors(2),
-                       fg=colors(1))
-        label1.place(relx=0.25, rely=0.03, relwidth=0.50)
+        self.label1 = Label(self.frame1, text='Comentários do dia', font=('Calibri', 13, 'bold'), bg=colors(2),
+                            fg=colors(1))
+        self.label1.place(relx=0.25, rely=0.03, relwidth=0.50)
 
     def editable_label(self, content):
         self.window = Toplevel()
         self.screen()
         self.frame()
         self.label()
+        self.scroll_bar()
         rely = 0.15
-        label_add = []
+        my_list = Text(self.frame1, yscrollcommand=self.scroll.set, bg=colors(3), fg=colors(1), font=('Calibri', 11), borderwidth=2, relief='groove', wrap=WORD)
+        my_list.tag_configure('center', justify='center')
         if len(content) > 1:
             for item in range(0, len(content)):
-                label_add.append(Label(self.frame1, text=content[item], bg=colors(3), fg=colors(1), font=('Calibri', 9), borderwidth=2, relief='groove'))
-                label_add[item].place(relx=0.04, rely=rely, relheight=0.20)
-                rely += 0.30
+                my_list.insert(END, content[item] + '\n\n')
+                my_list.place(relx=0.125, rely=rely, relwidth=0.75, relheight=0.85)
+                my_list.tag_add('center', 1.0, 'end')
         else:
-            label_add.append(Label(self.frame1, text=content, bg=colors(3), fg=colors(1), font=('Calibri', 9), borderwidth=2, relief='groove'))
-            label_add[0].place(relx=0.04, rely=rely, relheight=0.20)
+            self.label1['text'] = 'Comentário do dia'
+            my_list.insert(END, content)
+            my_list.place(relx=0.125, rely=rely + 0.175, relwidth=0.75, relheight=0.35)
+            my_list.tag_add('center', 1.0, 'end')
+        my_list.configure(state='disabled')
+        self.scroll.config(command=my_list.yview)
         self.window.mainloop()
 
 
@@ -540,14 +551,31 @@ class Days_month:
         dates.reset_all()
 
     def change_month_back(self, hidden_object, label, frame):
-        changing = 1
         for number in range(0, len(self.all_days)):
             self.all_days[number].place_forget()
             self.name_day[number].place_forget()
-        self.all_days, self.number_day, self.name_day = [], [], []
+        self.all_days, self.number_day, self.name_day, self.com_button = [], [], [], []
         control, relx, rely = 0, 0.02, 0.02
         max_width = 100
-        label.config(text=f'Agenda de {dates.date_month(back_time=changing)[0]}/{dates.year}!')
+        changing = 1
+        bd.connect()
+        aux_button = 0
+        name_month = dates.date_month(back_time=changing)[0]
+        verify_com = bd.view_day_comment(name_month, dates.year)
+        bd.disconnect()
+        img = Image.open('images/comentary_ico.png')
+        img_res = img.resize((10, 10))
+        self.img_view = ImageTk.PhotoImage(img_res)
+        if verify_com[1] == 0:
+            pass
+        else:
+            for item in range(0, verify_com[1]):
+                bd.connect()
+                desc = bd.view_content_comment(verify_com[0][item], name_month, dates.year)
+                bd.disconnect()
+                self.com_button.append(Button(frame, image=self.img_view, bg=colors(3), borderwidth=0,
+                                              command=lambda c=desc: window_aux.editable_label(c)))
+        label.config(text=f'Agenda de {name_month}/{dates.year}!')
         for days in range(1, dates.date_month(back_time=changing, change_or_not=True)[1] + 1):
             self.number_day.append(days)
             self.name_day.append(days)
@@ -564,6 +592,10 @@ class Days_month:
                                                    font=('Calibri', 10, 'bold'))
                     self.name_day[control].place(relx=relx + 0.035, rely=rely - 0.015, relheight=0.02)
                     self.all_days[control].place(relx=relx, rely=rely + 0.015, relwidth=0.10, relheight=0.20)
+                    if aux_button < verify_com[1] and verify_com[1] > 0:
+                        if self.number_day[control] == verify_com[0][aux_button]:
+                            self.com_button[aux_button].place(relx=relx + 0.070, rely=rely - 0.015)
+                            aux_button += 1
                     max_width -= 14
                     relx += 0.12
                     control += 1
@@ -583,14 +615,31 @@ class Days_month:
                 hidden_object[item].place_forget()
 
     def change_month_future(self, hidden_object, label, frame):
-        changing = 1
         for number in range(0, len(self.all_days)):
             self.all_days[number].place_forget()
             self.name_day[number].place_forget()
-        self.all_days, self.number_day, self.name_day = [], [], []
+        self.all_days, self.number_day, self.name_day, self.com_button = [], [], [], []
         control, relx, rely = 0, 0.02, 0.02
         max_width = 100
-        label.config(text=f'Agenda de {dates.date_month(advance_time=changing)[0]}/{dates.year}!')
+        changing = 1
+        bd.connect()
+        aux_button = 0
+        name_month = dates.date_month(advance_time=changing)[0]
+        verify_com = bd.view_day_comment(name_month, dates.year)
+        bd.disconnect()
+        img = Image.open('images/comentary_ico.png')
+        img_res = img.resize((10, 10))
+        self.img_view = ImageTk.PhotoImage(img_res)
+        if verify_com[1] == 0:
+            pass
+        else:
+            for item in range(0, verify_com[1]):
+                bd.connect()
+                desc = bd.view_content_comment(verify_com[0][item], name_month, dates.year)
+                bd.disconnect()
+                self.com_button.append(Button(frame, image=self.img_view, bg=colors(3), borderwidth=0,
+                                              command=lambda c=desc: window_aux.editable_label(c)))
+        label.config(text=f'Agenda de {name_month}/{dates.year}!')
         for days in range(1, dates.date_month(advance_time=changing, change_or_not=True)[1] + 1):
             self.number_day.append(days)
             self.name_day.append(days)
@@ -607,6 +656,10 @@ class Days_month:
                                                    font=('Calibri', 10, 'bold'))
                     self.name_day[control].place(relx=relx + 0.035, rely=rely - 0.015, relheight=0.02)
                     self.all_days[control].place(relx=relx, rely=rely + 0.015, relwidth=0.10, relheight=0.20)
+                    if aux_button < verify_com[1] and verify_com[1] > 0:
+                        if self.number_day[control] == verify_com[0][aux_button]:
+                            self.com_button[aux_button].place(relx=relx + 0.070, rely=rely - 0.015)
+                            aux_button += 1
                     max_width -= 14
                     relx += 0.12
                     control += 1
