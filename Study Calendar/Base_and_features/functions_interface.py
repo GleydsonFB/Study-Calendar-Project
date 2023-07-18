@@ -477,6 +477,7 @@ class Comment_show_window:
         my_list.tag_configure('center', justify='center')
         if len(content) > 1:
             for item in range(0, len(content)):
+                my_list.insert(END, f'{item + 1}° comentário:\n')
                 my_list.insert(END, content[item] + '\n\n')
                 my_list.place(relx=0.125, rely=rely, relwidth=0.75, relheight=0.85)
                 my_list.tag_add('center', 1.0, 'end')
@@ -507,6 +508,7 @@ class Days_month:
         control, relx, rely = 0, 0.02, 0.02
         max_width = 100
         aux_button = 0
+        unique_day, sup_unique = [], 0
         bd.connect()
         verify_com = bd.view_day_comment(dates.date_month()[0], year)
         bd.disconnect()
@@ -517,8 +519,14 @@ class Days_month:
             pass
         else:
             for item in range(0, verify_com[1]):
+                if verify_com[0][sup_unique] not in unique_day:
+                    unique_day.append(verify_com[0][sup_unique])
+                    sup_unique += 1
+                else:
+                    sup_unique += 1
+            for item in range(0, len(unique_day)):
                 bd.connect()
-                desc = bd.view_content_comment(verify_com[0][item], dates.date_month()[0], dates.year)
+                desc = bd.view_content_comment(unique_day[item], dates.date_month()[0], dates.year)
                 bd.disconnect()
                 self.com_button.append(Button(frame, image=self.img_view, bg=colors(3), borderwidth=0, command=lambda c=desc: window_aux.editable_label(c)))
         for days in range(1, dates.date_month()[1] + 1):
@@ -537,9 +545,9 @@ class Days_month:
                                                    font=('Calibri', 10, 'bold'))
                     self.name_day[control].place(relx=relx + 0.035, rely=rely - 0.015, relheight=0.02)
                     self.all_days[control].place(relx=relx, rely=rely + 0.015, relwidth=0.10, relheight=0.20)
-                    if aux_button < verify_com[1] and verify_com[1] > 0:
-                        if self.number_day[control] == verify_com[0][aux_button]:
-                            self.com_button[aux_button].place(relx=relx + 0.070, rely=rely - 0.015)
+                    if aux_button < len(unique_day) and len(unique_day) > 0:
+                        if self.number_day[control] == unique_day[aux_button]:
+                            self.com_button[aux_button].place(relx=relx + 0.070, rely=rely - 0.013)
                             aux_button += 1
                     max_width -= 14
                     relx += 0.12
@@ -556,6 +564,7 @@ class Days_month:
             self.name_day[number].place_forget()
         self.all_days, self.number_day, self.name_day, self.com_button = [], [], [], []
         control, relx, rely = 0, 0.02, 0.02
+        unique_day, sup_unique = [], 0
         max_width = 100
         changing = 1
         bd.connect()
@@ -570,8 +579,14 @@ class Days_month:
             pass
         else:
             for item in range(0, verify_com[1]):
+                if verify_com[0][sup_unique] not in unique_day:
+                    unique_day.append(verify_com[0][sup_unique])
+                    sup_unique += 1
+                else:
+                    sup_unique += 1
+            for item in range(0, len(unique_day)):
                 bd.connect()
-                desc = bd.view_content_comment(verify_com[0][item], name_month, dates.year)
+                desc = bd.view_content_comment(unique_day[item], name_month, dates.year)
                 bd.disconnect()
                 self.com_button.append(Button(frame, image=self.img_view, bg=colors(3), borderwidth=0,
                                               command=lambda c=desc: window_aux.editable_label(c)))
@@ -592,8 +607,8 @@ class Days_month:
                                                    font=('Calibri', 10, 'bold'))
                     self.name_day[control].place(relx=relx + 0.035, rely=rely - 0.015, relheight=0.02)
                     self.all_days[control].place(relx=relx, rely=rely + 0.015, relwidth=0.10, relheight=0.20)
-                    if aux_button < verify_com[1] and verify_com[1] > 0:
-                        if self.number_day[control] == verify_com[0][aux_button]:
+                    if aux_button < len(unique_day) and len(unique_day) > 0:
+                        if self.number_day[control] == unique_day[aux_button]:
                             self.com_button[aux_button].place(relx=relx + 0.070, rely=rely - 0.015)
                             aux_button += 1
                     max_width -= 14
@@ -621,6 +636,7 @@ class Days_month:
         self.all_days, self.number_day, self.name_day, self.com_button = [], [], [], []
         control, relx, rely = 0, 0.02, 0.02
         max_width = 100
+        unique_day, sup_unique = [], 0
         changing = 1
         bd.connect()
         aux_button = 0
@@ -634,8 +650,14 @@ class Days_month:
             pass
         else:
             for item in range(0, verify_com[1]):
+                if verify_com[0][sup_unique] not in unique_day:
+                    unique_day.append(verify_com[0][sup_unique])
+                    sup_unique += 1
+                else:
+                    sup_unique += 1
+            for item in range(0, len(unique_day)):
                 bd.connect()
-                desc = bd.view_content_comment(verify_com[0][item], name_month, dates.year)
+                desc = bd.view_content_comment(unique_day[item], name_month, dates.year)
                 bd.disconnect()
                 self.com_button.append(Button(frame, image=self.img_view, bg=colors(3), borderwidth=0,
                                               command=lambda c=desc: window_aux.editable_label(c)))
@@ -656,8 +678,8 @@ class Days_month:
                                                    font=('Calibri', 10, 'bold'))
                     self.name_day[control].place(relx=relx + 0.035, rely=rely - 0.015, relheight=0.02)
                     self.all_days[control].place(relx=relx, rely=rely + 0.015, relwidth=0.10, relheight=0.20)
-                    if aux_button < verify_com[1] and verify_com[1] > 0:
-                        if self.number_day[control] == verify_com[0][aux_button]:
+                    if aux_button < len(unique_day) and len(unique_day) > 0:
+                        if self.number_day[control] == unique_day[aux_button]:
                             self.com_button[aux_button].place(relx=relx + 0.070, rely=rely - 0.015)
                             aux_button += 1
                     max_width -= 14
