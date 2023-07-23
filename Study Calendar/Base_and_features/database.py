@@ -169,6 +169,19 @@ class Database:
             desc.append(item[0])
         return desc
 
+    def view_id_com(self, day, month, year):
+        sql = f'SELECT id_com FROM commentary WHERE day = {day} AND month = "{month}" AND year = {year};'
+        self.mouse.execute(sql)
+        r_id = []
+        for id_com in self.mouse:
+            r_id.append(id_com)
+        return r_id
+
+    def del_comment(self, ids):
+        sql = f'DELETE FROM commentary WHERE id_com = {ids};'
+        self.mouse.execute(sql)
+        self.con.commit()
+
     def insert_week(self, study_day, day_off, month, year, week):
         sql = 'INSERT INTO week(seg, ter, qua, qui, sex, sab, dom) VALUES ("{}", "{}", "{}", "{}", "{}", "{}", "{}")'\
             .format(week[0], week[1], week[2], week[3], week[4], week[5], week[6])

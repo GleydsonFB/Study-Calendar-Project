@@ -25,32 +25,32 @@ class Issue_date:
         if back_time == 0 and advance_time == 0:
             match self.months:
                 case 1:
-                    return 'janeiro', 31, day
+                    return 'janeiro', 31, day, self.months
                 case 2:
                     if (self.year % 4 == 0 and self.year % 100 != 0) or self.year % 4 == 0:
-                        return 'fevereiro', 29, day
+                        return 'fevereiro', 29, day, self.months
                     else:
-                        return 'fevereiro', 28, day
+                        return 'fevereiro', 28, day, self.months
                 case 3:
-                    return 'março', 31, day
+                    return 'março', 31, day, self.months
                 case 4:
-                    return 'abril', 30, day
+                    return 'abril', 30, day, self.months
                 case 5:
-                    return 'maio', 31, day
+                    return 'maio', 31, day, self.months
                 case 6:
-                    return 'junho', 30, day
+                    return 'junho', 30, day, self.months
                 case 7:
-                    return 'julho', 31, day
+                    return 'julho', 31, day, self.months
                 case 8:
-                    return 'agosto', 31, day
+                    return 'agosto', 31, day, self.months
                 case 9:
-                    return 'setembro', 30, day
+                    return 'setembro', 30, day, self.months
                 case 10:
-                    return 'outubro', 31, day
+                    return 'outubro', 31, day, self.months
                 case 11:
-                    return 'novembro', 30, day
+                    return 'novembro', 30, day, self.months
                 case 12:
-                    return 'dezembro', 31, day
+                    return 'dezembro', 31, day, self.months
         elif back_time >= 1 and advance_time == 0:
             if self.change_or_not is True:
                 self.back += back_time
@@ -61,32 +61,32 @@ class Issue_date:
             if 12 >= choose_now >= 1:
                 match choose_now:
                     case 1:
-                        return 'janeiro', 31, day
+                        return 'janeiro', 31, day, self.months
                     case 2:
                         if (self.year % 4 == 0 and self.year % 100 != 0) or self.year % 4 == 0:
-                            return 'fevereiro', 29, day
+                            return 'fevereiro', 29, day, self.months
                         else:
-                            return 'fevereiro', 28, day
+                            return 'fevereiro', 28, day, self.months
                     case 3:
-                        return 'março', 31, day
+                        return 'março', 31, day, self.months
                     case 4:
-                        return 'abril', 30, day
+                        return 'abril', 30, day, self.months
                     case 5:
-                        return 'maio', 31, day
+                        return 'maio', 31, day, self.months
                     case 6:
-                        return 'junho', 30, day
+                        return 'junho', 30, day, self.months
                     case 7:
-                        return 'julho', 31, day
+                        return 'julho', 31, day, self.months
                     case 8:
-                        return 'agosto', 31, day
+                        return 'agosto', 31, day, self.months
                     case 9:
-                        return 'setembro', 30, day
+                        return 'setembro', 30, day, self.months
                     case 10:
-                        return 'outubro', 31, day
+                        return 'outubro', 31, day, self.months
                     case 11:
-                        return 'novembro', 30, day
+                        return 'novembro', 30, day, self.months
                     case 12:
-                        return 'dezembro', 31, day
+                        return 'dezembro', 31, day, self.months
             else:
                 if choose_now >= 13:
                     self.year += 1
@@ -94,7 +94,7 @@ class Issue_date:
                     self.year -= 1
                 self.months = 12
                 self.back, self.name_month_back, self.future, self.name_month_future = -1, 0, 0, 0
-                return 'dezembro', 31, day
+                return 'dezembro', 31, day, self.months
         else:
             if change_or_not is True:
                 self.future += advance_time
@@ -105,32 +105,32 @@ class Issue_date:
             if 12 >= choose_now >= 1:
                 match choose_now:
                     case 1:
-                        return 'janeiro', 31, day
+                        return 'janeiro', 31, day, self.months
                     case 2:
                         if (self.year % 4 == 0 and self.year % 100 != 0) or self.year % 4 == 0:
-                            return 'fevereiro', 29, day
+                            return 'fevereiro', 29, day, self.months
                         else:
-                            return 'fevereiro', 28, day
+                            return 'fevereiro', 28, day, self.months
                     case 3:
-                        return 'março', 31, day
+                        return 'março', 31, day, self.months
                     case 4:
-                        return 'abril', 30, day
+                        return 'abril', 30, day, self.months
                     case 5:
-                        return 'maio', 31, day
+                        return 'maio', 31, day, self.months
                     case 6:
-                        return 'junho', 30, day
+                        return 'junho', 30, day, self.months
                     case 7:
-                        return 'julho', 31, day
+                        return 'julho', 31, day, self.months
                     case 8:
-                        return 'agosto', 31, day
+                        return 'agosto', 31, day, self.months
                     case 9:
-                        return 'setembro', 30, day
+                        return 'setembro', 30, day, self.months
                     case 10:
-                        return 'outubro', 31, day
+                        return 'outubro', 31, day, self.months
                     case 11:
-                        return 'novembro', 30, day
+                        return 'novembro', 30, day, self.months
                     case 12:
-                        return 'dezembro', 31, day
+                        return 'dezembro', 31, day, self.months
             else:
                 if choose_now >= 13:
                     self.year += 1
@@ -138,7 +138,7 @@ class Issue_date:
                     self.year -= 1
                 self.months = 1
                 self.future, self.name_month_future, self.back, self.name_month_back = -1, 0, 0, 0
-                return 'janeiro', 31, day
+                return 'janeiro', 31, day, self.months
 
     def day_registry(self):
         list_day = []
@@ -180,6 +180,7 @@ def max_comment(limit, arg, field, parent, days, months, years):
         bd.disconnect()
         messagebox.showinfo('Sucesso!', 'comentário inserido no dia desejado!', parent=parent)
         field.delete(1.0, END)
+        parent.update()
 
 
 def show_tree(treeview):
@@ -429,6 +430,10 @@ def registry_condition(parent, mon, yea, eff, field, cat):
                                      'Valor passado é negativo, não sendo possível o uso.',
                                      parent=parent)
                 field.delete(0, END)
+            elif v_eff > 100:
+                messagebox.showerror('Erro no registro da efetividade',
+                                     'Valor informado é maior que 100%', parent=parent)
+                field.delete(0, END)
             else:
                 bd.connect()
                 bd.insert_effectivity(v_eff, cat, mon.get(), yea.get())
@@ -439,10 +444,14 @@ def registry_condition(parent, mon, yea, eff, field, cat):
                 field.delete(0, END)
 
 
+dates = Issue_date()
+
+
 class Comment_show_window:
     def __init__(self):
         self.window, self.frame1, self.scroll = None, None, None
         self.label1 = None
+        self.button = []
 
     def screen(self):
         self.window.title('Comentários')
@@ -466,33 +475,65 @@ class Comment_show_window:
                             fg=colors(1))
         self.label1.place(relx=0.25, rely=0.03, relwidth=0.50)
 
-    def editable_label(self, content):
+    def editable_label(self, content, ids, actual_month, class_month=None, frame_month=None):
         self.window = Toplevel()
         self.screen()
         self.frame()
         self.label()
         self.scroll_bar()
-        rely = 0.15
+        self.button = []
+        rely, rely_button = 0.15, 0.15
+        #list to insert comments and working scrollbar
         my_list = Text(self.frame1, yscrollcommand=self.scroll.set, bg=colors(3), fg=colors(1), font=('Calibri', 11), borderwidth=2, relief='groove', wrap=WORD)
         my_list.tag_configure('center', justify='center')
+        #-
         if len(content) > 1:
             for item in range(0, len(content)):
-                my_list.insert(END, f'{item + 1}° comentário:\n')
+                # button for deletion of comment if actual month is same to system
+                if actual_month == month and dates.year == year:
+                    self.button.append(Button(my_list, text=f'{item + 1}', fg=colors(2), font=('calibri', 9), bg=colors(5),
+                                              command=lambda i=ids[item][0], p=item + 1: self.del_comments(i, p, class_month, frame_month)))
+                    my_list.window_create('end', window=self.button[item])
+                #-
+                else:
+                    pass
+                my_list.insert(END, '° comentário:\n')
                 my_list.insert(END, content[item] + '\n\n')
                 my_list.place(relx=0.125, rely=rely, relwidth=0.75, relheight=0.85)
                 my_list.tag_add('center', 1.0, 'end')
         else:
             self.label1['text'] = 'Comentário do dia'
-            my_list.insert(END, content)
+            my_list.insert(END, content[0])
             my_list.place(relx=0.125, rely=rely + 0.175, relwidth=0.75, relheight=0.35)
             my_list.tag_add('center', 1.0, 'end')
+            # button for deletion of comment if actual month is same to system
+            button = Button(self.frame1, text='x', fg=colors(2), font=('calibri', 9), bg=colors(5),
+                            command=lambda i=ids[0][0], p=1: self.del_comments(i, p, class_month, frame_month))
+            button.place(relx=0.06, relwidth=0.05, relheight=0.05, rely=rely + 0.18)
+            #-
         my_list.configure(state='disabled')
+
         self.scroll.config(command=my_list.yview)
         self.window.mainloop()
 
+    def del_comments(self, ids, pos, class_up, frame):
+        answer = messagebox.askyesno('Confirme a ação', f'Você tem certeza que deseja deletar o comentário de número {pos} deste dia?', parent=self.window)
+        if answer:
+            bd.connect()
+            bd.del_comment(ids)
+            bd.disconnect()
+            messagebox.showinfo('Sucesso!', 'Comentário foi excluído do programa.', parent=self.window)
+            self.window.destroy()
+            if class_up is None or frame is None:
+                pass
+            else:
+                class_update = class_up
+                class_update.day_month_system(self=class_update, frame=frame)
+        else:
+            messagebox.showinfo('Ação não executada', 'Comentário foi preservado conforme desejado', parent=self.window)
+
 
 window_aux = Comment_show_window()
-dates = Issue_date()
 
 
 class Days_month:
@@ -501,7 +542,6 @@ class Days_month:
         self.com_button = []
         self.advance_right = 0
         self.img_view = None
-        self.window = None
 
     def day_month_system(self, frame):
         self.all_days, self.number_day, self.name_day, self.com_button = [], [], [], []
@@ -509,6 +549,7 @@ class Days_month:
         max_width = 100
         aux_button = 0
         unique_day, sup_unique = [], 0
+        actual_month = dates.date_month()[0]
         bd.connect()
         verify_com = bd.view_day_comment(dates.date_month()[0], year)
         bd.disconnect()
@@ -526,9 +567,10 @@ class Days_month:
                     sup_unique += 1
             for item in range(0, len(unique_day)):
                 bd.connect()
-                desc = bd.view_content_comment(unique_day[item], dates.date_month()[0], dates.year)
+                desc = bd.view_content_comment(unique_day[item], actual_month, dates.year)
+                ids = bd.view_id_com(unique_day[item], actual_month, dates.year)
                 bd.disconnect()
-                self.com_button.append(Button(frame, image=self.img_view, bg=colors(3), borderwidth=0, command=lambda c=desc: window_aux.editable_label(c)))
+                self.com_button.append(Button(frame, image=self.img_view, bg=colors(3), borderwidth=0, command=lambda c=desc, i=ids, f=frame: window_aux.editable_label(c, i, actual_month, Days_month, f)))
         for days in range(1, dates.date_month()[1] + 1):
             self.number_day.append(days)
             self.name_day.append(days)
@@ -562,6 +604,8 @@ class Days_month:
         for number in range(0, len(self.all_days)):
             self.all_days[number].place_forget()
             self.name_day[number].place_forget()
+        for button in range(0, len(self.com_button)):
+            self.com_button[button].place_forget()
         self.all_days, self.number_day, self.name_day, self.com_button = [], [], [], []
         control, relx, rely = 0, 0.02, 0.02
         unique_day, sup_unique = [], 0
@@ -569,8 +613,8 @@ class Days_month:
         changing = 1
         bd.connect()
         aux_button = 0
-        name_month = dates.date_month(back_time=changing)[0]
-        verify_com = bd.view_day_comment(name_month, dates.year)
+        name_month = dates.date_month(back_time=changing)[0:4]
+        verify_com = bd.view_day_comment(name_month[0], dates.year)
         bd.disconnect()
         img = Image.open('images/comentary_ico.png')
         img_res = img.resize((10, 10))
@@ -586,11 +630,12 @@ class Days_month:
                     sup_unique += 1
             for item in range(0, len(unique_day)):
                 bd.connect()
-                desc = bd.view_content_comment(unique_day[item], name_month, dates.year)
+                desc = bd.view_content_comment(unique_day[item], name_month[0], dates.year)
+                ids = bd.view_id_com(unique_day[item], name_month[0], dates.year)
                 bd.disconnect()
                 self.com_button.append(Button(frame, image=self.img_view, bg=colors(3), borderwidth=0,
-                                              command=lambda c=desc: window_aux.editable_label(c)))
-        label.config(text=f'Agenda de {name_month}/{dates.year}!')
+                                              command=lambda c=desc, i=ids, f=frame: window_aux.editable_label(c, i, name_month[3], Days_month, f)))
+        label.config(text=f'Agenda de {name_month[0]}/{dates.year}!')
         for days in range(1, dates.date_month(back_time=changing, change_or_not=True)[1] + 1):
             self.number_day.append(days)
             self.name_day.append(days)
@@ -640,8 +685,8 @@ class Days_month:
         changing = 1
         bd.connect()
         aux_button = 0
-        name_month = dates.date_month(advance_time=changing)[0]
-        verify_com = bd.view_day_comment(name_month, dates.year)
+        name_month = dates.date_month(advance_time=changing)[0:4]
+        verify_com = bd.view_day_comment(name_month[0], dates.year)
         bd.disconnect()
         img = Image.open('images/comentary_ico.png')
         img_res = img.resize((10, 10))
@@ -657,11 +702,12 @@ class Days_month:
                     sup_unique += 1
             for item in range(0, len(unique_day)):
                 bd.connect()
-                desc = bd.view_content_comment(unique_day[item], name_month, dates.year)
+                desc = bd.view_content_comment(unique_day[item], name_month[0], dates.year)
+                ids = bd.view_id_com(unique_day[item], name_month[0], dates.year)
                 bd.disconnect()
                 self.com_button.append(Button(frame, image=self.img_view, bg=colors(3), borderwidth=0,
-                                              command=lambda c=desc: window_aux.editable_label(c)))
-        label.config(text=f'Agenda de {name_month}/{dates.year}!')
+                                              command=lambda c=desc, i=ids, f=frame: window_aux.editable_label(c, i, name_month[3], Days_month, f)))
+        label.config(text=f'Agenda de {name_month[0]}/{dates.year}!')
         for days in range(1, dates.date_month(advance_time=changing, change_or_not=True)[1] + 1):
             self.number_day.append(days)
             self.name_day.append(days)
