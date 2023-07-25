@@ -164,25 +164,6 @@ def colors(scale):
             return '#c1d4d9'
 
 
-def max_char(limit, arg, field, parent):
-    arg = arg.get()
-    if len(arg) >= limit:
-        messagebox.showerror('Erro', f'O campo em questão só permite {limit} caracteres', parent=parent)
-        field.delete(0, END)
-
-
-def max_comment(limit, arg, field, parent, days, months, years):
-    if len(arg) >= limit:
-        messagebox.showerror('Erro', f'O campo em questão só permite {limit} caracteres', parent=parent)
-    else:
-        bd.connect()
-        bd.insert_comment(arg, days, months, years)
-        bd.disconnect()
-        messagebox.showinfo('Sucesso!', 'comentário inserido no dia desejado!', parent=parent)
-        field.delete(1.0, END)
-        parent.update()
-
-
 def show_tree(treeview):
     bd.connect()
     total = bd.simple_select('CATEGORY', 'id_cat')
@@ -527,8 +508,7 @@ class Comment_show_window:
             if class_up is None or frame is None:
                 pass
             else:
-                class_update = class_up
-                class_update.day_month_system(self=class_update, frame=frame)
+                class_up.day_month_system(frame=frame, original_obj=class_up)
         else:
             messagebox.showinfo('Ação não executada', 'Comentário foi preservado conforme desejado', parent=self.window)
 
@@ -541,15 +521,16 @@ class Days_month:
         self.all_days, self.number_day, self.name_day = [], [], []
         self.com_button = []
         self.advance_right = 0
-        self.img_view = None
+        self.img_view, self.base_obj = None, None
 
-    def day_month_system(self, frame):
+    def day_month_system(self, frame, original_obj):
+        self.base_obj = original_obj
         self.all_days, self.number_day, self.name_day, self.com_button = [], [], [], []
         control, relx, rely = 0, 0.02, 0.02
         max_width = 100
         aux_button = 0
         unique_day, sup_unique = [], 0
-        actual_month = dates.date_month()[0]
+        actual_month = dates.date_month()[0:4]
         bd.connect()
         verify_com = bd.view_day_comment(dates.date_month()[0], year)
         bd.disconnect()
@@ -567,10 +548,10 @@ class Days_month:
                     sup_unique += 1
             for item in range(0, len(unique_day)):
                 bd.connect()
-                desc = bd.view_content_comment(unique_day[item], actual_month, dates.year)
-                ids = bd.view_id_com(unique_day[item], actual_month, dates.year)
+                desc = bd.view_content_comment(unique_day[item], actual_month[0], dates.year)
+                ids = bd.view_id_com(unique_day[item], actual_month[0], dates.year)
                 bd.disconnect()
-                self.com_button.append(Button(frame, image=self.img_view, bg=colors(3), borderwidth=0, command=lambda c=desc, i=ids, f=frame: window_aux.editable_label(c, i, actual_month, Days_month, f)))
+                self.com_button.append(Button(frame, image=self.img_view, bg=colors(3), borderwidth=0, command=lambda c=desc, i=ids, f=frame: window_aux.editable_label(c, i, actual_month[3], self.base_obj, f)))
         for days in range(1, dates.date_month()[1] + 1):
             self.number_day.append(days)
             self.name_day.append(days)
@@ -634,7 +615,7 @@ class Days_month:
                 ids = bd.view_id_com(unique_day[item], name_month[0], dates.year)
                 bd.disconnect()
                 self.com_button.append(Button(frame, image=self.img_view, bg=colors(3), borderwidth=0,
-                                              command=lambda c=desc, i=ids, f=frame: window_aux.editable_label(c, i, name_month[3], Days_month, f)))
+                                              command=lambda c=desc, i=ids, f=frame: window_aux.editable_label(c, i, name_month[3], self.base_obj, f)))
         label.config(text=f'Agenda de {name_month[0]}/{dates.year}!')
         for days in range(1, dates.date_month(back_time=changing, change_or_not=True)[1] + 1):
             self.number_day.append(days)
@@ -706,7 +687,7 @@ class Days_month:
                 ids = bd.view_id_com(unique_day[item], name_month[0], dates.year)
                 bd.disconnect()
                 self.com_button.append(Button(frame, image=self.img_view, bg=colors(3), borderwidth=0,
-                                              command=lambda c=desc, i=ids, f=frame: window_aux.editable_label(c, i, name_month[3], Days_month, f)))
+                                              command=lambda c=desc, i=ids, f=frame: window_aux.editable_label(c, i, name_month[3], self.base_obj, f)))
         label.config(text=f'Agenda de {name_month[0]}/{dates.year}!')
         for days in range(1, dates.date_month(advance_time=changing, change_or_not=True)[1] + 1):
             self.number_day.append(days)
@@ -745,3 +726,40 @@ class Days_month:
         else:
             for item in range(0, len(hidden_object)):
                 hidden_object[item].place_forget()
+
+
+class content_schedule:
+    def __init__(self, base_obj, frame_obj):
+        self.base = base_obj
+        self.frame = frame_obj
+
+    def max_char(self, limit, arg, field, parent):
+        arg = arg.get()
+        if len(arg) >= limit:
+            messagebox.showerror('Erro', f'O campo em questão só permite {limit} caracteres', parent=parent)
+            field.delete(0, END)
+
+    def max_comment(self, limit, arg, field, parent, days, months, years):
+        verify_content = ''
+        if len(arg) == 0 or arg == '':
+            messagebox.showerror('Erro', 'O campo está vazio', parent=parent)
+            field.delete(1.0, END)
+        elif len(arg) >= limit:
+            messagebox.showerror('Erro', f'O campo em questão só permite {limit} caracteres', parent=parent)
+            field.delete(1.0, END)
+        else:
+            for letter in arg:
+                if letter == ' ':
+                    verify_content = ''
+                else:
+                    verify_content = 1
+            if verify_content == '':
+                messagebox.showerror('Erro', 'O campo está vazio preenchido apenas com espaços', parent=parent)
+                field.delete(1.0, END)
+            else:
+                bd.connect()
+                bd.insert_comment(arg, days, months, years)
+                bd.disconnect()
+                messagebox.showinfo('Sucesso!', 'comentário inserido no dia desejado!', parent=parent)
+                field.delete(1.0, END)
+                self.base.day_month_system(frame=self.frame, original_obj=self.base)

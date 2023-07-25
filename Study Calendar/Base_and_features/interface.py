@@ -13,6 +13,7 @@ dates = Issue_date()
 rr = Registry_rule()
 cs = Choose_scale()
 dm = Days_month()
+content_s = content_schedule(dm, None)
 
 
 class Main_window:
@@ -86,7 +87,8 @@ class Schedule_window:
         self.screen()
         self.frame()
         self.label()
-        dm.day_month_system(self.frame2)
+        dm.day_month_system(self.frame2, dm)
+        content_s.frame = self.frame2
         self.button()
         self.window.mainloop()
 
@@ -261,7 +263,7 @@ class Registry_window:
         combo.place(relx=0.25, rely=0.18, relwidth=0.50)
         entry = Entry(self.frame1, textvariable=self.var, bg=colors(5))
         entry.place(relx=0.375, rely=0.38, relwidth=0.25)
-        button = Button(self.frame1, text='Inserir', command=lambda: max_char(5, self.var, entry, self.window),
+        button = Button(self.frame1, text='Inserir', command=lambda: content_s.max_char(5, self.var, entry, self.window),
                         bg=colors(2), fg=colors(5), font=('Calibri', 13, 'bold'))
         button.place(relx=0.375, rely=0.80, relwidth=0.25)
 
@@ -318,7 +320,7 @@ class Commentary_window:
         comment_text = Text(self.frame1, bg=colors(5), font=('calibri', 10), foreground='green')
         comment_text.place(relx=0.10, rely=0.38, relwidth=0.80, relheight=0.41)
         button = Button(self.frame1, text='Inserir',
-                        command=lambda: max_comment(254, comment_text.get(1.0, 'end-1c'), comment_text, self.window, combo.get(), dates.date_month()[0], year),
+                        command=lambda: content_s.max_comment(254, comment_text.get(1.0, 'end-1c'), comment_text, self.window, combo.get(), dates.date_month()[0], year),
                         bg=colors(2), fg=colors(5), font=('Calibri', 13, 'bold'))
         button.place(relx=0.375, rely=0.80, relwidth=0.25)
 
