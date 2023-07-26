@@ -16,17 +16,15 @@ class Database:
     def table_create(self):
         self.mouse.execute('CREATE TABLE IF NOT EXISTS category('
                            'id_cat integer NOT NULL PRIMARY KEY AUTOINCREMENT,'
-                           'name TEXT UNIQUE,'
-                           'color VARCHAR(255)'
-                           ');')
+                           'name TEXT UNIQUE NOT NULL,'
+                           'color VARCHAR(255) NOT NULL);')
 
         self.mouse.execute('CREATE TABLE IF NOT EXISTS effectivity('
                            'id_eff integer NOT NULL PRIMARY KEY AUTOINCREMENT,'
                            'efficiency FLOAT NOT NULL,'
-                           'id_cat INT NOT NULL,'
+                           'cat_ref TEXT NOT NULL,'
                            'month TEXT NOT NULL,'
-                           'year INT NOT NULL,'
-                           'FOREIGN KEY(id_cat) REFERENCES category(id_cat));')
+                           'year INT NOT NULL);')
 
         self.mouse.execute('CREATE TABLE IF NOT EXISTS dayOff('
                            'id_day integer NOT NULL PRIMARY KEY AUTOINCREMENT,'
@@ -47,20 +45,16 @@ class Database:
                            'day INT NOT NULL,'
                            'month TEXT NOT NULL,'
                            'year INT NOT NULL,'
-                           'cat_ref INT,'
-                           'offd_ref INT,'
-                           'com_ref INT,'
-                           'FOREIGN KEY(cat_ref) REFERENCES category(id_cat),'
-                           'FOREIGN KEY(offd_ref) REFERENCES dayOff(id_day),'
-                           'FOREIGN KEY(com_ref) REFERENCES commentary(id_com));')
+                           'cat_ref TEXT NOT NULL,'
+                           'color_cat VARCHAR(255) NOT NULL);')
 
         self.mouse.execute('CREATE TABLE IF NOT EXISTS goal('
                            'id_goa integer NOT NULL PRIMARY KEY AUTOINCREMENT,'
                            'objective INT NOT NULL,'
                            'month TEXT NOT NULL,'
                            'year INT NOT NULL,'
-                           'cate_ref INT NOT NULL,'
-                           'FOREIGN KEY (cate_ref) REFERENCES category(id_cat));')
+                           'cat_ref TEXT NOT NULL,'
+                           'color_cat VARCHAR(255) NOT NULL);')
 
         self.mouse.execute('CREATE TABLE IF NOT EXISTS week('
                            'id_wek integer NOT NULL PRIMARY KEY AUTOINCREMENT,'
@@ -93,9 +87,9 @@ class Database:
         sql = F'SELECT {name_col}, {name_col2} FROM {table} WHERE {col_search} = "{search}"'
         self.mouse.execute(sql)
         r = []
-        for ids, name in self.mouse:
-            r.append(ids)
-            r.append(name)
+        for col1, col2 in self.mouse:
+            r.append(col1)
+            r.append(col2)
         return r
 
     def insert_cat(self, name, color):
@@ -124,15 +118,15 @@ class Database:
         self.mouse.execute(sql1)
         self.con.commit()
 
-    def insert_goal(self, objective, month, year, category):
+    def insert_goal(self, objective, month, year, category, color):
         sql1 = f'SELECT id_goa FROM goal WHERE month = "{month}" AND year = "{year}" AND cate_ref = {category};'
         self.mouse.execute(sql1)
         unique = []
         for item in self.mouse:
             unique.append(item)
         if len(unique) == 0:
-            sql = 'INSERT INTO goal(objective, month, year, cate_ref) VALUES("{}", "{}", "{}", "{}")' \
-                .format(objective, month, year, category)
+            sql = 'INSERT INTO goal(objective, month, year, cate_ref, color) VALUES("{}", "{}", "{}", "{}", "{}")' \
+                .format(objective, month, year, category, color)
             try:
                 self.mouse.execute(sql)
                 self.con.commit()
@@ -141,7 +135,7 @@ class Database:
             else:
                 return 1
         else:
-            sql = 'UPDATE goal SET objective = "{}" WHERE month = "{}" AND year = "{}" AND cate_ref = "{}"'\
+            sql = 'UPDATE goal SET objective = "{}" WHERE month = "{}" AND year = "{}" AND cate_ref = "{}";'\
                 .format(objective, month, year, category)
             self.mouse.execute(sql)
             self.con.commit()

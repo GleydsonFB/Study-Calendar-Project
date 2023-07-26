@@ -204,12 +204,12 @@ def insert_goal(arg, field, parent, months, years, category):
     ctg = str(arg.get())
     if ctg.isnumeric():
         bd.connect()
-        cat = bd.choose_two('category', 'id_cat', 'name', 'name', category)
+        cat = bd.choose_two('category', 'color', 'name', 'name', category)
         if len(cat) == 0:
             messagebox.showerror('Erro no registro', 'Escolha uma categoria para receber a meta.', parent=parent)
             bd.disconnect()
         else:
-            insert = bd.insert_goal(ctg, months, years, cat[0])
+            insert = bd.insert_goal(ctg, months, years, cat[0], cat[1])
             if insert == 1:
                 messagebox.showinfo('Sucesso!',
                                     f'meta para a categoria {category} no mês {months} de {years} foi definida como'
@@ -243,12 +243,31 @@ class Complementar_tree:
         elif self.hex_col is None:
             messagebox.showerror('Erro', f'Não foi escolhida uma cor para a categoria.', parent=parent)
         else:
-            treeview.tag_configure(f'{self.hex_col}', background=colors(1), foreground=self.hex_col)
-            treeview.insert('', 'end', values=(arg, 'a', 'a'), tags=(f'{self.hex_col}',))
             bd.connect()
-            bd.insert_cat(arg, self.hex_col)
-            self.hex_col = None
+            test_name = bd.simple_select('category', 'name')
+            result = 0
             bd.disconnect()
+            for name in test_name[1]:
+                arg = arg.lstrip()
+                arg = arg.strip()
+                if arg == name:
+                    messagebox.showerror('Erro', 'O nome da categoria informado já existe, escolha outro', parent=parent)
+                    field.delete(0, END)
+                    result = 1
+                    break
+                else:
+                    pass
+            if result == 0:
+                treeview.tag_configure(f'{self.hex_col}', background=colors(1), foreground=self.hex_col)
+                treeview.insert('', 'end', values=(arg, 'a', 'a'), tags=(f'{self.hex_col}',))
+                bd.connect()
+                bd.insert_cat(arg, self.hex_col)
+                self.hex_col = None
+                bd.disconnect()
+                messagebox.showinfo('Sucesso!', f'A categoria {arg} foi cadastrada no programa!', parent=parent)
+                field.delete(0, END)
+            else:
+                pass
 
     def delete_tree(self, treeview, parent):
         try:
@@ -417,6 +436,7 @@ def registry_condition(parent, mon, yea, eff, field, cat):
                 field.delete(0, END)
             else:
                 bd.connect()
+                print(cat)
                 bd.insert_effectivity(v_eff, cat, mon.get(), yea.get())
                 bd.disconnect()
                 messagebox.showinfo('Sucesso!',
