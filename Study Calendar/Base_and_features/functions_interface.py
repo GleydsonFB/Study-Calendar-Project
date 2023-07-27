@@ -753,10 +753,28 @@ class content_schedule:
         self.base = base_obj
         self.frame = frame_obj
 
-    def max_char(self, limit, arg, field, parent):
-        arg = arg.get()
-        if len(arg) >= limit:
-            messagebox.showerror('Erro', f'O campo em questão só permite {limit} caracteres', parent=parent)
+    def max_char(self, limit, arg, field, cat, days, parent):
+        arg = str(arg.get())
+        if arg.isnumeric():
+            if len(arg) >= limit:
+                messagebox.showerror('Erro', f'O campo em questão só permite {limit} números (e do tipo inteiro)', parent=parent)
+                field.delete(0, END)
+            else:
+                bd.connect()
+                color = bd.choose_one('category', 'color', 'name', cat)
+                confirm = bd.insert_calendar(arg, days, dates.date_month()[0], dates.year, cat, color[0])
+                bd.disconnect()
+                if confirm == 0:
+                    messagebox.showinfo('Sucesso!', f'Registro da categoria {cat} no dia {days} realizado com sucesso!',
+                                        parent=parent)
+                    field.delete(0, END)
+                else:
+                    messagebox.showinfo('Atualizado com sucesso', f'O registro já existente para a categoria {cat} no dia {days} foi atualizado!',
+                                        parent=parent)
+                    field.delete(0, END)
+                self.base.day_month_system(frame=self.frame, original_obj=self.base)
+        else:
+            messagebox.showerror('Erro no campo', 'Só é permitido inserir valores números', parent=parent)
             field.delete(0, END)
 
     def max_comment(self, limit, arg, field, parent, days, months, years):

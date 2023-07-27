@@ -254,24 +254,24 @@ class Registry_window:
         self.frame1.place(relx=0.04, rely=0.06, relwidth=0.92, relheight=0.88)
 
     def insert_time(self):
-        #for tests
-        listt = ['English', 'Physic', 'Programing']
-
+        content_category = insert_combo()
         #combo and entry
-        combo = ttk.Combobox(self.frame1, values=listt, state='readonly', background=colors(5))
-        combo.set(listt[0])
+        combo = ttk.Combobox(self.frame1, values=content_category, state='readonly', background=colors(5))
+        combo.set(content_category[0])
         combo.place(relx=0.25, rely=0.18, relwidth=0.50)
         entry = Entry(self.frame1, textvariable=self.var, bg=colors(5))
         entry.place(relx=0.375, rely=0.38, relwidth=0.25)
-        button = Button(self.frame1, text='Inserir', command=lambda: content_s.max_char(5, self.var, entry, self.window),
-                        bg=colors(2), fg=colors(5), font=('Calibri', 13, 'bold'))
-        button.place(relx=0.375, rely=0.80, relwidth=0.25)
 
         #date registry
         list_day = dates.day_registry()
         combo1 = ttk.Combobox(self.frame1, values=list_day, state='readonly', background=colors(5))
         combo1.set(list_day[dates.date_month()[2] - 1])
         combo1.place(relx=0.25, rely=0.60, relwidth=0.15)
+
+        button = Button(self.frame1, text='Inserir',
+                        command=lambda: content_s.max_char(5, self.var, entry, combo.get(), combo1.get(), self.window),
+                        bg=colors(2), fg=colors(5), font=('Calibri', 13, 'bold'))
+        button.place(relx=0.375, rely=0.80, relwidth=0.25)
 
     def label(self):
         label1 = Label(self.frame1, text='Escolha a categoria', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))

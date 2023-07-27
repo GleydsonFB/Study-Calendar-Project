@@ -83,6 +83,14 @@ class Database:
             total.append(item[0])
         return len(total), total
 
+    def choose_one(self, table, name_col, col_search, search):
+        sql = F'SELECT {name_col} FROM {table} WHERE {col_search} = "{search}"'
+        self.mouse.execute(sql)
+        r = []
+        for col in self.mouse:
+            r.append(col)
+        return r
+
     def choose_two(self, table, name_col, name_col2, col_search, search):
         sql = F'SELECT {name_col}, {name_col2} FROM {table} WHERE {col_search} = "{search}"'
         self.mouse.execute(sql)
@@ -192,6 +200,30 @@ class Database:
         id_cat = 0
         for ids in self.mouse:
             id_cat = ids[0]
-        sql1 = f'INSERT INTO effectivity(efficiency, id_cat, month, year) VALUES ({eff}, {id_cat}, "{month}", {year});'
+        sql1 = f'INSERT INTO effectivity(efficiency, id_cat, month, year) VALUES({eff}, {id_cat}, "{month}", {year});'
         self.mouse.execute(sql1)
         self.con.commit()
+
+    def insert_calendar(self, time, day, month, year, cat, color):
+        sql = f'SELECT id_cal, time FROM calendar WHERE day = {day} AND month = "{month}" AND year = {year} AND cat_ref = "{cat}";'
+        self.mouse.execute(sql)
+        unique = []
+        times = []
+        time = int(time)
+        for i, t in self.mouse:
+            unique.append(i)
+            times.append(t)
+        if len(unique) == 0:
+            sql1 = f'INSERT INTO calendar(time, day, month, year, cat_ref, color_cat) VALUES({time}, {day}, "{month}", {year}, "{cat}", "{color}");'
+            self.mouse.execute(sql1)
+            self.con.commit()
+            return 0
+        else:
+            new_time = 0
+            for t in times:
+                new_time += t
+            new_time += time
+            sql2 = f'UPDATE calendar SET time = {new_time} WHERE id_cal = {unique[0]};'
+            self.mouse.execute(sql2)
+            self.con.commit()
+            return 1
