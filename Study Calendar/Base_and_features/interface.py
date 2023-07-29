@@ -25,6 +25,8 @@ class Main_window:
         self.frame()
         self.screen()
         self.button()
+        style = ttk.Style()
+        style.theme_use('clam')
         self.additional()
         self.window.mainloop()
 
@@ -183,7 +185,6 @@ class Category_window:
 
     def tree_view(self):
         style = ttk.Style()
-        style.theme_use('clam')
         style.configure("Treeview.Heading", background=colors(5), foreground=colors(1))
         style.configure('Treeview', fieldbackground=colors(1), font=('calibri', 12, 'bold'))
         style.map('Treeview', background=[('selected', colors(3))])
@@ -255,6 +256,8 @@ class Registry_window:
 
     def insert_time(self):
         content_category = insert_combo()
+        if content_category is None:
+            content_category = ['Nenhuma inserida']
         #combo and entry
         combo = ttk.Combobox(self.frame1, values=content_category, state='readonly', background=colors(5))
         combo.set(content_category[0])
@@ -335,13 +338,14 @@ class Commentary_window:
 class Remove_elem_window:
     def __init__(self):
         window4 = Toplevel()
-        self.frame1 = None
+        self.frame1, self.tree, self.combo = None, None, None
         self.var = StringVar()
         self.window = window4
         self.screen()
         self.frame()
         self.label_button()
         self.tree_view()
+        content_s.search = None
         self.window.mainloop()
 
     def screen(self):
@@ -365,29 +369,30 @@ class Remove_elem_window:
                        bg=colors(2))
         label1.place(relx=0.40, rely=0.20)
         list_day = dates.day_registry()
-        combo1 = ttk.Combobox(self.frame1, values=list_day, state='readonly', background=colors(5))
-        combo1.set(list_day[dates.date_month()[2] - 1])
-        combo1.place(relx=0.25, rely=0.20, relwidth=0.15)
-        button = Button(self.frame1, text='Buscar', bg=colors(2), fg=colors(5), font=('Calibri', 10, 'bold'))
+        self.combo = ttk.Combobox(self.frame1, values=list_day, state='readonly', background=colors(5))
+        self.combo.set(list_day[dates.date_month()[2] - 1])
+        self.combo.place(relx=0.25, rely=0.20, relwidth=0.15)
+        button = Button(self.frame1, text='Buscar', bg=colors(2), fg=colors(5), font=('Calibri', 10, 'bold'),
+                        command=lambda: content_s.find_element(self.tree, self.combo.get(), self.window))
         button.place(relx=0.40, rely=0.30, relwidth=0.20)
 
     def tree_view(self):
         style = ttk.Style()
-        style.theme_use('clam')
         style.configure("Treeview.Heading", background=colors(3), foreground=colors(1))
         style.configure('Treeview', fieldbackground=colors(5), font=('calibri', 12, 'bold'))
         style.map('Treeview', background=[('selected', colors(1))])
         style.configure('Scrollbar')
-        treeview = ttk.Treeview(self.frame1, height=3, columns=('Duração', 'Categoria'), selectmode='browse',
-                                show='headings')
-        treeview.heading('#0', text='')
-        treeview.heading('Duração', text='Duração')
-        treeview.heading('Categoria', text='Categoria')
-        treeview.column('#0', width=1, minwidth=1, stretch=NO)
-        treeview.column('Duração', width=50, minwidth=50, stretch=NO)
-        treeview.column('Categoria', width=211, minwidth=210, stretch=NO, anchor='c')
-        treeview.place(relx=0.04, rely=0.40, relwidth=0.92, relheight=0.50)
-        button_tree = Button(self.frame1, text='Remover registro', bg=colors(2), fg=colors(5), font=('Calibri', 10, 'bold'))
+        self.tree = ttk.Treeview(self.frame1, height=3, columns=('Duração', 'Categoria'), selectmode='browse',
+                                 show='headings')
+        self.tree.heading('#0', text='')
+        self.tree.heading('Duração', text='Minutos')
+        self.tree.heading('Categoria', text='Categoria')
+        self.tree.column('#0', width=1, minwidth=1, stretch=NO)
+        self.tree.column('Duração', width=60, minwidth=60, stretch=NO, anchor='c')
+        self.tree.column('Categoria', width=201, minwidth=200, stretch=NO, anchor='c')
+        self.tree.place(relx=0.04, rely=0.40, relwidth=0.92, relheight=0.50)
+        button_tree = Button(self.frame1, text='Remover registro', bg=colors(2), fg=colors(5), font=('Calibri', 10, 'bold'),
+                             command=lambda: content_s.delete_registry(self.tree, self.combo, self.window))
         button_tree.place(relx=0.30, rely=0.905, relwidth=0.40)
 
 

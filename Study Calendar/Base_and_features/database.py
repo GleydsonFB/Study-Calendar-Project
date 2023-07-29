@@ -100,6 +100,15 @@ class Database:
             r.append(col2)
         return r
 
+    def choose_three(self, table, name_col, name_col2, name_col3, col_search, col_search2, col_search3, *search):
+        sql = F'SELECT {name_col}, {name_col2}, {name_col3} FROM {table} ' \
+              F'WHERE {col_search} = "{search[0]}" AND {col_search2} = "{search[1]}" AND {col_search3} = "{search[2]}";'
+        self.mouse.execute(sql)
+        cols = []
+        for col in self.mouse:
+            cols.append(col)
+        return cols
+
     def insert_cat(self, name, color):
         sql = 'INSERT INTO category(name, color) VALUES ("{}", "{}");'.format(name, color)
         self.mouse.execute(sql)
@@ -117,10 +126,8 @@ class Database:
         sql = f'SELECT name, color FROM category;'
         self.mouse.execute(sql)
         cats = []
-        total = []
         for cat in self.mouse:
             cats.append(cat)
-            total.append(cat[0])
         choose = int(choose[1:]) - 1
         sql1 = f'DELETE FROM category WHERE name = "{cats[choose][0]}";'
         self.mouse.execute(sql1)
@@ -227,3 +234,14 @@ class Database:
             self.mouse.execute(sql2)
             self.con.commit()
             return 1
+
+    def del_registry(self, selection, day, month, year):
+        position = int(selection[1:]) - 1
+        sql = f'SELECT id_cal FROM calendar WHERE day = {day} AND month = "{month}" AND year = {year};'
+        ids = []
+        self.mouse.execute(sql)
+        for i in self.mouse:
+            ids.append(i)
+        sql2 = f'DELETE FROM calendar WHERE id_cal = {ids[position][0]};'
+        self.mouse.execute(sql2)
+        self.con.commit()

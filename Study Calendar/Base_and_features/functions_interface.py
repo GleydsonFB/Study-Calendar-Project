@@ -436,7 +436,6 @@ def registry_condition(parent, mon, yea, eff, field, cat):
                 field.delete(0, END)
             else:
                 bd.connect()
-                print(cat)
                 bd.insert_effectivity(v_eff, cat, mon.get(), yea.get())
                 bd.disconnect()
                 messagebox.showinfo('Sucesso!',
@@ -752,6 +751,7 @@ class content_schedule:
     def __init__(self, base_obj, frame_obj):
         self.base = base_obj
         self.frame = frame_obj
+        self.selection, self.search, self.current_day = None, None, None
 
     def max_char(self, limit, arg, field, cat, days, parent):
         arg = str(arg.get())
@@ -762,17 +762,22 @@ class content_schedule:
             else:
                 bd.connect()
                 color = bd.choose_one('category', 'color', 'name', cat)
-                confirm = bd.insert_calendar(arg, days, dates.date_month()[0], dates.year, cat, color[0])
-                bd.disconnect()
-                if confirm == 0:
-                    messagebox.showinfo('Sucesso!', f'Registro da categoria {cat} no dia {days} realizado com sucesso!',
-                                        parent=parent)
+                if len(color) == 0:
+                    messagebox.showerror('Erro', 'Não há uma categoria cadastrada ainda para inserção', parent=parent)
                     field.delete(0, END)
+                    bd.disconnect()
                 else:
-                    messagebox.showinfo('Atualizado com sucesso', f'O registro já existente para a categoria {cat} no dia {days} foi atualizado!',
-                                        parent=parent)
-                    field.delete(0, END)
-                self.base.day_month_system(frame=self.frame, original_obj=self.base)
+                    confirm = bd.insert_calendar(arg, days, dates.date_month()[0], year, cat, color[0][0])
+                    bd.disconnect()
+                    if confirm == 0:
+                        messagebox.showinfo('Sucesso!', f'Registro da categoria {cat} no dia {days} realizado com sucesso!',
+                                            parent=parent)
+                        field.delete(0, END)
+                    else:
+                        messagebox.showinfo('Atualizado com sucesso', f'O registro já existente para a categoria {cat} no dia {days} foi atualizado!',
+                                            parent=parent)
+                        field.delete(0, END)
+                    self.base.day_month_system(frame=self.frame, original_obj=self.base)
         else:
             messagebox.showerror('Erro no campo', 'Só é permitido inserir valores números', parent=parent)
             field.delete(0, END)
@@ -801,3 +806,40 @@ class content_schedule:
                 messagebox.showinfo('Sucesso!', 'comentário inserido no dia desejado!', parent=parent)
                 field.delete(1.0, END)
                 self.base.day_month_system(frame=self.frame, original_obj=self.base)
+
+    def delete_registry(self, treeview, days, window):
+        treeview.selection_clear()
+        try:
+            self.selection = treeview.selection()[0]
+        except IndexError:
+            messagebox.showerror('Erro', 'Não foi selecionado um registro para exclusão.', parent=window)
+        else:
+            treeview.delete(self.selection)
+            bd.connect()
+            bd.del_registry(self.selection, days.get(), dates.date_month()[0], year)
+            bd.disconnect()
+            messagebox.showinfo('Sucesso', 'Registro removido!', parent=window)
+            self.selection = None
+            self.base.day_month_system(frame=self.frame, original_obj=self.base)
+
+    def find_element(self, treeview, days, window):
+        if self.search == 1 and self.current_day == days:
+            messagebox.showerror('Ação repetida', f'Os registros do dia {days} já estão na tela (caso exista).', parent=window)
+        else:
+            self.search = None
+            bd.connect()
+            cat_day = bd.choose_three('calendar', 'time', 'cat_ref', 'color_cat', 'day', 'month', 'year', days,
+                                      dates.date_month()[0], year)
+            bd.disconnect()
+            if len(cat_day) == 0:
+                for item in treeview.get_children():
+                    treeview.delete(item)
+                messagebox.showerror('Retorno da busca',
+                                     f'Nenhum registro localizado para o dia {days} de {dates.date_month()[0]}.',
+                                     parent=window)
+            else:
+                for item in range(0, len(cat_day)):
+                    treeview.tag_configure(f'{cat_day[item][1]}', foreground=cat_day[item][2], background=colors(5))
+                    treeview.insert('', 'end', values=(cat_day[item][0], cat_day[item][1]), tags=(f'{cat_day[item][1]}',))
+        self.search = 1
+        self.current_day = days
