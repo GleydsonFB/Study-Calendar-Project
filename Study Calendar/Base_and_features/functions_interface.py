@@ -238,7 +238,7 @@ class Complementar_tree:
     def tree_insert(self, limit, arg, field, parent, treeview):
         arg = arg.get()
         if len(arg) >= limit:
-            messagebox.showerror('Erro', f'O campo em questão só permite {limit} caracteres.', parent=parent)
+            messagebox.showerror('Erro', f'O campo em questão só permite {limit - 1} caracteres.', parent=parent)
             field.delete(0, END)
         elif self.hex_col is None:
             messagebox.showerror('Erro', f'Não foi escolhida uma cor para a categoria.', parent=parent)
@@ -270,6 +270,7 @@ class Complementar_tree:
                 pass
 
     def delete_tree(self, treeview, parent):
+        treeview.selection_clear()
         try:
             self.selection = treeview.selection()[0]
         except IndexError:
@@ -279,6 +280,7 @@ class Complementar_tree:
             bd.connect()
             bd.delete_cat(self.selection)
             bd.disconnect()
+            messagebox.showinfo('Sucesso!', 'Categoria selecionada foi removida, o histórico dela no calendário será preservado (se houver)', parent=parent)
             self.selection = None
 
 
@@ -450,7 +452,7 @@ dates = Issue_date()
 class Comment_show_window:
     def __init__(self):
         self.window, self.frame1, self.scroll = None, None, None
-        self.label1 = None
+        self.label1, self.actual_day = None, None
         self.button = []
 
     def screen(self):
@@ -471,12 +473,13 @@ class Comment_show_window:
         self.scroll.pack(side=RIGHT, fill=Y)
 
     def label(self):
-        self.label1 = Label(self.frame1, text='Comentários do dia', font=('Calibri', 13, 'bold'), bg=colors(2),
+        self.label1 = Label(self.frame1, text=f'Comentários do dia {self.actual_day}', font=('Calibri', 13, 'bold'), bg=colors(2),
                             fg=colors(1))
-        self.label1.place(relx=0.25, rely=0.03, relwidth=0.50)
+        self.label1.place(relx=0.20, rely=0.03, relwidth=0.60)
 
-    def editable_label(self, content, ids, actual_month, class_month=None, frame_month=None):
+    def editable_label(self, content, ids, actual_month, day_reg, class_month=None, frame_month=None):
         self.window = Toplevel()
+        self.actual_day = day_reg
         self.screen()
         self.frame()
         self.label()
@@ -502,7 +505,7 @@ class Comment_show_window:
                 my_list.place(relx=0.125, rely=rely, relwidth=0.75, relheight=0.85)
                 my_list.tag_add('center', 1.0, 'end')
         else:
-            self.label1['text'] = 'Comentário do dia'
+            self.label1['text'] = f'Comentário do dia {self.actual_day}'
             my_list.insert(END, content[0])
             my_list.place(relx=0.125, rely=rely + 0.175, relwidth=0.75, relheight=0.35)
             my_list.tag_add('center', 1.0, 'end')
@@ -538,13 +541,13 @@ window_aux = Comment_show_window()
 class Days_month:
     def __init__(self):
         self.all_days, self.number_day, self.name_day = [], [], []
-        self.com_button = []
-        self.advance_right = 0
+        self.com_button, self.cal_reg = [], []
+        self.advance_right, self.control_cal = 0, 0
         self.img_view, self.base_obj = None, None
 
     def day_month_system(self, frame, original_obj):
         self.base_obj = original_obj
-        self.all_days, self.number_day, self.name_day, self.com_button = [], [], [], []
+        self.all_days, self.number_day, self.name_day, self.com_button, self.cal_reg, self.control_cal = [], [], [], [], [], 0
         control, relx, rely = 0, 0.02, 0.02
         max_width = 100
         aux_button = 0
@@ -567,10 +570,11 @@ class Days_month:
                     sup_unique += 1
             for item in range(0, len(unique_day)):
                 bd.connect()
-                desc = bd.view_content_comment(unique_day[item], actual_month[0], dates.year)
-                ids = bd.view_id_com(unique_day[item], actual_month[0], dates.year)
+                desc = bd.view_content_comment(unique_day[item], actual_month[0], year)
+                ids = bd.view_id_com(unique_day[item], actual_month[0], year)
                 bd.disconnect()
-                self.com_button.append(Button(frame, image=self.img_view, bg=colors(3), borderwidth=0, command=lambda c=desc, i=ids, f=frame: window_aux.editable_label(c, i, actual_month[3], self.base_obj, f)))
+                self.com_button.append(Button(frame, image=self.img_view, bg=colors(3), borderwidth=0,
+                                              command=lambda c=desc, i=ids, f=frame, d=unique_day[item]: window_aux.editable_label(c, i, actual_month[3], d, self.base_obj, f)))
         for days in range(1, dates.date_month()[1] + 1):
             self.number_day.append(days)
             self.name_day.append(days)
@@ -591,6 +595,26 @@ class Days_month:
                         if self.number_day[control] == unique_day[aux_button]:
                             self.com_button[aux_button].place(relx=relx + 0.070, rely=rely - 0.013)
                             aux_button += 1
+                    bd.connect()
+                    verify_calendar = bd.choose_three('calendar', 'time', 'cat_ref', 'color_cat', 'day', 'month',
+                                                      'year',
+                                                      self.number_day[control], actual_month[0], year)
+                    bd.disconnect()
+                    rely_cal = 0.01
+                    aux_cal = 0
+                    if len(verify_calendar) != 0:
+                        while True:
+                            if aux_cal < len(verify_calendar):
+                                self.cal_reg.append(Label(self.all_days[control],
+                                                          text=f'{verify_calendar[aux_cal][1]}\t{verify_calendar[aux_cal][0]}',
+                                                          font=('calibri', 10, 'bold'),
+                                                          fg=verify_calendar[aux_cal][2], bg=colors(4), anchor='center', highlightthickness=1, highlightbackground=verify_calendar[aux_cal][2]))
+                                self.cal_reg[self.control_cal].pack()
+                                self.control_cal += 1
+                                aux_cal += 1
+                                rely_cal += 0.20
+                            else:
+                                break
                     max_width -= 14
                     relx += 0.12
                     control += 1
@@ -634,7 +658,7 @@ class Days_month:
                 ids = bd.view_id_com(unique_day[item], name_month[0], dates.year)
                 bd.disconnect()
                 self.com_button.append(Button(frame, image=self.img_view, bg=colors(3), borderwidth=0,
-                                              command=lambda c=desc, i=ids, f=frame: window_aux.editable_label(c, i, name_month[3], self.base_obj, f)))
+                                              command=lambda c=desc, i=ids, f=frame, d=unique_day[item]: window_aux.editable_label(c, i, name_month[3], d, self.base_obj, f)))
         label.config(text=f'Agenda de {name_month[0]}/{dates.year}!')
         for days in range(1, dates.date_month(back_time=changing, change_or_not=True)[1] + 1):
             self.number_day.append(days)
@@ -656,6 +680,27 @@ class Days_month:
                         if self.number_day[control] == unique_day[aux_button]:
                             self.com_button[aux_button].place(relx=relx + 0.070, rely=rely - 0.015)
                             aux_button += 1
+                    bd.connect()
+                    verify_calendar = bd.choose_three('calendar', 'time', 'cat_ref', 'color_cat', 'day', 'month',
+                                                      'year',
+                                                      self.number_day[control], name_month[0], dates.year)
+                    bd.disconnect()
+                    rely_cal = 0.01
+                    aux_cal = 0
+                    if len(verify_calendar) != 0:
+                        while True:
+                            if aux_cal < len(verify_calendar):
+                                self.cal_reg.append(Label(self.all_days[control],
+                                                          text=f'{verify_calendar[aux_cal][1]}\t{verify_calendar[aux_cal][0]}',
+                                                          font=('calibri', 10, 'bold'),
+                                                          fg=verify_calendar[aux_cal][2], bg=colors(4), anchor='center',
+                                                          highlightthickness=1, highlightbackground=verify_calendar[aux_cal][2]))
+                                self.cal_reg[self.control_cal].pack()
+                                self.control_cal += 1
+                                aux_cal += 1
+                                rely_cal += 0.20
+                            else:
+                                break
                     max_width -= 14
                     relx += 0.12
                     control += 1
@@ -706,7 +751,7 @@ class Days_month:
                 ids = bd.view_id_com(unique_day[item], name_month[0], dates.year)
                 bd.disconnect()
                 self.com_button.append(Button(frame, image=self.img_view, bg=colors(3), borderwidth=0,
-                                              command=lambda c=desc, i=ids, f=frame: window_aux.editable_label(c, i, name_month[3], self.base_obj, f)))
+                                              command=lambda c=desc, i=ids, f=frame, d=unique_day[item]: window_aux.editable_label(c, i, name_month[3], d, self.base_obj, f)))
         label.config(text=f'Agenda de {name_month[0]}/{dates.year}!')
         for days in range(1, dates.date_month(advance_time=changing, change_or_not=True)[1] + 1):
             self.number_day.append(days)
@@ -728,6 +773,27 @@ class Days_month:
                         if self.number_day[control] == unique_day[aux_button]:
                             self.com_button[aux_button].place(relx=relx + 0.070, rely=rely - 0.015)
                             aux_button += 1
+                    bd.connect()
+                    verify_calendar = bd.choose_three('calendar', 'time', 'cat_ref', 'color_cat', 'day', 'month',
+                                                      'year',
+                                                      self.number_day[control], name_month[0], dates.year)
+                    bd.disconnect()
+                    rely_cal = 0.01
+                    aux_cal = 0
+                    if len(verify_calendar) != 0:
+                        while True:
+                            if aux_cal < len(verify_calendar):
+                                self.cal_reg.append(Label(self.all_days[control],
+                                                          text=f'{verify_calendar[aux_cal][1]}\t{verify_calendar[aux_cal][0]}',
+                                                          font=('calibri', 10, 'bold'),
+                                                          fg=verify_calendar[aux_cal][2], bg=colors(4), anchor='center',
+                                                          highlightthickness=1, highlightbackground=verify_calendar[aux_cal][2]))
+                                self.cal_reg[self.control_cal].pack()
+                                self.control_cal += 1
+                                aux_cal += 1
+                                rely_cal += 0.20
+                            else:
+                                break
                     max_width -= 14
                     relx += 0.12
                     control += 1
@@ -757,7 +823,7 @@ class content_schedule:
         arg = str(arg.get())
         if arg.isnumeric():
             if len(arg) >= limit:
-                messagebox.showerror('Erro', f'O campo em questão só permite {limit} números (e do tipo inteiro)', parent=parent)
+                messagebox.showerror('Erro', f'O campo em questão só permite {limit - 1} números (e do tipo inteiro)', parent=parent)
                 field.delete(0, END)
             else:
                 bd.connect()
@@ -788,7 +854,7 @@ class content_schedule:
             messagebox.showerror('Erro', 'O campo está vazio', parent=parent)
             field.delete(1.0, END)
         elif len(arg) >= limit:
-            messagebox.showerror('Erro', f'O campo em questão só permite {limit} caracteres', parent=parent)
+            messagebox.showerror('Erro', f'O campo em questão só permite {limit - 1} caracteres', parent=parent)
             field.delete(1.0, END)
         else:
             for letter in arg:
@@ -808,7 +874,6 @@ class content_schedule:
                 self.base.day_month_system(frame=self.frame, original_obj=self.base)
 
     def delete_registry(self, treeview, days, window):
-        treeview.selection_clear()
         try:
             self.selection = treeview.selection()[0]
         except IndexError:

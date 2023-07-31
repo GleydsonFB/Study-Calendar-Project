@@ -221,7 +221,7 @@ class Category_window:
         button2 = Button(self.frame1, text='Escolha a cor', command=color_helper.tree_color, bg=colors(2), fg=colors(5), font=('Calibri', 9, 'bold'))
         button2.place(relx=0.40, rely=0.20, relheight=0.10)
         button1 = Button(self.frame1, text='Insira', bg=colors(2), fg=colors(5), font=('Calibri', 9, 'bold'),
-                         command=lambda: color_helper.tree_insert(12, self.var, entry1, self.window, self.listt))
+                         command=lambda: color_helper.tree_insert(6, self.var, entry1, self.window, self.listt))
         button1.place(relx=0.75, rely=0.20, relheight=0.10)
         button3 = Button(self.window, text='Remover selecionada', bg=colors(2), fg=colors(5), font=('Calibri', 9, 'bold'),
                          command=lambda: color_helper.delete_tree(self.listt, self.window))
@@ -272,18 +272,18 @@ class Registry_window:
         combo1.place(relx=0.25, rely=0.60, relwidth=0.15)
 
         button = Button(self.frame1, text='Inserir',
-                        command=lambda: content_s.max_char(5, self.var, entry, combo.get(), combo1.get(), self.window),
+                        command=lambda: content_s.max_char(7, self.var, entry, combo.get(), combo1.get(), self.window),
                         bg=colors(2), fg=colors(5), font=('Calibri', 13, 'bold'))
         button.place(relx=0.375, rely=0.80, relwidth=0.25)
 
     def label(self):
         label1 = Label(self.frame1, text='Escolha a categoria', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
         label1.place(relx=0.25, relwidth=0.50, rely=0.05)
-        label2 = Label(self.frame1, text='Defina o tempo estudado', font=('Calibri', 12, 'bold'), fg=colors(5),
+        label2 = Label(self.frame1, text='Defina o tempo estudado em minutos', font=('Calibri', 12, 'bold'), fg=colors(5),
                        bg=colors(2))
-        label2.place(relx=0.125, rely=0.25, relwidth=0.75)
+        label2.place(relx=0.05, rely=0.30, relwidth=0.90)
         label3 = Label(self.frame1, text='Determine a data do estudo', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
-        label3.place(relx=0.15, rely=0.45)
+        label3.place(relx=0.15, rely=0.50)
         label4 = Label(self.frame1, text=f'/{dates.date_month()[0]}/{year}', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
         label4.place(relx=0.40, rely=0.60)
 
