@@ -2,6 +2,7 @@ import datetime
 import functools
 from tkinter import messagebox
 from tkinter import *
+from tkinter import ttk
 from tkinter import colorchooser
 from database import *
 from PIL import Image, ImageTk
@@ -18,7 +19,7 @@ class Issue_date:
         self.months = month
         self.future, self.back, self.name_month_back, self.name_month_future = 0, 0, 0, 0
         self.year = year
-        self.change_or_not = False
+        self.change_or_not, self.choose_now = False, month
 
     def date_month(self, back_time=0, advance_time=0, change_or_not=False):
         self.change_or_not = change_or_not
@@ -54,91 +55,91 @@ class Issue_date:
         elif back_time >= 1 and advance_time == 0:
             if self.change_or_not is True:
                 self.back += back_time
-                choose_now = self.months + self.future - self.back
+                self.choose_now = self.months + self.future - self.back
             else:
                 self.name_month_back += back_time
-                choose_now = self.months + self.name_month_future - self.name_month_back
-            if 12 >= choose_now >= 1:
-                match choose_now:
+                self.choose_now = self.months + self.name_month_future - self.name_month_back
+            if 12 >= self.choose_now >= 1:
+                match self.choose_now:
                     case 1:
-                        return 'janeiro', 31, day, self.months
+                        return 'janeiro', 31, day, self.choose_now
                     case 2:
                         if (self.year % 4 == 0 and self.year % 100 != 0) or self.year % 4 == 0:
-                            return 'fevereiro', 29, day, self.months
+                            return 'fevereiro', 29, day, self.choose_now
                         else:
-                            return 'fevereiro', 28, day, self.months
+                            return 'fevereiro', 28, day, self.choose_now
                     case 3:
-                        return 'março', 31, day, self.months
+                        return 'março', 31, day, self.choose_now
                     case 4:
-                        return 'abril', 30, day, self.months
+                        return 'abril', 30, day, self.choose_now
                     case 5:
-                        return 'maio', 31, day, self.months
+                        return 'maio', 31, day, self.choose_now
                     case 6:
-                        return 'junho', 30, day, self.months
+                        return 'junho', 30, day, self.choose_now
                     case 7:
-                        return 'julho', 31, day, self.months
+                        return 'julho', 31, day, self.choose_now
                     case 8:
-                        return 'agosto', 31, day, self.months
+                        return 'agosto', 31, day, self.choose_now
                     case 9:
-                        return 'setembro', 30, day, self.months
+                        return 'setembro', 30, day, self.choose_now
                     case 10:
-                        return 'outubro', 31, day, self.months
+                        return 'outubro', 31, day, self.choose_now
                     case 11:
-                        return 'novembro', 30, day, self.months
+                        return 'novembro', 30, day, self.choose_now
                     case 12:
-                        return 'dezembro', 31, day, self.months
+                        return 'dezembro', 31, day, self.choose_now
             else:
-                if choose_now >= 13:
+                if self.choose_now >= 13:
                     self.year += 1
-                elif choose_now <= 0:
+                elif self.choose_now <= 0:
                     self.year -= 1
                 self.months = 12
                 self.back, self.name_month_back, self.future, self.name_month_future = -1, 0, 0, 0
-                return 'dezembro', 31, day, self.months
+                return 'dezembro', 31, day, self.choose_now
         else:
             if change_or_not is True:
                 self.future += advance_time
-                choose_now = self.months + self.future - self.back
+                self.choose_now = self.months + self.future - self.back
             else:
                 self.name_month_future += advance_time
-                choose_now = self.months + self.name_month_future - self.name_month_back
-            if 12 >= choose_now >= 1:
-                match choose_now:
+                self.choose_now = self.months + self.name_month_future - self.name_month_back
+            if 12 >= self.choose_now >= 1:
+                match self.choose_now:
                     case 1:
-                        return 'janeiro', 31, day, self.months
+                        return 'janeiro', 31, day, self.choose_now
                     case 2:
                         if (self.year % 4 == 0 and self.year % 100 != 0) or self.year % 4 == 0:
-                            return 'fevereiro', 29, day, self.months
+                            return 'fevereiro', 29, day, self.choose_now
                         else:
-                            return 'fevereiro', 28, day, self.months
+                            return 'fevereiro', 28, day, self.choose_now
                     case 3:
-                        return 'março', 31, day, self.months
+                        return 'março', 31, day, self.choose_now
                     case 4:
-                        return 'abril', 30, day, self.months
+                        return 'abril', 30, day, self.choose_now
                     case 5:
-                        return 'maio', 31, day, self.months
+                        return 'maio', 31, day, self.choose_now
                     case 6:
-                        return 'junho', 30, day, self.months
+                        return 'junho', 30, day, self.choose_now
                     case 7:
-                        return 'julho', 31, day, self.months
+                        return 'julho', 31, day, self.choose_now
                     case 8:
-                        return 'agosto', 31, day, self.months
+                        return 'agosto', 31, day, self.choose_now
                     case 9:
-                        return 'setembro', 30, day, self.months
+                        return 'setembro', 30, day, self.choose_now
                     case 10:
-                        return 'outubro', 31, day, self.months
+                        return 'outubro', 31, day, self.choose_now
                     case 11:
-                        return 'novembro', 30, day, self.months
+                        return 'novembro', 30, day, self.choose_now
                     case 12:
-                        return 'dezembro', 31, day, self.months
+                        return 'dezembro', 31, day, self.choose_now
             else:
-                if choose_now >= 13:
+                if self.choose_now >= 13:
                     self.year += 1
-                elif choose_now <= 1:
+                elif self.choose_now <= 1:
                     self.year -= 1
                 self.months = 1
                 self.future, self.name_month_future, self.back, self.name_month_back = -1, 0, 0, 0
-                return 'janeiro', 31, day, self.months
+                return 'janeiro', 31, day, self.choose_now
 
     def day_registry(self):
         list_day = []
@@ -172,7 +173,7 @@ def show_tree(treeview):
     else:
         items = bd.show_cat()
         for cate in range(0, total[0]):
-            treeview.tag_configure(f'{items[cate - 1][1]}', background=colors(1), foreground=items[cate - 1][1])
+            treeview.tag_configure(f'{items[cate - 1][1]}', background=items[cate - 1][1], foreground='white')
             treeview.insert('', 'end', values=(items[cate - 1][0], 'a', 'a'), tags=(f'{items[cate - 1][1]}',))
     bd.disconnect()
 
@@ -209,11 +210,12 @@ def insert_goal(arg, field, parent, months, years, category):
             messagebox.showerror('Erro no registro', 'Escolha uma categoria para receber a meta.', parent=parent)
             bd.disconnect()
         else:
-            insert = bd.insert_goal(ctg, months, years, cat[0], cat[1])
+            insert = bd.insert_goal(ctg, months, years, cat[1], cat[0])
             if insert == 1:
                 messagebox.showinfo('Sucesso!',
                                     f'meta para a categoria {category} no mês {months} de {years} foi definida como'
                                     f' sendo {ctg} minuto(s).', parent=parent)
+                field.delete(0, END)
                 bd.disconnect()
             else:
                 messagebox.showerror('Erro no registro de meta',
@@ -225,6 +227,7 @@ def insert_goal(arg, field, parent, months, years, category):
         messagebox.showerror('Erro no registro dos minutos', 'Valor passado não é composto por um número inteiro.',
                              parent=parent)
         field.delete(0, END)
+        bd.disconnect()
 
 
 class Complementar_tree:
@@ -258,7 +261,7 @@ class Complementar_tree:
                 else:
                     pass
             if result == 0:
-                treeview.tag_configure(f'{self.hex_col}', background=colors(1), foreground=self.hex_col)
+                treeview.tag_configure(f'{self.hex_col}', background=self.hex_col, foreground='white')
                 treeview.insert('', 'end', values=(arg, 'a', 'a'), tags=(f'{self.hex_col}',))
                 bd.connect()
                 bd.insert_cat(arg, self.hex_col)
@@ -270,17 +273,20 @@ class Complementar_tree:
                 pass
 
     def delete_tree(self, treeview, parent):
-        treeview.selection_clear()
         try:
             self.selection = treeview.selection()[0]
-        except IndexError:
-            messagebox.showerror('Erro', 'Nenhuma categoria selecionada para exclusão.', parent=parent)
-        else:
             treeview.delete(self.selection)
             bd.connect()
             bd.delete_cat(self.selection)
             bd.disconnect()
+        except IndexError:
+            if self.selection is None:
+                messagebox.showerror('Erro', 'Nenhum registro selecionado para remoção.', parent=parent)
+            else:
+                messagebox.showerror('Erro de execução', 'Ocorreu um pequeno erro na solicitação, por favor, feche e abra novamente esta janela.', parent=parent)
+        else:
             messagebox.showinfo('Sucesso!', 'Categoria selecionada foi removida, o histórico dela no calendário será preservado (se houver)', parent=parent)
+            treeview.selection_remove(*treeview.selection())
             self.selection = None
 
 
@@ -510,9 +516,13 @@ class Comment_show_window:
             my_list.place(relx=0.125, rely=rely + 0.175, relwidth=0.75, relheight=0.35)
             my_list.tag_add('center', 1.0, 'end')
             # button for deletion of comment if actual month is same to system
-            button = Button(self.frame1, text='x', fg=colors(2), font=('calibri', 9), bg=colors(5),
-                            command=lambda i=ids[0][0], p=1: self.del_comments(i, p, class_month, frame_month))
-            button.place(relx=0.06, relwidth=0.05, relheight=0.05, rely=rely + 0.18)
+            if actual_month == month and dates.year == year:
+                print(actual_month, dates.year)
+                button = Button(self.frame1, text='x', fg=colors(2), font=('calibri', 9), bg=colors(5),
+                                command=lambda i=ids[0][0], p=1: self.del_comments(i, p, class_month, frame_month))
+                button.place(relx=0.06, relwidth=0.05, relheight=0.05, rely=rely + 0.18)
+            else:
+                pass
             #-
         my_list.configure(state='disabled')
 
@@ -606,7 +616,7 @@ class Days_month:
                         while True:
                             if aux_cal < len(verify_calendar):
                                 self.cal_reg.append(Label(self.all_days[control],
-                                                          text=f'{verify_calendar[aux_cal][1]}\t{verify_calendar[aux_cal][0]}',
+                                                          text=f'{verify_calendar[aux_cal][1]} - {verify_calendar[aux_cal][0]}',
                                                           font=('calibri', 10, 'bold'),
                                                           fg=verify_calendar[aux_cal][2], bg=colors(4), anchor='center', highlightthickness=1, highlightbackground=verify_calendar[aux_cal][2]))
                                 self.cal_reg[self.control_cal].pack()
@@ -876,14 +886,18 @@ class content_schedule:
     def delete_registry(self, treeview, days, window):
         try:
             self.selection = treeview.selection()[0]
-        except IndexError:
-            messagebox.showerror('Erro', 'Não foi selecionado um registro para exclusão.', parent=window)
-        else:
             treeview.delete(self.selection)
             bd.connect()
             bd.del_registry(self.selection, days.get(), dates.date_month()[0], year)
             bd.disconnect()
+        except IndexError:
+            if self.selection is None:
+                messagebox.showerror('Erro', 'Nenhum registro selecionado para remoção.', parent=window)
+            else:
+                messagebox.showerror('Erro de execução', 'Ocorreu um pequeno erro na solicitação, por favor, feche e abra novamente esta janela.', parent=window)
+        else:
             messagebox.showinfo('Sucesso', 'Registro removido!', parent=window)
+            treeview.selection_remove(*treeview.selection())
             self.selection = None
             self.base.day_month_system(frame=self.frame, original_obj=self.base)
 
@@ -908,3 +922,78 @@ class content_schedule:
                     treeview.insert('', 'end', values=(cat_day[item][0], cat_day[item][1]), tags=(f'{cat_day[item][1]}',))
         self.search = 1
         self.current_day = days
+
+
+class Goal_status_window:
+    def __init__(self, parent):
+        self.frame1, self.label1 = None, None
+        self.actual_m, self.window = None, None
+        self.parent = parent
+        self.view_status()
+
+    def screen(self):
+        self.window.title('Status das metas do mês')
+        self.window.configure(background=colors(1))
+        self.window.geometry('500x300+700+100')
+        self.window.resizable(False, False)
+        self.window.maxsize(width=500, height=300)
+        self.window.minsize(width=500, height=300)
+        self.window.iconbitmap('images/girl.ico')
+
+    def frame(self):
+        self.frame1 = Frame(self.window, background=colors(2))
+        self.frame1.place(relx=0.04, rely=0.04, relwidth=0.92, relheight=0.92)
+
+    def view_status(self):
+        match dates.choose_now:
+            case 1:
+                self.actual_m = 'janeiro'
+            case 2:
+                self.actual_m = 'fevereiro'
+            case 3:
+                self.actual_m = 'março'
+            case 4:
+                self.actual_m = 'abril'
+            case 5:
+                self.actual_m = 'maio'
+            case 6:
+                self.actual_m = 'junho'
+            case 7:
+                self.actual_m = 'julho'
+            case 8:
+                self.actual_m = 'agosto'
+            case 9:
+                self.actual_m = 'setembro'
+            case 10:
+                self.actual_m = 'outubro'
+            case 11:
+                self.actual_m = 'novembro'
+            case 12:
+                self.actual_m = 'dezembro'
+
+        bd.connect()
+        result = bd.search_goal(self.actual_m, dates.year)
+        bd.disconnect()
+        if len(result) == 0:
+            messagebox.showerror('Erro na execução', 'Para o mês e ano selecionados não há registros de meta para apresentar.', parent=self.parent)
+        else:
+            self.window = Toplevel()
+            self.screen()
+            self.frame()
+            style = ttk.Style()
+            style.configure("Treeview.Heading", background=colors(5), foreground=colors(1))
+            style.configure('Treeview', fieldbackground=colors(1), font=('calibri', 12, 'bold'))
+            style.map('Treeview', background=[('selected', colors(3))], foreground=[('selected', colors(1))])
+            style.configure('Scrollbar')
+            tree = ttk.Treeview(self.frame1, height=2, columns=('Categoria', 'Meta'), selectmode='browse', show='headings')
+            tree.heading('#0', text='')
+            tree.heading('Categoria', text='Categoria')
+            tree.heading('Meta', text='Meta')
+            tree.column('#0', width=1, minwidth=1, stretch=NO)
+            tree.column('Categoria', width=300, minwidth=300, stretch=NO, anchor='c')
+            tree.column('Meta', width=120, minwidth=120, stretch=NO, anchor='c')
+            tree.place(relx=0.04, rely=0.04, relheight=0.92, relwidth=0.92)
+            for item in range(0, len(result)):
+                tree.tag_configure(f'{result[item][0]}', foreground='white', background=result[item][2])
+                tree.insert('', 'end', values=(result[item][1], result[item][0]), tags=(f'{result[item][0]}',))
+            self.window.mainloop()

@@ -134,13 +134,14 @@ class Database:
         self.con.commit()
 
     def insert_goal(self, objective, month, year, category, color):
-        sql1 = f'SELECT id_goa FROM goal WHERE month = "{month}" AND year = "{year}" AND cate_ref = {category};'
+        print(objective, month, year, category, color)
+        sql1 = f'SELECT id_goa FROM goal WHERE month = "{month}" AND year = "{year}" AND cat_ref = {category};'
         self.mouse.execute(sql1)
         unique = []
         for item in self.mouse:
             unique.append(item)
         if len(unique) == 0:
-            sql = 'INSERT INTO goal(objective, month, year, cate_ref, color) VALUES("{}", "{}", "{}", "{}", "{}")' \
+            sql = 'INSERT INTO goal(objective, month, year, cat_ref, color_cat) VALUES("{}", "{}", "{}", "{}", "{}")' \
                 .format(objective, month, year, category, color)
             try:
                 self.mouse.execute(sql)
@@ -245,3 +246,11 @@ class Database:
         sql2 = f'DELETE FROM calendar WHERE id_cal = {ids[position][0]};'
         self.mouse.execute(sql2)
         self.con.commit()
+
+    def search_goal(self, month, year):
+        sql = f'SELECT objective, cat_ref, color_cat FROM goal WHERE month = "{month}" AND year = {year};'
+        r = []
+        self.mouse.execute(sql)
+        for data in self.mouse:
+            r.append(data)
+        return r

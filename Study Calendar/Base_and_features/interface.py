@@ -141,6 +141,8 @@ class Schedule_window:
         button6 = Button(self.frame1, text='Inserir comentário', fg=colors(5), font=('Calibri', 9, 'bold'),
                          bg=colors(2), command=Commentary_window)
         button6.place(relx=0.03, rely=0.945, relwidth=0.10)
+        button7 = Button(self.frame1, text='Metas', fg=colors(5), font=('Calibri', 12, 'bold'), bg=colors(2), command=lambda: Goal_status_window(self.window))
+        button7.place(relx=0.85, rely=0.70, relheight=0.20)
 
         #custom buttons
         button3 = Button(self.window, image=self.bt_left, bg=colors(2), borderwidth=0,
@@ -187,7 +189,7 @@ class Category_window:
         style = ttk.Style()
         style.configure("Treeview.Heading", background=colors(5), foreground=colors(1))
         style.configure('Treeview', fieldbackground=colors(1), font=('calibri', 12, 'bold'))
-        style.map('Treeview', background=[('selected', colors(3))])
+        style.map('Treeview', background=[('selected', colors(3))], foreground=[('selected', colors(1))])
         style.configure('Scrollbar')
         self.listt = ttk.Treeview(self.frame1, height=3, columns=('Nome da categoria', 'vazio'), selectmode='browse',
                                   show='headings')
@@ -221,7 +223,7 @@ class Category_window:
         button2 = Button(self.frame1, text='Escolha a cor', command=color_helper.tree_color, bg=colors(2), fg=colors(5), font=('Calibri', 9, 'bold'))
         button2.place(relx=0.40, rely=0.20, relheight=0.10)
         button1 = Button(self.frame1, text='Insira', bg=colors(2), fg=colors(5), font=('Calibri', 9, 'bold'),
-                         command=lambda: color_helper.tree_insert(6, self.var, entry1, self.window, self.listt))
+                         command=lambda: color_helper.tree_insert(13, self.var, entry1, self.window, self.listt))
         button1.place(relx=0.75, rely=0.20, relheight=0.10)
         button3 = Button(self.window, text='Remover selecionada', bg=colors(2), fg=colors(5), font=('Calibri', 9, 'bold'),
                          command=lambda: color_helper.delete_tree(self.listt, self.window))
