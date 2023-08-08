@@ -134,8 +134,7 @@ class Database:
         self.con.commit()
 
     def insert_goal(self, objective, month, year, category, color):
-        print(objective, month, year, category, color)
-        sql1 = f'SELECT id_goa FROM goal WHERE month = "{month}" AND year = "{year}" AND cat_ref = {category};'
+        sql1 = f'SELECT id_goa FROM goal WHERE month = "{month}" AND year = "{year}" AND cat_ref = "{category}";'
         self.mouse.execute(sql1)
         unique = []
         for item in self.mouse:
@@ -203,13 +202,8 @@ class Database:
         self.con.commit()
 
     def insert_effectivity(self, eff, cat, month, year):
-        sql = f'SELECT id_cat FROM category WHERE name = "{cat}";'
+        sql = f'INSERT INTO effectivity(efficiency, cat_ref, month, year) VALUES({eff}, "{cat}", "{month}", {year});'
         self.mouse.execute(sql)
-        id_cat = 0
-        for ids in self.mouse:
-            id_cat = ids[0]
-        sql1 = f'INSERT INTO effectivity(efficiency, id_cat, month, year) VALUES({eff}, {id_cat}, "{month}", {year});'
-        self.mouse.execute(sql1)
         self.con.commit()
 
     def insert_calendar(self, time, day, month, year, cat, color):
@@ -251,6 +245,22 @@ class Database:
         sql = f'SELECT objective, cat_ref, color_cat FROM goal WHERE month = "{month}" AND year = {year};'
         r = []
         self.mouse.execute(sql)
+        for data in self.mouse:
+            r.append(data)
+        return r
+
+    def select_two_search(self, table, col, search1, search2, col_s, col_s2):
+        sql = f'SELECT {col} FROM {table} WHERE {col_s} = "{search1}" AND {col_s2} = "{search2}";'
+        self.mouse.execute(sql)
+        r = []
+        for data in self.mouse:
+            r.append(data)
+        return r
+
+    def select_three_search(self, table, col, search1, search2, search3, col_s, col_s2, col_s3):
+        sql = f'SELECT {col} FROM {table} WHERE {col_s} = "{search1}" AND {col_s2} = "{search2}" AND {col_s3} = "{search3}";'
+        self.mouse.execute(sql)
+        r = []
         for data in self.mouse:
             r.append(data)
         return r
