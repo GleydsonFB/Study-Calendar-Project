@@ -143,7 +143,6 @@ class Schedule_window:
         button6.place(relx=0.03, rely=0.945, relwidth=0.10)
         button7 = Button(self.frame1, text='Metas', fg=colors(5), font=('Calibri', 12, 'bold'), bg=colors(2), command=lambda: Goal_status_window(self.window))
         button7.place(relx=0.85, rely=0.70, relheight=0.20)
-
         #custom buttons
         button3 = Button(self.window, image=self.bt_left, bg=colors(2), borderwidth=0,
                          command=lambda: dm.change_month_back((combo, button6, button5, button2, button1, self.label2), self.label1, self.frame2))
@@ -197,19 +196,10 @@ class Category_window:
         self.listt.heading('Nome da categoria', text='Categorias cadastradas')
         self.listt.heading('vazio', text='')
         self.listt.column('#0', width=1, minwidth=1, stretch=NO)
-        self.listt.column('Nome da categoria', width=230, minwidth=230, stretch=NO, anchor='c')
+        self.listt.column('Nome da categoria', width=231, minwidth=231, stretch=NO, anchor='c')
         self.listt.column('vazio', width=1, minwidth=1, stretch=NO)
         self.listt.place(relx=0.04, rely=0.35, relwidth=0.92, relheight=0.58)
         show_tree(self.listt)
-
-        #scrollbar vertical
-        scrollbar_list = Scrollbar(self.frame1, orient='vertical', command=self.listt.yview)
-        scrollbar_list.place(relx=0.94, rely=0.35, relwidth=0.06, relheight=0.64)
-
-        #scrollbar horizontal
-        scrollbar_listh = Scrollbar(self.frame1, orient='horizontal', command=self.listt.xview)
-        scrollbar_listh.place(relx=0.04, rely=0.93, relwidth=0.92, relheight=0.06)
-        self.listt.configure(yscrollcommand=scrollbar_list.set, xscrollcommand=scrollbar_listh.set)
 
     def field(self):
         label = Label(self.frame1, text='Digite o nome da nova categoria', font=('Calibri', 10, 'bold'), fg=colors(5), bg=colors(1))
@@ -428,7 +418,7 @@ class Goal_window:
         label1.place(relx=0.10, rely=0.05)
         label2 = Label(self.frame1, text='Tempo de estudo mensal', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
         label2.place(relx=0.10, rely=0.30)
-        label3 = Label(self.frame1, text='em minutos', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
+        label3 = Label(self.frame1, text='em horas', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
         label3.place(relx=0.21, rely=0.45)
         label4 = Label(self.frame1, text='Escolha o mês e o ano', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
         label4.place(relx=0.10, rely=0.60)

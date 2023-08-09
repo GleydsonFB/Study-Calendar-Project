@@ -148,9 +148,9 @@ class Database:
             except:
                 pass
             else:
-                return 1
+                return 0
         else:
-            sql = 'UPDATE goal SET objective = "{}" WHERE month = "{}" AND year = "{}" AND cate_ref = "{}";'\
+            sql = 'UPDATE goal SET objective = "{}" WHERE month = "{}" AND year = "{}" AND cat_ref = "{}";'\
                 .format(objective, month, year, category)
             self.mouse.execute(sql)
             self.con.commit()
@@ -202,31 +202,48 @@ class Database:
         self.con.commit()
 
     def insert_effectivity(self, eff, cat, month, year):
-        sql = f'INSERT INTO effectivity(efficiency, cat_ref, month, year) VALUES({eff}, "{cat}", "{month}", {year});'
+        sql = f'SELECT id_eff FROM effectivity WHERE cat_ref = "{cat}" AND month = "{month}" AND year = {year};'
         self.mouse.execute(sql)
-        self.con.commit()
+        unique = []
+        for i in self.mouse:
+            unique.append(i)
+        if len(unique) == 0:
+            sql1 = f'INSERT INTO effectivity(efficiency, cat_ref, month, year) VALUES({eff}, "{cat}", "{month}", {year});'
+            self.mouse.execute(sql1)
+            self.con.commit()
+            return 0
+        else:
+            sql2 = f'UPDATE effectivity SET efficiency = {eff} WHERE id_eff = {unique[0][0]};'
+            self.mouse.execute(sql2)
+            self.con.commit()
+            return 1
 
     def insert_calendar(self, time, day, month, year, cat, color):
         sql = f'SELECT id_cal, time FROM calendar WHERE day = {day} AND month = "{month}" AND year = {year} AND cat_ref = "{cat}";'
         self.mouse.execute(sql)
-        unique = []
-        times = []
+        unique, times, total = [], [], []
         time = int(time)
         for i, t in self.mouse:
             unique.append(i)
             times.append(t)
-        if len(unique) == 0:
-            sql1 = f'INSERT INTO calendar(time, day, month, year, cat_ref, color_cat) VALUES({time}, {day}, "{month}", {year}, "{cat}", "{color}");'
-            self.mouse.execute(sql1)
+        sql1 = f'SELECT id_cal FROM calendar WHERE day = {day} AND month = "{month}" AND year = {year};'
+        self.mouse.execute(sql1)
+        for i in self.mouse:
+            total.append(i)
+        if len(unique) == 0 and len(total) < 5:
+            sql2 = f'INSERT INTO calendar(time, day, month, year, cat_ref, color_cat) VALUES({time}, {day}, "{month}", {year}, "{cat}", "{color}");'
+            self.mouse.execute(sql2)
             self.con.commit()
             return 0
+        elif len(total) >= 5 and len(unique) == 0:
+            return 2
         else:
             new_time = 0
             for t in times:
                 new_time += t
             new_time += time
-            sql2 = f'UPDATE calendar SET time = {new_time} WHERE id_cal = {unique[0]};'
-            self.mouse.execute(sql2)
+            sql3 = f'UPDATE calendar SET time = {new_time} WHERE id_cal = {unique[0]};'
+            self.mouse.execute(sql3)
             self.con.commit()
             return 1
 

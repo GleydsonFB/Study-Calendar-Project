@@ -212,15 +212,21 @@ def insert_goal(arg, field, parent, months, years, category):
             bd.disconnect()
         else:
             insert = bd.insert_goal(ctg, months, years, cat[1], cat[0])
-            if insert == 1:
+            if insert == 0:
                 messagebox.showinfo('Sucesso!',
                                     f'meta para a categoria {category} no mês {months} de {years} foi definida como'
-                                    f' sendo {ctg} minuto(s).', parent=parent)
+                                    f' sendo {ctg} hora(s).', parent=parent)
+                field.delete(0, END)
+                bd.disconnect()
+            elif insert == 1:
+                messagebox.showinfo('Sucesso!',
+                                    f'meta para a categoria {category} no mês {months} de {years} foi atualizada para'
+                                    f' {ctg} hora(s).', parent=parent)
                 field.delete(0, END)
                 bd.disconnect()
             else:
                 messagebox.showerror('Erro no registro de meta',
-                                     'As informações preenchidas no campo de minutos estão inválidas.'
+                                     'As informações preenchidas no campo de horas estão inválidas.'
                                      , parent=parent)
                 field.delete(0, END)
                 bd.disconnect()
@@ -450,12 +456,18 @@ def registry_condition(parent, mon, yea, eff, field, cat):
                 field.delete(0, END)
             else:
                 bd.connect()
-                bd.insert_effectivity(v_eff, cat, mon.get(), yea.get())
+                confirm = bd.insert_effectivity(v_eff, cat, mon.get(), yea.get())
                 bd.disconnect()
-                messagebox.showinfo('Sucesso!',
-                                    f'Efetividade de {v_eff}% para a categoria {cat.upper()} durante o período do mês {mon.get()} de {yea.get()} inserida com sucesso!',
-                                    parent=parent)
-                field.delete(0, END)
+                if confirm == 0:
+                    messagebox.showinfo('Sucesso!',
+                                        f'Efetividade de {v_eff}% para a categoria {cat.upper()} durante o período do mês {mon.get()} de {yea.get()} inserida com sucesso!',
+                                        parent=parent)
+                    field.delete(0, END)
+                else:
+                    messagebox.showinfo('Sucesso!',
+                                        f'A efetividade para a categoria {cat.upper()} durante o período do mês {mon.get()} de {yea.get()} foi atualizad para {v_eff}%!',
+                                        parent=parent)
+                    field.delete(0, END)
 
 
 dates = Issue_date()
@@ -614,7 +626,7 @@ class Days_month:
                     self.all_days[control].place(relx=relx, rely=rely + 0.015, relwidth=0.10, relheight=0.20)
                     if aux_button < len(unique_day) and len(unique_day) > 0:
                         if self.number_day[control] == unique_day[aux_button]:
-                            self.com_button[aux_button].place(relx=relx - 0.10, rely=rely - 0.010)
+                            self.com_button[aux_button].place(relx=relx + 0.02, rely=rely - 0.010)
                             aux_button += 1
                     bd.connect()
                     verify_calendar = bd.choose_three('calendar', 'time', 'cat_ref', 'color_cat', 'day', 'month',
@@ -870,11 +882,18 @@ class content_schedule:
                         messagebox.showinfo('Sucesso!', f'Registro da categoria {cat} no dia {days} realizado com sucesso!',
                                             parent=parent)
                         field.delete(0, END)
-                    else:
-                        messagebox.showinfo('Atualizado com sucesso', f'O registro já existente para a categoria {cat} no dia {days} foi atualizado!',
+                        self.base.day_month_system(frame=self.frame, original_obj=self.base)
+                    elif confirm == 1:
+                        messagebox.showinfo('Atualizado com sucesso',
+                                            f'O registro já existente para a categoria {cat} no dia {days} foi atualizado!',
                                             parent=parent)
                         field.delete(0, END)
-                    self.base.day_month_system(frame=self.frame, original_obj=self.base)
+                        self.base.day_month_system(frame=self.frame, original_obj=self.base)
+                    else:
+                        messagebox.showerror('Erro no registro', 'Para este dia, já existem 5 categorias cadastras, por esse motivo, '
+                                                                 'não será possível cadastrar outra sem remover algum registro.', parent=parent)
+                        field.delete(0, END)
+
         else:
             messagebox.showerror('Erro no campo', 'Só é permitido inserir valores números', parent=parent)
             field.delete(0, END)
@@ -1025,8 +1044,14 @@ class Goal_status_window:
             for item in range(0, len(result)):
                 calc_study.cat = result[item][1]
                 actual_time = calc_study.cal_study()
-                if actual_time == '':
-                    actual_time = 'N/A'
                 tree.tag_configure(f'{result[item][1]}', foreground='white', background=result[item][2])
-                tree.insert('', 'end', values=(result[item][1], result[item][0], actual_time, 1), tags=(f'{result[item][1]}',))
+                tree.insert('', 'end', values=(result[item][1], result[item][0], actual_time[0], actual_time[1]), tags=(f'{result[item][1]}',))
             self.window.mainloop()
+
+            
+class Goal_main_view:
+    def __init__(self, window, frame):
+        self.window = window
+        self.frame = frame
+
+    #def show_data(self):
