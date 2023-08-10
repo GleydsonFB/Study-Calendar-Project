@@ -14,6 +14,7 @@ rr = Registry_rule()
 cs = Choose_scale()
 dm = Days_month()
 content_s = content_schedule(dm, None)
+goal_main_v = Goal_main_view(None, None)
 
 
 class Main_window:
@@ -27,6 +28,9 @@ class Main_window:
         self.button()
         style = ttk.Style()
         style.theme_use('clam')
+        goal_main_v.frame = self.frame2
+        goal_main_v.a_month = month
+        goal_main_v.show_data()
         self.additional()
         self.window.mainloop()
 
@@ -391,8 +395,9 @@ class Remove_elem_window:
 class Goal_window:
     def __init__(self):
         window5 = Toplevel()
-        self.frame1 = None
+        self.frame1, self.frame2 = None, None
         self.var, self.category, self.month, self.year = StringVar(), StringVar(), StringVar(), StringVar()
+        self.month2, self.year2, self.category2 = StringVar(), StringVar(), StringVar()
         self.window = window5
         self.screen()
         self.frame()
@@ -404,31 +409,48 @@ class Goal_window:
         self.window.title('Definir metas')
         self.window.configure(background=colors(1))
         self.window.geometry(f'300x300+400+50')
-        self.window.maxsize(width=321, height=321)
-        self.window.minsize(width=300, height=300)
+        self.window.maxsize(width=600, height=321)
+        self.window.minsize(width=600, height=321)
         self.window.resizable(False, False)
         self.window.iconbitmap('images/girl.ico')
 
     def frame(self):
         self.frame1 = Frame(self.window, bd=1, bg=colors(2), highlightbackground=colors(3), highlightthickness=2)
-        self.frame1.place(relx=0.04, rely=0.04, relwidth=0.92, relheight=0.92)
+        self.frame1.place(relx=0.04, rely=0.04, relwidth=0.42, relheight=0.92)
+        self.frame2 = Frame(self.window, bd=1, bg=colors(2), highlightthickness=2, highlightbackground=colors(3))
+        self.frame2.place(relx=0.54, rely=0.04, relwidth=0.42, relheight=0.92)
 
     def label(self):
+        #Registry feature
+        label = Label(self.frame1, text='Registrar', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
+        label.place(relx=0.375, rely=0.01, relwidth=0.25)
         label1 = Label(self.frame1, text='Escolha a categoria', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
-        label1.place(relx=0.10, rely=0.05)
+        label1.place(relx=0.10, rely=0.15)
         label2 = Label(self.frame1, text='Tempo de estudo mensal', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
-        label2.place(relx=0.10, rely=0.30)
+        label2.place(relx=0.10, rely=0.35)
         label3 = Label(self.frame1, text='em horas', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
-        label3.place(relx=0.21, rely=0.45)
+        label3.place(relx=0.21, rely=0.47)
         label4 = Label(self.frame1, text='Escolha o mês e o ano', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
         label4.place(relx=0.10, rely=0.60)
 
+        #delete feature
+        label5 = Label(self.frame2, text='Remover', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
+        label5.place(relx=0.375, rely=0.01, relwidth=0.25)
+        label6 = Label(self.frame2, text='Selecione a categoria', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
+        label6.place(relx=0.10, rely=0.15)
+        label7 = Label(self.frame2, text='Escolha o mês e ano', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
+        label7.place(relx=0.10, rely=0.40)
+        label8 = Label(self.frame2, text='Por fim clique no botão para buscar um registro',
+                       font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2), wraplength=200)
+        label8.place(relx=0.15, rely=0.65)
+
     def button(self):
+        #goal registry buttons
         content_combo = insert_combo()
         combo = ttk.Combobox(self.frame1, values=content_combo, state='readonly', background=colors(5), textvariable=self.category)
-        combo.place(relx=0.10, rely=0.20)
+        combo.place(relx=0.10, rely=0.25)
         entry = Entry(self.frame1, bg=colors(5), textvariable=self.var)
-        entry.place(relx=0.10, rely=0.45, relwidth=0.10)
+        entry.place(relx=0.10, rely=0.47, relwidth=0.10)
         mon = month_combo()
         combo2 = ttk.Combobox(self.frame1, values=mon, state='readonly', background=colors(5), textvariable=self.month)
         combo2.set(mon[month - 1])
@@ -438,9 +460,24 @@ class Goal_window:
         combo3.set(yea[year - 2023])
         combo3.place(relx=0.45, rely=0.70, relwidth=0.20)
         button = Button(self.frame1, text='Registrar meta', bg=colors(2), fg=colors(5),
-                        font=('Calibri', 12, 'bold'), command=lambda: insert_goal(self.var, entry, self.window, self.month.get(), self.year.get()
-                                                                                  , self.category.get()))
+                        font=('Calibri', 11, 'bold'), command=lambda: insert_goal(self.var, entry, self.window, self.month.get(), self.year.get()
+                                                                                  , self.category.get(), goal_main_v))
         button.place(relx=0.30, relwidth=0.40, rely=0.85)
+
+        #goal remove buttons
+        combo3 = ttk.Combobox(self.frame2, values=content_combo, state='readonly', background=colors(5),
+                              textvariable=self.category2)
+        combo3.place(relx=0.10, rely=0.25)
+        combo4 = ttk.Combobox(self.frame2, values=mon, state='readonly', background=colors(5), textvariable=self.month2)
+        combo4.set(mon[month - 1])
+        combo4.place(relx=0.10, rely=0.50, relwidth=0.30)
+        combo5 = ttk.Combobox(self.frame2, values=yea, state='readonly', background=colors(5), textvariable=self.year2)
+        combo5.set(yea[year - 2023])
+        combo5.place(relx=0.45, rely=0.50, relwidth=0.20)
+        button2 = Button(self.frame2, text='Buscar', bg=colors(2), fg=colors(5),
+                         font=('Calibri', 11, 'bold'),
+                         command=lambda: delete_goal(self.window, self.month2.get(), self.year2.get(), self.category2.get(), goal_main_v))
+        button2.place(relx=0.30, relwidth=0.40, rely=0.85)
 
 
 class Rule_window:

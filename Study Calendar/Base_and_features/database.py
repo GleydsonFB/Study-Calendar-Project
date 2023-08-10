@@ -281,3 +281,8 @@ class Database:
         for data in self.mouse:
             r.append(data)
         return r
+
+    def del_simple(self, table, col_s, search):
+        sql = f'DELETE FROM {table} WHERE {col_s} = "{search}";'
+        self.mouse.execute(sql)
+        self.con.commit()

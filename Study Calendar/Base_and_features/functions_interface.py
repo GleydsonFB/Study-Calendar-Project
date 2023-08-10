@@ -202,7 +202,7 @@ def year_combo():
     return y
 
 
-def insert_goal(arg, field, parent, months, years, category):
+def insert_goal(arg, field, parent, months, years, category, goal_status):
     ctg = str(arg.get())
     if ctg.isnumeric():
         bd.connect()
@@ -218,12 +218,16 @@ def insert_goal(arg, field, parent, months, years, category):
                                     f' sendo {ctg} hora(s).', parent=parent)
                 field.delete(0, END)
                 bd.disconnect()
+                goal_status.clear_frame()
+                goal_status.show_data()
             elif insert == 1:
                 messagebox.showinfo('Sucesso!',
                                     f'meta para a categoria {category} no mês {months} de {years} foi atualizada para'
                                     f' {ctg} hora(s).', parent=parent)
                 field.delete(0, END)
                 bd.disconnect()
+                goal_status.clear_frame()
+                goal_status.show_data()
             else:
                 messagebox.showerror('Erro no registro de meta',
                                      'As informações preenchidas no campo de horas estão inválidas.'
@@ -235,6 +239,21 @@ def insert_goal(arg, field, parent, months, years, category):
                              parent=parent)
         field.delete(0, END)
         bd.disconnect()
+
+
+def delete_goal(parent, months, years, category, goal_status):
+    bd.connect()
+    registries = bd.select_three_search('goal', 'id_goa', category, months, years, 'cat_ref', 'month', 'year')
+    if len(registries) == 0:
+        messagebox.showerror('Retorno da busca', f'Não foi localizado uma meta para a categoria {category} em {months} de {years}.', parent=parent)
+        bd.disconnect()
+    else:
+        bd.del_simple('goal', 'id_goa', registries[0][0])
+        messagebox.showinfo('Retorno da busca', f'Foi removida a meta cadastrada em {months} de {years} na categoria {category}.', parent=parent)
+        goal_status.clear_frame()
+        goal_status.show_data()
+        bd.disconnect()
+
 
 
 class Complementar_tree:
@@ -267,6 +286,12 @@ class Complementar_tree:
                     break
                 else:
                     pass
+            arg = arg.lstrip()
+            arg = arg.strip()
+            if arg == '':
+                messagebox.showerror('Erro', 'Campo de categoria vazio.', parent=parent)
+                field.delete(0, END)
+                result = 1
             if result == 0:
                 treeview.tag_configure(f'{self.hex_col}', background=self.hex_col, foreground='white')
                 treeview.insert('', 'end', values=(arg, 'a', 'a'), tags=(f'{self.hex_col}',))
@@ -535,7 +560,6 @@ class Comment_show_window:
             my_list.tag_add('center', 1.0, 'end')
             # button for deletion of comment if actual month is same to system
             if actual_month == month and dates.year == year:
-                print(actual_month, dates.year)
                 button = Button(self.frame1, text='x', fg=colors(2), font=('calibri', 9), bg=colors(5),
                                 command=lambda i=ids[0][0], p=1: self.del_comments(i, p, class_month, frame_month))
                 button.place(relx=0.06, relwidth=0.05, relheight=0.05, rely=rely + 0.18)
@@ -543,7 +567,6 @@ class Comment_show_window:
                 pass
             #-
         my_list.configure(state='disabled')
-
         self.scroll.config(command=my_list.yview)
         self.window.mainloop()
 
@@ -1036,10 +1059,10 @@ class Goal_status_window:
             tree.heading('Estudado', text='Estudado')
             tree.heading('% completa', text='% completa')
             tree.column('#0', width=1, minwidth=1, stretch=NO)
-            tree.column('Categoria', width=120, stretch=NO, anchor='c')
-            tree.column('Estudado', width=100, stretch=NO, anchor='c')
-            tree.column('% completa', width=100, stretch=NO, anchor='c')
-            tree.column('Meta', width=100, stretch=NO, anchor='c')
+            tree.column('Categoria', width=120, minwidth=120, stretch=NO, anchor='c')
+            tree.column('Estudado', width=100, minwidth=100, stretch=NO, anchor='c')
+            tree.column('% completa', width=100, minwidth=100, stretch=NO, anchor='c')
+            tree.column('Meta', width=100, minwidth=100, stretch=NO, anchor='c')
             tree.place(relx=0.04, rely=0.04, relheight=0.92, relwidth=0.92)
             for item in range(0, len(result)):
                 calc_study.cat = result[item][1]
@@ -1048,10 +1071,74 @@ class Goal_status_window:
                 tree.insert('', 'end', values=(result[item][1], result[item][0], actual_time[0], actual_time[1]), tags=(f'{result[item][1]}',))
             self.window.mainloop()
 
-            
-class Goal_main_view:
-    def __init__(self, window, frame):
-        self.window = window
-        self.frame = frame
 
-    #def show_data(self):
+class Goal_main_view:
+    def __init__(self, frame, a_month):
+        self.frame = frame
+        self.a_month = a_month
+        self.actual_m, self.tree, self.style = None, None, None
+
+    def show_data(self):
+        match self.a_month:
+            case 1:
+                self.actual_m = 'janeiro'
+            case 2:
+                self.actual_m = 'fevereiro'
+            case 3:
+                self.actual_m = 'março'
+            case 4:
+                self.actual_m = 'abril'
+            case 5:
+                self.actual_m = 'maio'
+            case 6:
+                self.actual_m = 'junho'
+            case 7:
+                self.actual_m = 'julho'
+            case 8:
+                self.actual_m = 'agosto'
+            case 9:
+                self.actual_m = 'setembro'
+            case 10:
+                self.actual_m = 'outubro'
+            case 11:
+                self.actual_m = 'novembro'
+            case 12:
+                self.actual_m = 'dezembro'
+
+        bd.connect()
+        result = bd.search_goal(self.actual_m, dates.year)
+        bd.disconnect()
+
+        if len(result) == 0:
+            label = Label(self.frame, text='Ainda não há metas para visualização, por favor, cadastre alguma!', bg=colors(2), fg=colors(5), font=('Calibri', 15, 'underline'),
+                          wraplength=200)
+            label.place(relx=0.10, rely=0.10)
+        else:
+            self.style = ttk.Style()
+            self.style.configure("Treeview.Heading", background=colors(5), foreground=colors(1))
+            self.style.configure('Treeview', fieldbackground=colors(1), font=('calibri', 12, 'bold'))
+            self.style.map('Treeview', background=[('selected', colors(3))], foreground=[('selected', colors(1))])
+            self.style.configure('Scrollbar')
+            self.tree = ttk.Treeview(self.frame, height=2, columns=('Categoria', 'Meta', 'Estudado', '% completa'),
+                                     selectmode='browse', show='headings')
+            self.tree.heading('#0', text='')
+            self.tree.heading('Categoria', text='Categoria')
+            self.tree.heading('Meta', text='Meta')
+            self.tree.heading('Estudado', text='Feito')
+            self.tree.heading('% completa', text='%')
+            self.tree.column('#0', width=1, minwidth=1, stretch=NO)
+            self.tree.column('Categoria', width=87, stretch=NO, anchor='c')
+            self.tree.column('Estudado', width=50, stretch=NO, anchor='c')
+            self.tree.column('% completa', width=50, stretch=NO, anchor='c')
+            self.tree.column('Meta', width=50, stretch=NO, anchor='c')
+            self.tree.place(relx=0.04, rely=0.04, relheight=0.92, relwidth=0.92)
+            for item in range(0, len(result)):
+                calc_study.cat = result[item][1]
+                actual_time = calc_study.cal_study()
+                self.tree.tag_configure(f'{result[item][1]}', foreground='white', background=result[item][2])
+                self.tree.insert('', 'end', values=(result[item][1], result[item][0], actual_time[0], actual_time[1]),
+                                 tags=(f'{result[item][1]}',))
+
+    def clear_frame(self):
+        for widget in self.frame.winfo_children():
+            widget.destroy()
