@@ -255,7 +255,6 @@ def delete_goal(parent, months, years, category, goal_status):
         bd.disconnect()
 
 
-
 class Complementar_tree:
     def __init__(self):
         self.hex_col, self.selection = None, None
@@ -306,23 +305,20 @@ class Complementar_tree:
 
     def delete_tree(self, treeview, parent):
         try:
-            self.selection = treeview.selection()[0]
-            treeview.delete(self.selection)
+            self.selection = treeview.item(treeview.focus())
             bd.connect()
-            bd.delete_cat(self.selection)
+            bd.delete_cat(self.selection['tags'][0])
             bd.disconnect()
         except IndexError:
             if self.selection is None:
                 messagebox.showerror('Erro', 'Nenhum registro selecionado para remoção.', parent=parent)
-                treeview.selection_remove(*treeview.selection())
                 self.selection = None
             else:
                 messagebox.showerror('Erro de execução', 'Ocorreu um pequeno erro na solicitação, por favor, feche e abra novamente esta janela.', parent=parent)
-                treeview.selection_remove(*treeview.selection())
                 self.selection = None
         else:
             messagebox.showinfo('Sucesso!', 'Categoria selecionada foi removida, o histórico dela no calendário será preservado (se houver)', parent=parent)
-            treeview.selection_remove(*treeview.selection())
+            treeview.delete(treeview.focus())
             self.selection = None
 
 
@@ -442,7 +438,7 @@ class Choose_scale:
             bd.insert_week(choose_s, choose_d, choose_m, choose_y, self.week)
             bd.disconnect()
             parent.destroy()
-            self.study = []
+            self.study, self.week = [], []
             for variable in range(0, len(self.variables)):
                 self.variables[variable].set(0)
 
@@ -590,7 +586,8 @@ window_aux = Comment_show_window()
 
 
 class Days_month:
-    def __init__(self):
+    def __init__(self, window):
+        self.window_parent = window
         self.all_days, self.number_day, self.name_day = [], [], []
         self.com_button, self.cal_reg = [], []
         self.week_day, self.week_day_name = [], ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom']
@@ -607,6 +604,13 @@ class Days_month:
         unique_day, sup_unique = [], 0
         actual_month = dates.date_month()[0:4]
         bd.connect()
+        check_scale = bd.select_two_search('scale', 'week', actual_month[0], year, 'month', 'year')
+        if len(check_scale) == 0:
+            messagebox.showinfo('Notificação', 'Você ainda não definiu uma escala de estudo, faça isso o quanto antes para melhor aproveitamento!', parent=self.window_parent)
+        else:
+            pass
+        check_scale = bd.show_week_scale(check_scale[0][0])
+        print(check_scale[0][7])
         calc_study.month = actual_month[0]
         calc_study.year = year
         verify_com = bd.view_day_comment(dates.date_month()[0], year)
@@ -656,7 +660,7 @@ class Days_month:
                                                       'year',
                                                       self.number_day[control], actual_month[0], year)
                     bd.disconnect()
-                    rely_cal = 0.01
+                    rely_cal = 0
                     aux_cal = 0
                     if len(verify_calendar) != 0:
                         while True:
@@ -665,7 +669,7 @@ class Days_month:
                                                           text=f'{verify_calendar[aux_cal][1]} - {verify_calendar[aux_cal][0]}',
                                                           font=('calibri', 10, 'bold'),
                                                           fg=verify_calendar[aux_cal][2], bg=colors(4), anchor='center', highlightthickness=1, highlightbackground=verify_calendar[aux_cal][2]))
-                                self.cal_reg[self.control_cal].pack()
+                                self.cal_reg[self.control_cal].place(relx=0.005, rely=rely_cal, relwidth=0.99)
                                 self.control_cal += 1
                                 aux_cal += 1
                                 rely_cal += 0.20
@@ -746,17 +750,18 @@ class Days_month:
                                                       'year',
                                                       self.number_day[control], name_month[0], dates.year)
                     bd.disconnect()
-                    rely_cal = 0.01
+                    rely_cal = 0
                     aux_cal = 0
                     if len(verify_calendar) != 0:
                         while True:
                             if aux_cal < len(verify_calendar):
                                 self.cal_reg.append(Label(self.all_days[control],
-                                                          text=f'{verify_calendar[aux_cal][1]}\t{verify_calendar[aux_cal][0]}',
+                                                          text=f'{verify_calendar[aux_cal][1]} - {verify_calendar[aux_cal][0]}',
                                                           font=('calibri', 10, 'bold'),
                                                           fg=verify_calendar[aux_cal][2], bg=colors(4), anchor='center',
-                                                          highlightthickness=1, highlightbackground=verify_calendar[aux_cal][2]))
-                                self.cal_reg[self.control_cal].pack()
+                                                          highlightthickness=1,
+                                                          highlightbackground=verify_calendar[aux_cal][2]))
+                                self.cal_reg[self.control_cal].place(relx=0.005, rely=rely_cal, relwidth=0.99)
                                 self.control_cal += 1
                                 aux_cal += 1
                                 rely_cal += 0.20
@@ -844,17 +849,18 @@ class Days_month:
                                                       'year',
                                                       self.number_day[control], name_month[0], dates.year)
                     bd.disconnect()
-                    rely_cal = 0.01
+                    rely_cal = 0
                     aux_cal = 0
                     if len(verify_calendar) != 0:
                         while True:
                             if aux_cal < len(verify_calendar):
                                 self.cal_reg.append(Label(self.all_days[control],
-                                                          text=f'{verify_calendar[aux_cal][1]}\t{verify_calendar[aux_cal][0]}',
+                                                          text=f'{verify_calendar[aux_cal][1]} - {verify_calendar[aux_cal][0]}',
                                                           font=('calibri', 10, 'bold'),
                                                           fg=verify_calendar[aux_cal][2], bg=colors(4), anchor='center',
-                                                          highlightthickness=1, highlightbackground=verify_calendar[aux_cal][2]))
-                                self.cal_reg[self.control_cal].pack()
+                                                          highlightthickness=1,
+                                                          highlightbackground=verify_calendar[aux_cal][2]))
+                                self.cal_reg[self.control_cal].place(relx=0.005, rely=rely_cal, relwidth=0.99)
                                 self.control_cal += 1
                                 aux_cal += 1
                                 rely_cal += 0.20
@@ -918,7 +924,7 @@ class content_schedule:
                         field.delete(0, END)
 
         else:
-            messagebox.showerror('Erro no campo', 'Só é permitido inserir valores números', parent=parent)
+            messagebox.showerror('Erro no campo', 'Só é permitido inserir valores numéricos', parent=parent)
             field.delete(0, END)
 
     def max_comment(self, limit, arg, field, parent, days, months, years):
@@ -948,23 +954,20 @@ class content_schedule:
 
     def delete_registry(self, treeview, days, window):
         try:
-            self.selection = treeview.selection()[0]
-            treeview.delete(self.selection)
+            self.selection = treeview.item(treeview.focus())
             bd.connect()
-            bd.del_registry(self.selection, days.get(), dates.date_month()[0], year)
+            bd.del_registry(self.selection['tags'][0], days.get(), dates.date_month()[0], year)
             bd.disconnect()
         except IndexError:
             if self.selection is None:
                 messagebox.showerror('Erro', 'Nenhum registro selecionado para remoção.', parent=window)
-                treeview.selection_remove(*treeview.selection())
                 self.selection = None
             else:
                 messagebox.showerror('Erro de execução', 'Ocorreu um pequeno erro na solicitação, por favor, feche e abra novamente esta janela.', parent=window)
-                treeview.selection_remove(*treeview.selection())
                 self.selection = None
         else:
             messagebox.showinfo('Sucesso', 'Registro removido!', parent=window)
-            treeview.selection_remove(*treeview.selection())
+            treeview.delete(treeview.focus())
             self.selection = None
             self.base.day_month_system(frame=self.frame, original_obj=self.base)
 
@@ -1064,6 +1067,7 @@ class Goal_status_window:
             tree.column('% completa', width=100, minwidth=100, stretch=NO, anchor='c')
             tree.column('Meta', width=100, minwidth=100, stretch=NO, anchor='c')
             tree.place(relx=0.04, rely=0.04, relheight=0.92, relwidth=0.92)
+            tree.bind('<Motion>', 'break')
             for item in range(0, len(result)):
                 calc_study.cat = result[item][1]
                 actual_time = calc_study.cal_study()
@@ -1076,7 +1080,7 @@ class Goal_main_view:
     def __init__(self, frame, a_month):
         self.frame = frame
         self.a_month = a_month
-        self.actual_m, self.tree, self.style = None, None, None
+        self.actual_m = None
 
     def show_data(self):
         match self.a_month:
@@ -1114,30 +1118,31 @@ class Goal_main_view:
                           wraplength=200)
             label.place(relx=0.10, rely=0.10)
         else:
-            self.style = ttk.Style()
-            self.style.configure("Treeview.Heading", background=colors(5), foreground=colors(1))
-            self.style.configure('Treeview', fieldbackground=colors(1), font=('calibri', 12, 'bold'))
-            self.style.map('Treeview', background=[('selected', colors(3))], foreground=[('selected', colors(1))])
-            self.style.configure('Scrollbar')
-            self.tree = ttk.Treeview(self.frame, height=2, columns=('Categoria', 'Meta', 'Estudado', '% completa'),
-                                     selectmode='browse', show='headings')
-            self.tree.heading('#0', text='')
-            self.tree.heading('Categoria', text='Categoria')
-            self.tree.heading('Meta', text='Meta')
-            self.tree.heading('Estudado', text='Feito')
-            self.tree.heading('% completa', text='%')
-            self.tree.column('#0', width=1, minwidth=1, stretch=NO)
-            self.tree.column('Categoria', width=87, stretch=NO, anchor='c')
-            self.tree.column('Estudado', width=50, stretch=NO, anchor='c')
-            self.tree.column('% completa', width=50, stretch=NO, anchor='c')
-            self.tree.column('Meta', width=50, stretch=NO, anchor='c')
-            self.tree.place(relx=0.04, rely=0.04, relheight=0.92, relwidth=0.92)
+            style = ttk.Style()
+            style.configure("Treeview.Heading", background=colors(5), foreground=colors(1))
+            style.configure('Treeview', fieldbackground=colors(1), font=('calibri', 12, 'bold'))
+            style.map('Treeview', background=[('selected', colors(3))], foreground=[('selected', colors(1))])
+            style.configure('Scrollbar')
+            tree = ttk.Treeview(self.frame, height=2, columns=('Categoria', 'Meta', 'Estudado', '% completa'),
+                                selectmode='browse', show='headings')
+            tree.heading('#0', text='')
+            tree.heading('Categoria', text='Categoria')
+            tree.heading('Meta', text='Meta')
+            tree.heading('Estudado', text='Feito')
+            tree.heading('% completa', text='%')
+            tree.column('#0', width=1, minwidth=1)
+            tree.column('Categoria', width=87, anchor='c')
+            tree.column('Estudado', width=50, anchor='c')
+            tree.column('% completa', width=50, anchor='c')
+            tree.column('Meta', width=50, anchor='c')
+            tree.place(relx=0.04, rely=0.04, relheight=0.92, relwidth=0.92)
+            tree.bind('<Motion>', 'break')
             for item in range(0, len(result)):
                 calc_study.cat = result[item][1]
                 actual_time = calc_study.cal_study()
-                self.tree.tag_configure(f'{result[item][1]}', foreground='white', background=result[item][2])
-                self.tree.insert('', 'end', values=(result[item][1], result[item][0], actual_time[0], actual_time[1]),
-                                 tags=(f'{result[item][1]}',))
+                tree.tag_configure(f'{result[item][1]}', foreground='white', background=result[item][2])
+                tree.insert('', 'end', values=(result[item][1], result[item][0], actual_time[0], actual_time[1]),
+                            tags=(f'{result[item][1]}',))
 
     def clear_frame(self):
         for widget in self.frame.winfo_children():

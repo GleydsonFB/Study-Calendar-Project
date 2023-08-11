@@ -123,14 +123,8 @@ class Database:
         return cats
 
     def delete_cat(self, choose):
-        sql = f'SELECT name, color FROM category;'
+        sql = f'DELETE FROM category WHERE name = "{choose}";'
         self.mouse.execute(sql)
-        cats = []
-        for cat in self.mouse:
-            cats.append(cat)
-        choose = int(choose[1:]) - 1
-        sql1 = f'DELETE FROM category WHERE name = "{cats[choose][0]}";'
-        self.mouse.execute(sql1)
         self.con.commit()
 
     def insert_goal(self, objective, month, year, category, color):
@@ -192,14 +186,28 @@ class Database:
         self.con.commit()
 
     def insert_week(self, study_day, day_off, month, year, week):
-        sql = 'INSERT INTO week(seg, ter, qua, qui, sex, sab, dom) VALUES ("{}", "{}", "{}", "{}", "{}", "{}", "{}")'\
-            .format(week[0], week[1], week[2], week[3], week[4], week[5], week[6])
+        sql = f'SELECT week FROM scale WHERE month = "{month}" AND year = {year};'
         self.mouse.execute(sql)
-        id_week = self.mouse.lastrowid
-        self.con.commit()
-        sql1 = f'INSERT INTO scale (work, off, month, year, week) VALUES ("{study_day}", "{day_off}", "{month}", "{year}", "{id_week}");'
-        self.mouse.execute(sql1)
-        self.con.commit()
+        total = []
+        for item in self.mouse:
+            total.append(item)
+        if len(total) == 0:
+            sql1 = 'INSERT INTO week(seg, ter, qua, qui, sex, sab, dom) VALUES ("{}", "{}", "{}", "{}", "{}", "{}", "{}")'\
+                .format(week[0], week[1], week[2], week[3], week[4], week[5], week[6])
+            self.mouse.execute(sql1)
+            id_week = self.mouse.lastrowid
+            self.con.commit()
+            sql2 = f'INSERT INTO scale (work, off, month, year, week) VALUES ("{study_day}", "{day_off}", "{month}", "{year}", "{id_week}");'
+            self.mouse.execute(sql2)
+            self.con.commit()
+        else:
+            sql1 = 'UPDATE week SET seg = "{}", ter = "{}", qua = "{}", qui = "{}", sex = "{}", sab = "{}", dom = "{}" WHERE id_wek = "{}";'\
+                .format(week[0], week[1], week[2], week[3], week[4], week[5], week[6], total[0][0])
+            self.mouse.execute(sql1)
+            self.con.commit()
+            sql2 = 'UPDATE scale SET work = "{}", off = "{}" WHERE week = "{}";'.format(study_day, day_off, total[0][0])
+            self.mouse.execute(sql2)
+            self.con.commit()
 
     def insert_effectivity(self, eff, cat, month, year):
         sql = f'SELECT id_eff FROM effectivity WHERE cat_ref = "{cat}" AND month = "{month}" AND year = {year};'
@@ -248,13 +256,12 @@ class Database:
             return 1
 
     def del_registry(self, selection, day, month, year):
-        position = int(selection[1:]) - 1
-        sql = f'SELECT id_cal FROM calendar WHERE day = {day} AND month = "{month}" AND year = {year};'
+        sql = f'SELECT id_cal FROM calendar WHERE day = {day} AND month = "{month}" AND year = {year} AND cat_ref = "{selection}";'
         ids = []
         self.mouse.execute(sql)
         for i in self.mouse:
             ids.append(i)
-        sql2 = f'DELETE FROM calendar WHERE id_cal = {ids[position][0]};'
+        sql2 = f'DELETE FROM calendar WHERE id_cal = {ids[0][0]};'
         self.mouse.execute(sql2)
         self.con.commit()
 
@@ -286,3 +293,11 @@ class Database:
         sql = f'DELETE FROM {table} WHERE {col_s} = "{search}";'
         self.mouse.execute(sql)
         self.con.commit()
+
+    def show_week_scale(self, id_week):
+        sql = f'SELECT * FROM week WHERE id_wek = {id_week};'
+        self.mouse.execute(sql)
+        r = []
+        for item in self.mouse:
+            r.append(item)
+        return r

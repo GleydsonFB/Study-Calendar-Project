@@ -12,7 +12,7 @@ base.table_create()
 dates = Issue_date()
 rr = Registry_rule()
 cs = Choose_scale()
-dm = Days_month()
+dm = Days_month(None)
 content_s = content_schedule(dm, None)
 goal_main_v = Goal_main_view(None, None)
 
@@ -93,6 +93,7 @@ class Schedule_window:
         self.screen()
         self.frame()
         self.label()
+        dm.window_parent = self.window
         dm.day_month_system(self.frame2, dm)
         content_s.frame = self.frame2
         self.button()
@@ -146,7 +147,7 @@ class Schedule_window:
                          bg=colors(2), command=Commentary_window)
         button6.place(relx=0.03, rely=0.945, relwidth=0.10)
         button7 = Button(self.frame1, text='Metas', fg=colors(5), font=('Calibri', 12, 'bold'), bg=colors(2), command=lambda: Goal_status_window(self.window))
-        button7.place(relx=0.85, rely=0.70, relheight=0.20)
+        button7.place(relx=0.86, rely=0.75)
         #custom buttons
         button3 = Button(self.window, image=self.bt_left, bg=colors(2), borderwidth=0,
                          command=lambda: dm.change_month_back((combo, button6, button5, button2, button1, self.label2), self.label1, self.frame2))
@@ -199,10 +200,11 @@ class Category_window:
         self.listt.heading('#0', text='')
         self.listt.heading('Nome da categoria', text='Categorias cadastradas')
         self.listt.heading('vazio', text='')
-        self.listt.column('#0', width=1, minwidth=1, stretch=NO)
-        self.listt.column('Nome da categoria', width=231, minwidth=231, stretch=NO, anchor='c')
-        self.listt.column('vazio', width=1, minwidth=1, stretch=NO)
+        self.listt.column('#0', width=1, minwidth=1)
+        self.listt.column('Nome da categoria', width=231, minwidth=231, anchor='c')
+        self.listt.column('vazio', width=1, minwidth=1)
         self.listt.place(relx=0.04, rely=0.35, relwidth=0.92, relheight=0.58)
+        self.listt.bind('<Motion>', 'break')
         show_tree(self.listt)
 
     def field(self):
@@ -268,7 +270,7 @@ class Registry_window:
         combo1.place(relx=0.25, rely=0.60, relwidth=0.15)
 
         button = Button(self.frame1, text='Inserir',
-                        command=lambda: content_s.max_char(7, self.var, entry, combo.get(), combo1.get(), self.window),
+                        command=lambda: content_s.max_char(4, self.var, entry, combo.get(), combo1.get(), self.window),
                         bg=colors(2), fg=colors(5), font=('Calibri', 13, 'bold'))
         button.place(relx=0.375, rely=0.80, relwidth=0.25)
 
@@ -376,17 +378,18 @@ class Remove_elem_window:
         style = ttk.Style()
         style.configure("Treeview.Heading", background=colors(3), foreground=colors(1))
         style.configure('Treeview', fieldbackground=colors(5), font=('calibri', 12, 'bold'))
-        style.map('Treeview', background=[('selected', colors(1))])
+        style.map('Treeview', background=[('selected', colors(1))], foreground=[('selected', colors(5))])
         style.configure('Scrollbar')
         self.tree = ttk.Treeview(self.frame1, height=3, columns=('Duração', 'Categoria'), selectmode='browse',
                                  show='headings')
         self.tree.heading('#0', text='')
         self.tree.heading('Duração', text='Minutos')
         self.tree.heading('Categoria', text='Categoria')
-        self.tree.column('#0', width=1, minwidth=1, stretch=NO)
-        self.tree.column('Duração', width=60, minwidth=60, stretch=NO, anchor='c')
-        self.tree.column('Categoria', width=201, minwidth=200, stretch=NO, anchor='c')
+        self.tree.column('#0', width=1, minwidth=1)
+        self.tree.column('Duração', width=60, minwidth=60, anchor='c')
+        self.tree.column('Categoria', width=201, minwidth=200, anchor='c')
         self.tree.place(relx=0.04, rely=0.40, relwidth=0.92, relheight=0.50)
+        self.tree.bind('<Motion>', 'break')
         button_tree = Button(self.frame1, text='Remover registro', bg=colors(2), fg=colors(5), font=('Calibri', 10, 'bold'),
                              command=lambda: content_s.delete_registry(self.tree, self.combo, self.window))
         button_tree.place(relx=0.30, rely=0.905, relwidth=0.40)
