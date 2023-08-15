@@ -39,4 +39,23 @@ class Study_calc:
                 return answer, percentual
         return round(answer, 2), round(percentual, 2)
 
+    def cal_goal(self, id_week):
+        aux_bd.connect()
+        total_study_day = aux_bd.show_week_scale(id_week[0])
+        count = 0
+        for day in range(0, len(total_study_day[0])):
+            if total_study_day[0][day] == 1:
+                count += 1
+            else:
+                pass
+        if self.month == 'fevereiro':
+            if (self.year % 4 == 0 and self.year % 100 != 0) or self.year % 4 == 0:
+                count_fev = count * 3.857
+                return round(count_fev, 0)
+            else:
+                count_fev = count * 3.714
+                return round(count_fev, 0)
+        else:
+            return count * 4
+
 

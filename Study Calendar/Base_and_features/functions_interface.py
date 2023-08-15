@@ -3,7 +3,6 @@ from tkinter import messagebox
 from tkinter import *
 from tkinter import ttk
 from tkinter import colorchooser
-from database import *
 from PIL import Image, ImageTk
 from auxiliar_math import *
 
@@ -96,7 +95,7 @@ class Issue_date:
                     self.year -= 1
                 self.months = 12
                 self.back, self.name_month_back, self.future, self.name_month_future = -1, 0, 0, 0
-                return 'dezembro', 31, day, self.choose_now
+                return 'dezembro', 31, day, self.months
         else:
             if change_or_not is True:
                 self.future += advance_time
@@ -140,7 +139,7 @@ class Issue_date:
                     self.year -= 1
                 self.months = 1
                 self.future, self.name_month_future, self.back, self.name_month_back = -1, 0, 0, 0
-                return 'janeiro', 31, day, self.choose_now
+                return 'janeiro', 31, day, self.months
 
     def day_registry(self):
         list_day = []
@@ -150,6 +149,9 @@ class Issue_date:
 
     def reset_all(self):
         self.__init__()
+
+
+dates = Issue_date()
 
 
 def colors(scale):
@@ -174,8 +176,8 @@ def show_tree(treeview):
     else:
         items = bd.show_cat()
         for cate in range(0, total[0]):
-            treeview.tag_configure(f'{items[cate - 1][1]}', background=items[cate - 1][1], foreground='white')
-            treeview.insert('', 'end', values=(items[cate - 1][0], 'a', 'a'), tags=(f'{items[cate - 1][1]}',))
+            treeview.tag_configure(f'{items[cate - 1][0]}', background=items[cate - 1][1], foreground='white')
+            treeview.insert('', 'end', values=(items[cate - 1][0], 'a', 'a'), tags=(f'{items[cate - 1][0]}',))
     bd.disconnect()
 
 
@@ -202,6 +204,16 @@ def year_combo():
     return y
 
 
+def insert_combo_choose(table, col):
+    bd.connect()
+    result = bd.simple_select(table, col)
+    bd.disconnect()
+    if result[0] == 0:
+        pass
+    else:
+        return result[1]
+
+
 def insert_goal(arg, field, parent, months, years, category, goal_status):
     ctg = str(arg.get())
     if ctg.isnumeric():
@@ -211,29 +223,37 @@ def insert_goal(arg, field, parent, months, years, category, goal_status):
             messagebox.showerror('Erro no registro', 'Escolha uma categoria para receber a meta.', parent=parent)
             bd.disconnect()
         else:
-            insert = bd.insert_goal(ctg, months, years, cat[1], cat[0])
-            if insert == 0:
-                messagebox.showinfo('Sucesso!',
-                                    f'meta para a categoria {category} no mês {months} de {years} foi definida como'
-                                    f' sendo {ctg} hora(s).', parent=parent)
+            search_scale = bd.select_two_search('scale', 'week', months, years, 'month', 'year')
+            if len(search_scale[0]) == 0:
+                messagebox.showerror('Erro na criação da meta', 'Ainda não foi definida uma escala de estudo'
+                                                                ' para que possamos calcular sua meta. Por favor, insira uma!', parent=parent)
                 field.delete(0, END)
-                bd.disconnect()
-                goal_status.clear_frame()
-                goal_status.show_data()
-            elif insert == 1:
-                messagebox.showinfo('Sucesso!',
-                                    f'meta para a categoria {category} no mês {months} de {years} foi atualizada para'
-                                    f' {ctg} hora(s).', parent=parent)
-                field.delete(0, END)
-                bd.disconnect()
-                goal_status.clear_frame()
-                goal_status.show_data()
             else:
-                messagebox.showerror('Erro no registro de meta',
-                                     'As informações preenchidas no campo de horas estão inválidas.'
-                                     , parent=parent)
-                field.delete(0, END)
-                bd.disconnect()
+                total_days = calc_study.cal_goal(search_scale)
+                ctg = int(ctg)
+                insert = bd.insert_goal(ctg * total_days, months, years, cat[1], cat[0])
+                if insert == 0:
+                    messagebox.showinfo('Sucesso!',
+                                        f'meta para a categoria {category} no mês {months} de {years} foi definida como'
+                                        f' sendo {round((ctg * total_days)  / 60, 1)} hora(s).', parent=parent)
+                    field.delete(0, END)
+                    bd.disconnect()
+                    goal_status.clear_frame()
+                    goal_status.show_data()
+                elif insert == 1:
+                    messagebox.showinfo('Sucesso!',
+                                        f'meta para a categoria {category} no mês {months} de {years} foi atualizada para'
+                                        f' {round((ctg * total_days)  / 60, 1)} hora(s).', parent=parent)
+                    field.delete(0, END)
+                    bd.disconnect()
+                    goal_status.clear_frame()
+                    goal_status.show_data()
+                else:
+                    messagebox.showerror('Erro no registro de meta',
+                                         'As informações preenchidas no campo "em minutos" estão inválidas.'
+                                         , parent=parent)
+                    field.delete(0, END)
+                    bd.disconnect()
     else:
         messagebox.showerror('Erro no registro dos minutos', 'Valor passado não é composto por um número inteiro.',
                              parent=parent)
@@ -292,8 +312,8 @@ class Complementar_tree:
                 field.delete(0, END)
                 result = 1
             if result == 0:
-                treeview.tag_configure(f'{self.hex_col}', background=self.hex_col, foreground='white')
-                treeview.insert('', 'end', values=(arg, 'a', 'a'), tags=(f'{self.hex_col}',))
+                treeview.tag_configure(arg, background=self.hex_col, foreground='white')
+                treeview.insert('', 'end', values=(arg, 'a', 'a'), tags=(arg, ))
                 bd.connect()
                 bd.insert_cat(arg, self.hex_col)
                 self.hex_col = None
@@ -310,7 +330,7 @@ class Complementar_tree:
             bd.delete_cat(self.selection['tags'][0])
             bd.disconnect()
         except IndexError:
-            if self.selection is None:
+            if self.selection['tags'] == '':
                 messagebox.showerror('Erro', 'Nenhum registro selecionado para remoção.', parent=parent)
                 self.selection = None
             else:
@@ -400,10 +420,12 @@ class Registry_rule:
 
 
 class Choose_scale:
-    def __init__(self):
+    def __init__(self, parent=None, base_obj=None):
         self.study, self.check = [], []
         self.variables, self.days = [], ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom']
+        self.parent = parent
         self.week = []
+        self.base = base_obj
 
     def scale_default(self, parent):
         move_button = 0.04
@@ -441,6 +463,48 @@ class Choose_scale:
             self.study, self.week = [], []
             for variable in range(0, len(self.variables)):
                 self.variables[variable].set(0)
+
+    def insert_off(self, c_day):
+        bd.connect()
+        id_scale = bd.select_two_search('scale', 'week', dates.date_month()[0], year, 'month', 'year')
+        scale_now = bd.show_week_scale(id_scale[0])
+        check_day_off = []
+        bd.disconnect()
+        for item in scale_now:
+            check_day_off.append(item)
+        choose_day = datetime.date(year, dates.date_month()[3], c_day).weekday()
+        if check_day_off[0][choose_day] == 1:
+            answer = messagebox.askyesno('Confirme a folga', 'O dia escolhido é uma data de estudo e não de folga, tem certeza que deseja inserir a folga?', parent=self.parent)
+            if answer:
+                bd.connect()
+                result = bd.insert_off(c_day, dates.date_month()[0], year)
+                bd.disconnect()
+                if result != 1:
+                    messagebox.showinfo('Sucesso!', f'Folga registrada para o dia {c_day}!', parent=self.parent)
+                    self.base.day_month_system(original_obj=self.base)
+                else:
+                    messagebox.showerror('Erro no registro da folga', 'O dia em questão já tem uma folga cadastrada.', parent=self.parent)
+            else:
+                messagebox.showinfo('Escolha confirmada', 'A folga não foi inserida, é sempre importante seguir a escala!', parent=self.parent)
+        else:
+            bd.connect()
+            result = bd.insert_off(c_day, dates.date_month()[0], year)
+            bd.disconnect()
+            if result != 1:
+                messagebox.showinfo('Sucesso!', f'Uma folga foi registrada para o dia {c_day} respeitando a escala definida.', parent=self.parent)
+                self.base.day_month_system(original_obj=self.base)
+            else:
+                messagebox.showerror('Erro no registro da folga', 'O dia em questão já tem uma folga cadastrada.',
+                                     parent=self.parent)
+
+    def delete_off(self, c_day):
+        answer = messagebox.askyesno('Confirme a escolha', f'Deseja mesmo remover a folga do dia {c_day}?', parent=self.parent)
+        if answer:
+            bd.del_off(c_day, dates.date_month()[0], year)
+            messagebox.showinfo('Sucesso', 'A folga foi apagada conforme desejado.', parent=self.parent)
+            self.base.day_month_system(original_obj=self.base)
+        else:
+            messagebox.showinfo('Escolha confirmada', 'Folga mantida conforme escohido.', parent=self.parent)
 
 
 def registry_condition(parent, mon, yea, eff, field, cat):
@@ -491,9 +555,6 @@ def registry_condition(parent, mon, yea, eff, field, cat):
                     field.delete(0, END)
 
 
-dates = Issue_date()
-
-
 class Comment_show_window:
     def __init__(self):
         self.window, self.frame1, self.scroll = None, None, None
@@ -522,7 +583,7 @@ class Comment_show_window:
                             fg=colors(1))
         self.label1.place(relx=0.20, rely=0.03, relwidth=0.60)
 
-    def editable_label(self, content, ids, actual_month, day_reg, class_month=None, frame_month=None):
+    def editable_label(self, content, ids, actual_month, day_reg, class_month=None):
         self.window = Toplevel()
         self.actual_day = day_reg
         self.screen()
@@ -540,7 +601,7 @@ class Comment_show_window:
                 # button for deletion of comment if actual month is same to system
                 if actual_month == month and dates.year == year:
                     self.button.append(Button(my_list, text=f'{item + 1}', fg=colors(2), font=('calibri', 9), bg=colors(5),
-                                              command=lambda i=ids[item][0], p=item + 1: self.del_comments(i, p, class_month, frame_month)))
+                                              command=lambda i=ids[item][0], p=item + 1: self.del_comments(i, p, class_month)))
                     my_list.window_create('end', window=self.button[item])
                 #-
                 else:
@@ -557,7 +618,7 @@ class Comment_show_window:
             # button for deletion of comment if actual month is same to system
             if actual_month == month and dates.year == year:
                 button = Button(self.frame1, text='x', fg=colors(2), font=('calibri', 9), bg=colors(5),
-                                command=lambda i=ids[0][0], p=1: self.del_comments(i, p, class_month, frame_month))
+                                command=lambda i=ids[0][0], p=1: self.del_comments(i, p, class_month))
                 button.place(relx=0.06, relwidth=0.05, relheight=0.05, rely=rely + 0.18)
             else:
                 pass
@@ -566,7 +627,7 @@ class Comment_show_window:
         self.scroll.config(command=my_list.yview)
         self.window.mainloop()
 
-    def del_comments(self, ids, pos, class_up, frame):
+    def del_comments(self, ids, pos, class_up):
         answer = messagebox.askyesno('Confirme a ação', f'Você tem certeza que deseja deletar o comentário de número {pos} deste dia?', parent=self.window)
         if answer:
             bd.connect()
@@ -574,10 +635,10 @@ class Comment_show_window:
             bd.disconnect()
             messagebox.showinfo('Sucesso!', 'Comentário foi excluído do programa.', parent=self.window)
             self.window.destroy()
-            if class_up is None or frame is None:
+            if class_up is None:
                 pass
             else:
-                class_up.day_month_system(frame=frame, original_obj=class_up)
+                class_up.day_month_system(original_obj=class_up)
         else:
             messagebox.showinfo('Ação não executada', 'Comentário foi preservado conforme desejado', parent=self.window)
 
@@ -586,32 +647,39 @@ window_aux = Comment_show_window()
 
 
 class Days_month:
-    def __init__(self, window):
+    def __init__(self, window=None, off_system=None, frame=None):
         self.window_parent = window
+        self.principal_frame = frame
         self.all_days, self.number_day, self.name_day = [], [], []
-        self.com_button, self.cal_reg = [], []
+        self.com_button, self.cal_reg, self.rem_off = [], [], []
         self.week_day, self.week_day_name = [], ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom']
         self.advance_right, self.control_cal = 0, 0
         self.img_view, self.base_obj = None, None
+        self.off_system = off_system
 
-    def day_month_system(self, frame, original_obj):
+    def day_month_system(self, original_obj):
+        self.clear_frame()
         self.base_obj = original_obj
         self.all_days, self.number_day, self.name_day, self.com_button, self.cal_reg, self.control_cal = [], [], [], [], [], 0
-        self.week_day = []
+        self.week_day, self.rem_off = [], []
         control, relx, rely = 0, 0.02, 0.02
         max_width = 100
         aux_button = 0
         unique_day, sup_unique = [], 0
         actual_month = dates.date_month()[0:4]
         bd.connect()
-        check_scale = bd.select_two_search('scale', 'week', actual_month[0], year, 'month', 'year')
-        if len(check_scale) == 0:
+        check_scale = [bd.select_two_search('scale', 'week', actual_month[0], year, 'month', 'year'), False]
+        if len(check_scale[0]) == 0:
             messagebox.showinfo('Notificação', 'Você ainda não definiu uma escala de estudo, faça isso o quanto antes para melhor aproveitamento!', parent=self.window_parent)
         else:
-            pass
-        check_scale = bd.show_week_scale(check_scale[0][0])
-        print(check_scale[0][7])
+            check_scale[0] = bd.show_week_scale(check_scale[0][0])
+            check_scale[1] = True
         calc_study.month = actual_month[0]
+        off_history = [bd.select_two_search('dayOff', 'day', actual_month[0], year, 'month', 'year', True), False, 0]
+        if len(off_history[0]) == 0:
+            pass
+        else:
+            off_history[1] = True
         calc_study.year = year
         verify_com = bd.view_day_comment(dates.date_month()[0], year)
         bd.disconnect()
@@ -632,25 +700,58 @@ class Days_month:
                 desc = bd.view_content_comment(unique_day[item], actual_month[0], year)
                 ids = bd.view_id_com(unique_day[item], actual_month[0], year)
                 bd.disconnect()
-                self.com_button.append(Button(frame, image=self.img_view, bg=colors(3), borderwidth=0,
-                                              command=lambda c=desc, i=ids, f=frame, d=unique_day[item]: window_aux.editable_label(c, i, actual_month[3], d, self.base_obj, f)))
+                self.com_button.append(Button(self.principal_frame, image=self.img_view, bg=colors(3), borderwidth=0,
+                                              command=lambda c=desc, i=ids, d=unique_day[item]: window_aux.editable_label(c, i, actual_month[3], d, self.base_obj)))
         for days in range(1, dates.date_month()[1] + 1):
             self.number_day.append(days)
             self.name_day.append(days)
             self.week_day.append(datetime.date(year, actual_month[3], days).weekday())
         for number in range(len(self.number_day)):
             self.all_days.append(number)
-            self.all_days[number] = Frame(frame, bd=1, bg=colors(4))
+            self.all_days[number] = Frame(self.principal_frame, bd=1, bg=colors(4))
+        sup_scale = self.week_day[0]
         while True:
             if control >= len(self.all_days):
                 break
             else:
                 if max_width >= 2:
-                    self.name_day[control] = Label(frame, text=f'{self.week_day_name[self.week_day[control]]} - Dia {self.number_day[control]}', fg=colors(5),
+                    self.name_day[control] = Label(self.principal_frame, text=f'{self.week_day_name[self.week_day[control]]} - Dia {self.number_day[control]}', fg=colors(5),
                                                    bg=colors(3),
                                                    font=('Calibri', 10, 'bold'))
                     self.name_day[control].place(relx=relx + 0.035, rely=rely - 0.015, relheight=0.03)
                     self.all_days[control].place(relx=relx, rely=rely + 0.015, relwidth=0.10, relheight=0.20)
+                    if check_scale[1] is True:
+                        if sup_scale < 7:
+                            if check_scale[0][0][sup_scale] == 1:
+                                self.all_days[control].configure(highlightbackground='black', highlightthickness=3)
+                                sup_scale += 1
+                            else:
+                                self.all_days[control].configure(highlightbackground='green', highlightthickness=3)
+                                sup_scale += 1
+                        else:
+                            sup_scale = 0
+                            if check_scale[0][0][sup_scale] == 1:
+                                self.all_days[control].configure(highlightbackground='black', highlightthickness=3)
+                                sup_scale += 1
+                            else:
+                                self.all_days[control].configure(highlightbackground='green', highlightthickness=3)
+                                sup_scale += 1
+                    else:
+                        pass
+                    if off_history[1] is True:
+                        if off_history[2] < len(off_history[0]):
+                            if off_history[0][off_history[2]][0] == control + 1:
+                                self.all_days[control].configure(background='green')
+                                self.rem_off.append(Button(self.all_days[control], text='X', bg='green', fg='white',
+                                                           command=lambda r=off_history[0][off_history[2]][0]: self.off_system.delete_off(r)))
+                                self.rem_off[off_history[2]].pack(side=BOTTOM, anchor=SE)
+                                off_history[2] += 1
+                            else:
+                                pass
+                        else:
+                            pass
+                    else:
+                        pass
                     if aux_button < len(unique_day) and len(unique_day) > 0:
                         if self.number_day[control] == unique_day[aux_button]:
                             self.com_button[aux_button].place(relx=relx + 0.02, rely=rely - 0.010)
@@ -660,8 +761,7 @@ class Days_month:
                                                       'year',
                                                       self.number_day[control], actual_month[0], year)
                     bd.disconnect()
-                    rely_cal = 0
-                    aux_cal = 0
+                    rely_cal, aux_cal = 0, 0
                     if len(verify_calendar) != 0:
                         while True:
                             if aux_cal < len(verify_calendar):
@@ -684,13 +784,10 @@ class Days_month:
                     relx = 0.02
         dates.reset_all()
 
-    def change_month_back(self, hidden_object, label, frame):
-        for number in range(0, len(self.all_days)):
-            self.all_days[number].place_forget()
-            self.name_day[number].place_forget()
-        for button in range(0, len(self.com_button)):
-            self.com_button[button].place_forget()
-        self.all_days, self.number_day, self.name_day, self.com_button, self.week_day = [], [], [], [], []
+    def change_month_back(self, hidden_object, label):
+        self.clear_frame()
+        self.all_days, self.number_day, self.name_day, self.com_button, self.week_day, self.control_cal = [], [], [], [], [], 0
+        self.rem_off, self.cal_reg = [], []
         control, relx, rely = 0, 0.02, 0.02
         unique_day, sup_unique = [], 0
         max_width = 100
@@ -700,6 +797,12 @@ class Days_month:
         name_month = dates.date_month(back_time=changing)[0:4]
         verify_com = bd.view_day_comment(name_month[0], dates.year)
         calc_study.month = name_month[0]
+        check_scale = [bd.select_two_search('scale', 'week', name_month[0], dates.year, 'month', 'year'), False]
+        if len(check_scale[0]) == 0:
+            pass
+        else:
+            check_scale[0] = bd.show_week_scale(check_scale[0][0])
+            check_scale[1] = True
         calc_study.year = dates.year
         bd.disconnect()
         img = Image.open('images/comentary_ico.png')
@@ -719,8 +822,8 @@ class Days_month:
                 desc = bd.view_content_comment(unique_day[item], name_month[0], dates.year)
                 ids = bd.view_id_com(unique_day[item], name_month[0], dates.year)
                 bd.disconnect()
-                self.com_button.append(Button(frame, image=self.img_view, bg=colors(3), borderwidth=0,
-                                              command=lambda c=desc, i=ids, f=frame, d=unique_day[item]: window_aux.editable_label(c, i, name_month[3], d, self.base_obj, f)))
+                self.com_button.append(Button(self.principal_frame, image=self.img_view, bg=colors(3), borderwidth=0,
+                                              command=lambda c=desc, i=ids, d=unique_day[item]: window_aux.editable_label(c, i, name_month[3], d, self.base_obj)))
         label.config(text=f'Agenda de {name_month[0]}/{dates.year}!')
         for days in range(1, dates.date_month(back_time=changing, change_or_not=True)[1] + 1):
             self.number_day.append(days)
@@ -728,19 +831,38 @@ class Days_month:
             self.week_day.append(datetime.date(dates.year, name_month[3], days).weekday())
         for number in range(len(self.number_day)):
             self.all_days.append(number)
-            self.all_days[number] = Frame(frame, bd=1, bg=colors(4))
+            self.all_days[number] = Frame(self.principal_frame, bd=1, bg=colors(4))
+        sup_scale = self.week_day[0]
         while True:
             if control >= len(self.all_days):
                 break
             else:
                 if max_width >= 2:
-                    self.name_day[control] = Label(frame,
+                    self.name_day[control] = Label(self.principal_frame,
                                                    text=f'{self.week_day_name[self.week_day[control]]} - Dia {self.number_day[control]}',
                                                    fg=colors(5),
                                                    bg=colors(3),
                                                    font=('Calibri', 10, 'bold'))
                     self.name_day[control].place(relx=relx + 0.035, rely=rely - 0.015, relheight=0.03)
                     self.all_days[control].place(relx=relx, rely=rely + 0.015, relwidth=0.10, relheight=0.20)
+                    if check_scale[1] is True:
+                        if sup_scale < 7:
+                            if check_scale[0][0][sup_scale] == 1:
+                                self.all_days[control].configure(highlightbackground='black', highlightthickness=3)
+                                sup_scale += 1
+                            else:
+                                self.all_days[control].configure(highlightbackground='green', highlightthickness=3)
+                                sup_scale += 1
+                        else:
+                            sup_scale = 0
+                            if check_scale[0][0][sup_scale] == 1:
+                                self.all_days[control].configure(highlightbackground='black', highlightthickness=3)
+                                sup_scale += 1
+                            else:
+                                self.all_days[control].configure(highlightbackground='green', highlightthickness=3)
+                                sup_scale += 1
+                    else:
+                        pass
                     if aux_button < len(unique_day) and len(unique_day) > 0:
                         if self.number_day[control] == unique_day[aux_button]:
                             self.com_button[aux_button].place(relx=relx - 0.10, rely=rely - 0.010)
@@ -750,8 +872,7 @@ class Days_month:
                                                       'year',
                                                       self.number_day[control], name_month[0], dates.year)
                     bd.disconnect()
-                    rely_cal = 0
-                    aux_cal = 0
+                    rely_cal, aux_cal = 0, 0
                     if len(verify_calendar) != 0:
                         while True:
                             if aux_cal < len(verify_calendar):
@@ -785,11 +906,10 @@ class Days_month:
             for item in range(0, len(hidden_object)):
                 hidden_object[item].place_forget()
 
-    def change_month_future(self, hidden_object, label, frame):
-        for number in range(0, len(self.all_days)):
-            self.all_days[number].place_forget()
-            self.name_day[number].place_forget()
-        self.all_days, self.number_day, self.name_day, self.com_button, self.week_day = [], [], [], [], []
+    def change_month_future(self, hidden_object, label):
+        self.clear_frame()
+        self.all_days, self.number_day, self.name_day, self.com_button, self.week_day, self.control_cal = [], [], [], [], [], 0
+        self.rem_off, self.cal_reg = [], []
         control, relx, rely = 0, 0.02, 0.02
         max_width = 100
         unique_day, sup_unique = [], 0
@@ -799,6 +919,12 @@ class Days_month:
         name_month = dates.date_month(advance_time=changing)[0:4]
         verify_com = bd.view_day_comment(name_month[0], dates.year)
         calc_study.month = name_month[0]
+        check_scale = [bd.select_two_search('scale', 'week', name_month[0], dates.year, 'month', 'year'), False]
+        if len(check_scale[0]) == 0:
+            pass
+        else:
+            check_scale[0] = bd.show_week_scale(check_scale[0][0])
+            check_scale[1] = True
         calc_study.year = dates.year
         bd.disconnect()
         img = Image.open('images/comentary_ico.png')
@@ -818,8 +944,8 @@ class Days_month:
                 desc = bd.view_content_comment(unique_day[item], name_month[0], dates.year)
                 ids = bd.view_id_com(unique_day[item], name_month[0], dates.year)
                 bd.disconnect()
-                self.com_button.append(Button(frame, image=self.img_view, bg=colors(3), borderwidth=0,
-                                              command=lambda c=desc, i=ids, f=frame, d=unique_day[item]: window_aux.editable_label(c, i, name_month[3], d, self.base_obj, f)))
+                self.com_button.append(Button(self.principal_frame, image=self.img_view, bg=colors(3), borderwidth=0,
+                                              command=lambda c=desc, i=ids, d=unique_day[item]: window_aux.editable_label(c, i, name_month[3], d, self.base_obj)))
         label.config(text=f'Agenda de {name_month[0]}/{dates.year}!')
         for days in range(1, dates.date_month(advance_time=changing, change_or_not=True)[1] + 1):
             self.number_day.append(days)
@@ -827,19 +953,38 @@ class Days_month:
             self.week_day.append(datetime.date(dates.year, name_month[3], days).weekday())
         for number in range(len(self.number_day)):
             self.all_days.append(number)
-            self.all_days[number] = Frame(frame, bd=1, bg=colors(4))
+            self.all_days[number] = Frame(self.principal_frame, bd=1, bg=colors(4))
+        sup_scale = self.week_day[0]
         while True:
             if control >= len(self.all_days):
                 break
             else:
                 if max_width >= 2:
-                    self.name_day[control] = Label(frame,
+                    self.name_day[control] = Label(self.principal_frame,
                                                    text=f'{self.week_day_name[self.week_day[control]]} - Dia {self.number_day[control]}',
                                                    fg=colors(5),
                                                    bg=colors(3),
                                                    font=('Calibri', 10, 'bold'))
                     self.name_day[control].place(relx=relx + 0.035, rely=rely - 0.015, relheight=0.03)
                     self.all_days[control].place(relx=relx, rely=rely + 0.015, relwidth=0.10, relheight=0.20)
+                    if check_scale[1] is True:
+                        if sup_scale < 7:
+                            if check_scale[0][0][sup_scale] == 1:
+                                self.all_days[control].configure(highlightbackground='black', highlightthickness=3)
+                                sup_scale += 1
+                            else:
+                                self.all_days[control].configure(highlightbackground='green', highlightthickness=3)
+                                sup_scale += 1
+                        else:
+                            sup_scale = 0
+                            if check_scale[0][0][sup_scale] == 1:
+                                self.all_days[control].configure(highlightbackground='black', highlightthickness=3)
+                                sup_scale += 1
+                            else:
+                                self.all_days[control].configure(highlightbackground='green', highlightthickness=3)
+                                sup_scale += 1
+                    else:
+                        pass
                     if aux_button < len(unique_day) and len(unique_day) > 0:
                         if self.number_day[control] == unique_day[aux_button]:
                             self.com_button[aux_button].place(relx=relx - 0.10, rely=rely - 0.010)
@@ -849,8 +994,7 @@ class Days_month:
                                                       'year',
                                                       self.number_day[control], name_month[0], dates.year)
                     bd.disconnect()
-                    rely_cal = 0
-                    aux_cal = 0
+                    rely_cal, aux_cal = 0, 0
                     if len(verify_calendar) != 0:
                         while True:
                             if aux_cal < len(verify_calendar):
@@ -884,11 +1028,14 @@ class Days_month:
             for item in range(0, len(hidden_object)):
                 hidden_object[item].place_forget()
 
+    def clear_frame(self):
+        for widget in self.principal_frame.winfo_children():
+            widget.destroy()
+
 
 class content_schedule:
-    def __init__(self, base_obj, frame_obj):
+    def __init__(self, base_obj):
         self.base = base_obj
-        self.frame = frame_obj
         self.selection, self.search, self.current_day = None, None, None
 
     def max_char(self, limit, arg, field, cat, days, parent):
@@ -911,13 +1058,13 @@ class content_schedule:
                         messagebox.showinfo('Sucesso!', f'Registro da categoria {cat} no dia {days} realizado com sucesso!',
                                             parent=parent)
                         field.delete(0, END)
-                        self.base.day_month_system(frame=self.frame, original_obj=self.base)
+                        self.base.day_month_system(original_obj=self.base)
                     elif confirm == 1:
                         messagebox.showinfo('Atualizado com sucesso',
                                             f'O registro já existente para a categoria {cat} no dia {days} foi atualizado!',
                                             parent=parent)
                         field.delete(0, END)
-                        self.base.day_month_system(frame=self.frame, original_obj=self.base)
+                        self.base.day_month_system(original_obj=self.base)
                     else:
                         messagebox.showerror('Erro no registro', 'Para este dia, já existem 5 categorias cadastras, por esse motivo, '
                                                                  'não será possível cadastrar outra sem remover algum registro.', parent=parent)
@@ -950,7 +1097,7 @@ class content_schedule:
                 bd.disconnect()
                 messagebox.showinfo('Sucesso!', 'comentário inserido no dia desejado!', parent=parent)
                 field.delete(1.0, END)
-                self.base.day_month_system(frame=self.frame, original_obj=self.base)
+                self.base.day_month_system(original_obj=self.base)
 
     def delete_registry(self, treeview, days, window):
         try:
@@ -969,7 +1116,7 @@ class content_schedule:
             messagebox.showinfo('Sucesso', 'Registro removido!', parent=window)
             treeview.delete(treeview.focus())
             self.selection = None
-            self.base.day_month_system(frame=self.frame, original_obj=self.base)
+            self.base.day_month_system(original_obj=self.base)
 
     def find_element(self, treeview, days, window):
         if self.search == 1 and self.current_day == days:
@@ -1072,7 +1219,7 @@ class Goal_status_window:
                 calc_study.cat = result[item][1]
                 actual_time = calc_study.cal_study()
                 tree.tag_configure(f'{result[item][1]}', foreground='white', background=result[item][2])
-                tree.insert('', 'end', values=(result[item][1], result[item][0], actual_time[0], actual_time[1]), tags=(f'{result[item][1]}',))
+                tree.insert('', 'end', values=(result[item][1], round(result[item][0] / 60, 1), actual_time[0], actual_time[1]), tags=(f'{result[item][1]}',))
             self.window.mainloop()
 
 
@@ -1110,7 +1257,7 @@ class Goal_main_view:
                 self.actual_m = 'dezembro'
 
         bd.connect()
-        result = bd.search_goal(self.actual_m, dates.year)
+        result = bd.search_goal(self.actual_m, year)
         bd.disconnect()
 
         if len(result) == 0:
@@ -1137,11 +1284,13 @@ class Goal_main_view:
             tree.column('Meta', width=50, anchor='c')
             tree.place(relx=0.04, rely=0.04, relheight=0.92, relwidth=0.92)
             tree.bind('<Motion>', 'break')
+            calc_study.month = self.actual_m
+            calc_study.year = year
             for item in range(0, len(result)):
                 calc_study.cat = result[item][1]
                 actual_time = calc_study.cal_study()
                 tree.tag_configure(f'{result[item][1]}', foreground='white', background=result[item][2])
-                tree.insert('', 'end', values=(result[item][1], result[item][0], actual_time[0], actual_time[1]),
+                tree.insert('', 'end', values=(result[item][1], round(result[item][0] / 60, 1), actual_time[0], actual_time[1]),
                             tags=(f'{result[item][1]}',))
 
     def clear_frame(self):

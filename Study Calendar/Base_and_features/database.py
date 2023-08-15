@@ -273,13 +273,21 @@ class Database:
             r.append(data)
         return r
 
-    def select_two_search(self, table, col, search1, search2, col_s, col_s2):
-        sql = f'SELECT {col} FROM {table} WHERE {col_s} = "{search1}" AND {col_s2} = "{search2}";'
-        self.mouse.execute(sql)
-        r = []
-        for data in self.mouse:
-            r.append(data)
-        return r
+    def select_two_search(self, table, col, search1, search2, col_s, col_s2, order=False):
+        if order is False:
+            sql = f'SELECT {col} FROM {table} WHERE {col_s} = "{search1}" AND {col_s2} = "{search2}";'
+            self.mouse.execute(sql)
+            r = []
+            for data in self.mouse:
+                r.append(data)
+            return r
+        else:
+            sql = f'SELECT {col} FROM {table} WHERE {col_s} = "{search1}" AND {col_s2} = "{search2}" ORDER BY {col} ASC;'
+            self.mouse.execute(sql)
+            r = []
+            for data in self.mouse:
+                r.append(data)
+            return r
 
     def select_three_search(self, table, col, search1, search2, search3, col_s, col_s2, col_s3):
         sql = f'SELECT {col} FROM {table} WHERE {col_s} = "{search1}" AND {col_s2} = "{search2}" AND {col_s3} = "{search3}";'
@@ -295,9 +303,29 @@ class Database:
         self.con.commit()
 
     def show_week_scale(self, id_week):
-        sql = f'SELECT * FROM week WHERE id_wek = {id_week};'
+        sql = f'SELECT seg, ter, qua, qui, sex, sab, dom FROM week WHERE id_wek = {id_week[0]};'
         self.mouse.execute(sql)
         r = []
         for item in self.mouse:
             r.append(item)
         return r
+
+    def insert_off(self, day, month, year):
+        sql = f'SELECT id_day FROM dayOff WHERE day = {day} AND month = "{month}" AND year = {year};'
+        self.mouse.execute(sql)
+        total = []
+        for item in self.mouse:
+            total.append(item)
+        if len(total) == 0:
+            sql1 = f'INSERT INTO dayOff (day, month, year) VALUES ({day}, "{month}", {year});'
+            self.mouse.execute(sql1)
+            self.con.commit()
+        else:
+            return 1
+
+    def del_off(self, day, month, year):
+        self.connect()
+        sql = f'DELETE FROM dayOff WHERE day = {day} AND month = "{month}" AND year = {year};'
+        self.mouse.execute(sql)
+        self.con.commit()
+        self.disconnect()

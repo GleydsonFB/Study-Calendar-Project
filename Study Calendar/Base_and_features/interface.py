@@ -12,8 +12,8 @@ base.table_create()
 dates = Issue_date()
 rr = Registry_rule()
 cs = Choose_scale()
-dm = Days_month(None)
-content_s = content_schedule(dm, None)
+dm = Days_month()
+content_s = content_schedule(dm)
 goal_main_v = Goal_main_view(None, None)
 
 
@@ -94,8 +94,12 @@ class Schedule_window:
         self.frame()
         self.label()
         dm.window_parent = self.window
-        dm.day_month_system(self.frame2, dm)
-        content_s.frame = self.frame2
+        dm.principal_frame = self.frame2
+        dm.day_month_system(dm)
+        cs.parent = self.window
+        cs.base = dm
+        dm.off_system = cs
+        cs.frame = self.frame2
         self.button()
         self.window.mainloop()
 
@@ -141,7 +145,7 @@ class Schedule_window:
                          bg=colors(2), command=Remove_elem_window)
         button2.place(relx=0.50, rely=0.945, relwidth=0.10)
         button5 = Button(self.frame1, text='Inserir folga', fg=colors(5), font=('Calibri', 9, 'bold'),
-                         bg=colors(2))
+                         bg=colors(2), command=lambda: cs.insert_off(int(combo.get())))
         button5.place(relx=0.89, rely=0.945, relwidth=0.08)
         button6 = Button(self.frame1, text='Inserir comentário', fg=colors(5), font=('Calibri', 9, 'bold'),
                          bg=colors(2), command=Commentary_window)
@@ -150,10 +154,10 @@ class Schedule_window:
         button7.place(relx=0.86, rely=0.75)
         #custom buttons
         button3 = Button(self.window, image=self.bt_left, bg=colors(2), borderwidth=0,
-                         command=lambda: dm.change_month_back((combo, button6, button5, button2, button1, self.label2), self.label1, self.frame2))
+                         command=lambda: dm.change_month_back((combo, button6, button5, button2, button1, self.label2), self.label1))
         button3.place(relx=0.045, rely=0.042)
         button4 = Button(self.window, image=self.bt_right, bg=colors(2), borderwidth=0,
-                         command=lambda: dm.change_month_future((combo, button6, button5, button2, button1, self.label2), self.label1, self.frame2))
+                         command=lambda: dm.change_month_future((combo, button6, button5, button2, button1, self.label2), self.label1))
         button4.place(relx=0.925, rely=0.042)
 
         # combo days for day offs
@@ -429,12 +433,12 @@ class Goal_window:
         label.place(relx=0.375, rely=0.01, relwidth=0.25)
         label1 = Label(self.frame1, text='Escolha a categoria', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
         label1.place(relx=0.10, rely=0.15)
-        label2 = Label(self.frame1, text='Tempo de estudo mensal', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
-        label2.place(relx=0.10, rely=0.35)
-        label3 = Label(self.frame1, text='em horas', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
-        label3.place(relx=0.21, rely=0.47)
+        label2 = Label(self.frame1, text='Quanto tempo quer estudar por dia?', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2), wraplength=200)
+        label2.place(relx=0.05, rely=0.35)
+        label3 = Label(self.frame1, text='em minutos', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
+        label3.place(relx=0.21, rely=0.50)
         label4 = Label(self.frame1, text='Escolha o mês e o ano', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
-        label4.place(relx=0.10, rely=0.60)
+        label4.place(relx=0.10, rely=0.63)
 
         #delete feature
         label5 = Label(self.frame2, text='Remover', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
@@ -453,22 +457,23 @@ class Goal_window:
         combo = ttk.Combobox(self.frame1, values=content_combo, state='readonly', background=colors(5), textvariable=self.category)
         combo.place(relx=0.10, rely=0.25)
         entry = Entry(self.frame1, bg=colors(5), textvariable=self.var)
-        entry.place(relx=0.10, rely=0.47, relwidth=0.10)
+        entry.place(relx=0.10, rely=0.50, relwidth=0.10)
         mon = month_combo()
         combo2 = ttk.Combobox(self.frame1, values=mon, state='readonly', background=colors(5), textvariable=self.month)
         combo2.set(mon[month - 1])
-        combo2.place(relx=0.10, rely=0.70, relwidth=0.30)
+        combo2.place(relx=0.10, rely=0.73, relwidth=0.30)
         yea = year_combo()
         combo3 = ttk.Combobox(self.frame1, values=yea, state='readonly', background=colors(5), textvariable=self.year)
         combo3.set(yea[year - 2023])
-        combo3.place(relx=0.45, rely=0.70, relwidth=0.20)
+        combo3.place(relx=0.45, rely=0.73, relwidth=0.20)
         button = Button(self.frame1, text='Registrar meta', bg=colors(2), fg=colors(5),
                         font=('Calibri', 11, 'bold'), command=lambda: insert_goal(self.var, entry, self.window, self.month.get(), self.year.get()
                                                                                   , self.category.get(), goal_main_v))
-        button.place(relx=0.30, relwidth=0.40, rely=0.85)
+        button.place(relx=0.30, relwidth=0.40, rely=0.88)
 
         #goal remove buttons
-        combo3 = ttk.Combobox(self.frame2, values=content_combo, state='readonly', background=colors(5),
+        content_combo2 = insert_combo_choose('goal', 'cat_ref')
+        combo3 = ttk.Combobox(self.frame2, values=content_combo2, state='readonly', background=colors(5),
                               textvariable=self.category2)
         combo3.place(relx=0.10, rely=0.25)
         combo4 = ttk.Combobox(self.frame2, values=mon, state='readonly', background=colors(5), textvariable=self.month2)
