@@ -224,7 +224,7 @@ def insert_goal(arg, field, parent, months, years, category, goal_status):
             bd.disconnect()
         else:
             search_scale = bd.select_two_search('scale', 'week', months, years, 'month', 'year')
-            if len(search_scale[0]) == 0:
+            if len(search_scale) == 0:
                 messagebox.showerror('Erro na criação da meta', 'Ainda não foi definida uma escala de estudo'
                                                                 ' para que possamos calcular sua meta. Por favor, insira uma!', parent=parent)
                 field.delete(0, END)
