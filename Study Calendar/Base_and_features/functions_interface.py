@@ -311,6 +311,11 @@ class Complementar_tree:
                 messagebox.showerror('Erro', 'Campo de categoria vazio.', parent=parent)
                 field.delete(0, END)
                 result = 1
+            elif arg == 'Folgas' or arg == 'Folga':
+                messagebox.showerror('Erro', 'O nome escolhido é reservado pelo programa para funcionamento adequado.',
+                                     parent=parent)
+                field.delete(0, END)
+                result = 1
             if result == 0:
                 treeview.tag_configure(arg, background=self.hex_col, foreground='white')
                 treeview.insert('', 'end', values=(arg, 'a', 'a'), tags=(arg, ))
@@ -343,9 +348,10 @@ class Complementar_tree:
 
 
 class Registry_rule:
-    def __init__(self):
+    def __init__(self, goal_m=None):
         self.choose_s, self.choose_d = None, None
         self.year, self.month = None, None
+        self.goal_m = goal_m
 
     def collect_option_default(self, option, parent):
         op = str(option.get())
@@ -410,9 +416,12 @@ class Registry_rule:
             week = [1, 1, 1, 1, 1, 1, 1]
             bd.connect()
             bd.insert_week(self.choose_s, 0, self.month, self.year, week)
+            bd.insert_goal(0, self.month, self.year, 'Folgas', '#00FA9A')
             self.choose_s = None
             bd.disconnect()
             self.month, self.year = None, None
+            self.goal_m.clear_frame()
+            self.goal_m.show_data()
         elif self.choose_s is None or self.choose_d is None:
             messagebox.showerror('Erro', 'Escolha primeiro a quantia de dias para estudo e folga', parent=parent)
         else:
@@ -420,12 +429,13 @@ class Registry_rule:
 
 
 class Choose_scale:
-    def __init__(self, parent=None, base_obj=None):
+    def __init__(self, parent=None, base_obj=None, goal_main=None):
         self.study, self.check = [], []
         self.variables, self.days = [], ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom']
         self.parent = parent
         self.week = []
         self.base = base_obj
+        self.goal_m = goal_main
 
     def scale_default(self, parent):
         move_button = 0.04
@@ -458,11 +468,31 @@ class Choose_scale:
                                 parent=parent)
             bd.connect()
             bd.insert_week(choose_s, choose_d, choose_m, choose_y, self.week)
+            if choose_m == 'feveiro':
+                total_off = 0
+                for item in self.week:
+                    if item == 0:
+                        total_off += 1
+                    else:
+                        pass
+                total_off = (total_off - 1) * 4
+                bd.insert_goal(total_off, choose_m, choose_y, 'Folgas', '#00FA9A')
+            else:
+                total_off = 0
+                for item in self.week:
+                    if item == 0:
+                        total_off += 1
+                    else:
+                        pass
+                total_off = total_off * 4
+                bd.insert_goal(total_off, choose_m, choose_y, 'Folgas', '#00FA9A')
             bd.disconnect()
             parent.destroy()
             self.study, self.week = [], []
             for variable in range(0, len(self.variables)):
                 self.variables[variable].set(0)
+            self.goal_m.clear_frame()
+            self.goal_m.show_data()
 
     def insert_off(self, c_day):
         bd.connect()
@@ -1206,7 +1236,7 @@ class Goal_status_window:
             tree.heading('#0', text='')
             tree.heading('Categoria', text='Categoria')
             tree.heading('Meta', text='Meta')
-            tree.heading('Estudado', text='Estudado')
+            tree.heading('Estudado', text='Realizado')
             tree.heading('% completa', text='% completa')
             tree.column('#0', width=1, minwidth=1, stretch=NO)
             tree.column('Categoria', width=120, minwidth=120, stretch=NO, anchor='c')
@@ -1218,8 +1248,13 @@ class Goal_status_window:
             for item in range(0, len(result)):
                 calc_study.cat = result[item][1]
                 actual_time = calc_study.cal_study()
-                tree.tag_configure(f'{result[item][1]}', foreground='white', background=result[item][2])
-                tree.insert('', 'end', values=(result[item][1], round(result[item][0] / 60, 1), actual_time[0], actual_time[1]), tags=(f'{result[item][1]}',))
+                if result[item][1] == 'Folgas':
+                    tree.tag_configure(f'{result[item][1]}', foreground='black', background=result[item][2])
+                    tree.insert('', 'end', values=(result[item][1], result[item][0], actual_time[0], actual_time[1]),
+                                tags=(f'{result[item][1]}',))
+                else:
+                    tree.tag_configure(f'{result[item][1]}', foreground='white', background=result[item][2])
+                    tree.insert('', 'end', values=(result[item][1], round(result[item][0] / 60, 1), actual_time[0], actual_time[1]), tags=(f'{result[item][1]}',))
             self.window.mainloop()
 
 
@@ -1289,9 +1324,14 @@ class Goal_main_view:
             for item in range(0, len(result)):
                 calc_study.cat = result[item][1]
                 actual_time = calc_study.cal_study()
-                tree.tag_configure(f'{result[item][1]}', foreground='white', background=result[item][2])
-                tree.insert('', 'end', values=(result[item][1], round(result[item][0] / 60, 1), actual_time[0], actual_time[1]),
-                            tags=(f'{result[item][1]}',))
+                if result[item][1] == 'Folgas':
+                    tree.tag_configure(f'{result[item][1]}', foreground='black', background=result[item][2])
+                    tree.insert('', 'end', values=(result[item][1], result[item][0], actual_time[0], actual_time[1]),
+                                tags=(f'{result[item][1]}',))
+                else:
+                    tree.tag_configure(f'{result[item][1]}', foreground='white', background=result[item][2])
+                    tree.insert('', 'end', values=(result[item][1], round(result[item][0] / 60, 1), actual_time[0], actual_time[1]),
+                                tags=(f'{result[item][1]}',))
 
     def clear_frame(self):
         for widget in self.frame.winfo_children():

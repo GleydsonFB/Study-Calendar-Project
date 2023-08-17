@@ -31,6 +31,8 @@ class Main_window:
         goal_main_v.frame = self.frame2
         goal_main_v.a_month = month
         goal_main_v.show_data()
+        cs.goal_m = goal_main_v
+        rr.goal_m = goal_main_v
         self.additional()
         self.window.mainloop()
 
