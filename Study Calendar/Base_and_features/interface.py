@@ -101,6 +101,7 @@ class Schedule_window:
         cs.parent = self.window
         cs.base = dm
         dm.off_system = cs
+        content_s.goal_m = goal_main_v
         cs.frame = self.frame2
         self.button()
         self.window.mainloop()
@@ -276,7 +277,7 @@ class Registry_window:
         combo1.place(relx=0.25, rely=0.60, relwidth=0.15)
 
         button = Button(self.frame1, text='Inserir',
-                        command=lambda: content_s.max_char(4, self.var, entry, combo.get(), combo1.get(), self.window),
+                        command=lambda: content_s.insert_study(4, self.var, entry, combo.get(), combo1.get(), self.window),
                         bg=colors(2), fg=colors(5), font=('Calibri', 13, 'bold'))
         button.place(relx=0.375, rely=0.80, relwidth=0.25)
 
@@ -377,7 +378,7 @@ class Remove_elem_window:
         self.combo.set(list_day[dates.date_month()[2] - 1])
         self.combo.place(relx=0.25, rely=0.20, relwidth=0.15)
         button = Button(self.frame1, text='Buscar', bg=colors(2), fg=colors(5), font=('Calibri', 10, 'bold'),
-                        command=lambda: content_s.find_element(self.tree, self.combo.get(), self.window))
+                        command=lambda: content_s.find_study(self.tree, self.combo.get(), self.window))
         button.place(relx=0.40, rely=0.30, relwidth=0.20)
 
     def tree_view(self):
@@ -397,7 +398,7 @@ class Remove_elem_window:
         self.tree.place(relx=0.04, rely=0.40, relwidth=0.92, relheight=0.50)
         self.tree.bind('<Motion>', 'break')
         button_tree = Button(self.frame1, text='Remover registro', bg=colors(2), fg=colors(5), font=('Calibri', 10, 'bold'),
-                             command=lambda: content_s.delete_registry(self.tree, self.combo, self.window))
+                             command=lambda: content_s.delete_study(self.tree, self.combo, self.window))
         button_tree.place(relx=0.30, rely=0.905, relwidth=0.40)
 
 

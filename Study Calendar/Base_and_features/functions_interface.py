@@ -20,6 +20,8 @@ class Issue_date:
         self.future, self.back, self.name_month_back, self.name_month_future = 0, 0, 0, 0
         self.year = year
         self.change_or_not, self.choose_now = False, month
+        self.name_month_now = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro',
+                               'outubro', 'novembro', 'dezembro']
 
     def date_month(self, back_time=0, advance_time=0, change_or_not=False):
         self.change_or_not = change_or_not
@@ -226,7 +228,8 @@ def insert_goal(arg, field, parent, months, years, category, goal_status):
             search_scale = bd.select_two_search('scale', 'week', months, years, 'month', 'year')
             if len(search_scale) == 0:
                 messagebox.showerror('Erro na criação da meta', 'Ainda não foi definida uma escala de estudo'
-                                                                ' para que possamos calcular sua meta. Por favor, insira uma!', parent=parent)
+                                                                ' para que possamos calcular sua meta. Por favor, insira uma!',
+                                     parent=parent)
                 field.delete(0, END)
             else:
                 total_days = calc_study.cal_goal(search_scale)
@@ -235,7 +238,7 @@ def insert_goal(arg, field, parent, months, years, category, goal_status):
                 if insert == 0:
                     messagebox.showinfo('Sucesso!',
                                         f'meta para a categoria {category} no mês {months} de {years} foi definida como'
-                                        f' sendo {round((ctg * total_days)  / 60, 1)} hora(s).', parent=parent)
+                                        f' sendo {round((ctg * total_days) / 60, 1)} hora(s).', parent=parent)
                     field.delete(0, END)
                     bd.disconnect()
                     goal_status.clear_frame()
@@ -243,15 +246,14 @@ def insert_goal(arg, field, parent, months, years, category, goal_status):
                 elif insert == 1:
                     messagebox.showinfo('Sucesso!',
                                         f'meta para a categoria {category} no mês {months} de {years} foi atualizada para'
-                                        f' {round((ctg * total_days)  / 60, 1)} hora(s).', parent=parent)
+                                        f' {round((ctg * total_days) / 60, 1)} hora(s).', parent=parent)
                     field.delete(0, END)
                     bd.disconnect()
                     goal_status.clear_frame()
                     goal_status.show_data()
                 else:
                     messagebox.showerror('Erro no registro de meta',
-                                         'As informações preenchidas no campo "em minutos" estão inválidas.'
-                                         , parent=parent)
+                                         'As informações preenchidas no campo "em minutos" estão inválidas.', parent=parent)
                     field.delete(0, END)
                     bd.disconnect()
     else:
@@ -265,11 +267,15 @@ def delete_goal(parent, months, years, category, goal_status):
     bd.connect()
     registries = bd.select_three_search('goal', 'id_goa', category, months, years, 'cat_ref', 'month', 'year')
     if len(registries) == 0:
-        messagebox.showerror('Retorno da busca', f'Não foi localizado uma meta para a categoria {category} em {months} de {years}.', parent=parent)
+        messagebox.showerror('Retorno da busca',
+                             f'Não foi localizado uma meta para a categoria {category} em {months} de {years}.',
+                             parent=parent)
         bd.disconnect()
     else:
         bd.del_simple('goal', 'id_goa', registries[0][0])
-        messagebox.showinfo('Retorno da busca', f'Foi removida a meta cadastrada em {months} de {years} na categoria {category}.', parent=parent)
+        messagebox.showinfo('Retorno da busca',
+                            f'Foi removida a meta cadastrada em {months} de {years} na categoria {category}.',
+                            parent=parent)
         goal_status.clear_frame()
         goal_status.show_data()
         bd.disconnect()
@@ -299,7 +305,8 @@ class Complementar_tree:
                 arg = arg.lstrip()
                 arg = arg.strip()
                 if arg == name:
-                    messagebox.showerror('Erro', 'O nome da categoria informado já existe, escolha outro', parent=parent)
+                    messagebox.showerror('Erro', 'O nome da categoria informado já existe, escolha outro',
+                                         parent=parent)
                     field.delete(0, END)
                     result = 1
                     break
@@ -318,7 +325,7 @@ class Complementar_tree:
                 result = 1
             if result == 0:
                 treeview.tag_configure(arg, background=self.hex_col, foreground='white')
-                treeview.insert('', 'end', values=(arg, 'a', 'a'), tags=(arg, ))
+                treeview.insert('', 'end', values=(arg, 'a', 'a'), tags=(arg,))
                 bd.connect()
                 bd.insert_cat(arg, self.hex_col)
                 self.hex_col = None
@@ -339,10 +346,14 @@ class Complementar_tree:
                 messagebox.showerror('Erro', 'Nenhum registro selecionado para remoção.', parent=parent)
                 self.selection = None
             else:
-                messagebox.showerror('Erro de execução', 'Ocorreu um pequeno erro na solicitação, por favor, feche e abra novamente esta janela.', parent=parent)
+                messagebox.showerror('Erro de execução',
+                                     'Ocorreu um pequeno erro na solicitação, por favor, feche e abra novamente esta janela.',
+                                     parent=parent)
                 self.selection = None
         else:
-            messagebox.showinfo('Sucesso!', 'Categoria selecionada foi removida, o histórico dela no calendário será preservado (se houver)', parent=parent)
+            messagebox.showinfo('Sucesso!',
+                                'Categoria selecionada foi removida, o histórico dela no calendário será preservado (se houver)',
+                                parent=parent)
             treeview.delete(treeview.focus())
             self.selection = None
 
@@ -496,43 +507,106 @@ class Choose_scale:
 
     def insert_off(self, c_day):
         bd.connect()
-        id_scale = bd.select_two_search('scale', 'week', dates.date_month()[0], year, 'month', 'year')
-        scale_now = bd.show_week_scale(id_scale[0])
-        check_day_off = []
-        bd.disconnect()
-        for item in scale_now:
-            check_day_off.append(item)
-        choose_day = datetime.date(year, dates.date_month()[3], c_day).weekday()
-        if check_day_off[0][choose_day] == 1:
-            answer = messagebox.askyesno('Confirme a folga', 'O dia escolhido é uma data de estudo e não de folga, tem certeza que deseja inserir a folga?', parent=self.parent)
-            if answer:
-                bd.connect()
-                result = bd.insert_off(c_day, dates.date_month()[0], year)
-                bd.disconnect()
-                if result != 1:
-                    messagebox.showinfo('Sucesso!', f'Folga registrada para o dia {c_day}!', parent=self.parent)
-                    self.base.day_month_system(original_obj=self.base)
-                else:
-                    messagebox.showerror('Erro no registro da folga', 'O dia em questão já tem uma folga cadastrada.', parent=self.parent)
-            else:
-                messagebox.showinfo('Escolha confirmada', 'A folga não foi inserida, é sempre importante seguir a escala!', parent=self.parent)
+        id_scale = bd.select_two_search('scale', 'week', dates.name_month_now[dates.choose_now - 1], dates.year, 'month', 'year')
+        if len(id_scale) == 0:
+            messagebox.showerror('Erro ao inserir folga', 'Ainda não foi definida uma escala para ser usada como base de '
+                                                          'cálculo para as folgas. Por favor, insira uma para continuar.'
+                                 , parent=self.parent)
         else:
-            bd.connect()
-            result = bd.insert_off(c_day, dates.date_month()[0], year)
+            scale_now = bd.show_week_scale(id_scale[0])
+            check_day_off = []
             bd.disconnect()
-            if result != 1:
-                messagebox.showinfo('Sucesso!', f'Uma folga foi registrada para o dia {c_day} respeitando a escala definida.', parent=self.parent)
-                self.base.day_month_system(original_obj=self.base)
+            for item in scale_now:
+                check_day_off.append(item)
+            choose_day = datetime.date(year, dates.choose_now, c_day).weekday()
+            if check_day_off[0][choose_day] == 1:
+                answer = messagebox.askyesno('Confirme a folga',
+                                             'O dia escolhido é uma data de estudo e não de folga, tem certeza que deseja inserir a folga?',
+                                             parent=self.parent)
+                if answer:
+                    bd.connect()
+                    result = bd.insert_off(c_day, dates.name_month_now[dates.choose_now - 1], dates.year)
+                    bd.disconnect()
+                    if result != 1 and result != 2:
+                        answer = messagebox.askyesno('Confirme a opção',
+                                                     'Ao inserir esta folga, todos os registros do dia em questão serão removidos. Deseja seguir?',
+                                                     parent=self.parent)
+                        if answer:
+                            messagebox.showinfo('Sucesso!',
+                                                f'Uma folga foi registrada para o dia {c_day} conforme solicitado.',
+                                                parent=self.parent)
+                            bd.connect()
+                            for registry in result:
+                                bd.del_simple('calendar', 'id_cal', registry[0])
+                            bd.confirm_insert_off(c_day, dates.name_month_now[dates.choose_now - 1], dates.year)
+                            self.goal_m.clear_frame()
+                            self.goal_m.show_data()
+                            self.base.day_month_system(original_obj=self.base)
+                            bd.disconnect()
+                        else:
+                            messagebox.showinfo('Opção definida',
+                                                'A folga não foi inserida e, por tanto, os registros do dia foram preservados!',
+                                                parent=self.parent)
+                    elif result == 1:
+                        messagebox.showerror('Erro no registro da folga', 'O dia em questão já tem uma folga cadastrada.',
+                                             parent=self.parent)
+                    else:
+                        messagebox.showinfo('Sucesso!',
+                                            f'Uma folga foi registrada para o dia {c_day} conforme solicitado.',
+                                            parent=self.parent)
+                        self.goal_m.clear_frame()
+                        self.goal_m.show_data()
+                        self.base.day_month_system(original_obj=self.base)
+                else:
+                    messagebox.showinfo('Escolha confirmada',
+                                        'A folga não foi inserida, é sempre importante seguir a escala!',
+                                        parent=self.parent)
             else:
-                messagebox.showerror('Erro no registro da folga', 'O dia em questão já tem uma folga cadastrada.',
-                                     parent=self.parent)
+                bd.connect()
+                result = bd.insert_off(c_day, dates.name_month_now[dates.choose_now - 1], dates.year)
+                bd.disconnect()
+                if result != 1 and result != 2:
+                    answer = messagebox.askyesno('Confirme a opção',
+                                                 'Ao inserir esta folga, todos os registros do dia em questão serão removidos. Deseja seguir?',
+                                                 parent=self.parent)
+                    if answer:
+                        messagebox.showinfo('Sucesso!',
+                                            f'Uma folga foi registrada para o dia {c_day} respeitando a escala definida.',
+                                            parent=self.parent)
+                        bd.connect()
+                        for registry in result:
+                            bd.del_simple('calendar', 'cat_ref', registry[0])
+                        bd.confirm_insert_off(c_day, dates.name_month_now[dates.choose_now - 1], dates.year)
+                        self.goal_m.clear_frame()
+                        self.goal_m.show_data()
+                        self.base.day_month_system(original_obj=self.base)
+                        bd.disconnect()
+                    else:
+                        messagebox.showinfo('Opção definida',
+                                            'A folga não foi inserida e, por tanto, os registros do dia foram preservados!',
+                                            parent=self.parent)
+                elif result == 1:
+                    messagebox.showerror('Erro no registro da folga', 'O dia em questão já tem uma folga cadastrada.',
+                                         parent=self.parent)
+                else:
+                    messagebox.showinfo('Sucesso!',
+                                        f'Uma folga foi registrada para o dia {c_day} conforme solicitado.',
+                                        parent=self.parent)
+                    self.goal_m.clear_frame()
+                    self.goal_m.show_data()
+                    self.base.day_month_system(original_obj=self.base)
 
     def delete_off(self, c_day):
-        answer = messagebox.askyesno('Confirme a escolha', f'Deseja mesmo remover a folga do dia {c_day}?', parent=self.parent)
+        answer = messagebox.askyesno('Confirme a escolha', f'Deseja mesmo remover a folga do dia {c_day}?',
+                                     parent=self.parent)
         if answer:
-            bd.del_off(c_day, dates.date_month()[0], year)
+            bd.connect()
+            bd.del_off(c_day, dates.name_month_now[dates.choose_now - 1], dates.year)
+            bd.disconnect()
             messagebox.showinfo('Sucesso', 'A folga foi apagada conforme desejado.', parent=self.parent)
             self.base.day_month_system(original_obj=self.base)
+            self.goal_m.clear_frame()
+            self.goal_m.show_data()
         else:
             messagebox.showinfo('Escolha confirmada', 'Folga mantida conforme escohido.', parent=self.parent)
 
@@ -552,7 +626,7 @@ def registry_condition(parent, mon, yea, eff, field, cat):
         v_eff = str(eff)
         v_eff = v_eff.replace(',', '.')
         try:
-            verify = float(v_eff)
+            float(v_eff)
         except:
             messagebox.showerror('Erro no cadastro da condição',
                                  'Valor inserido no campo de efetividade não é um número inteiro ou real.',
@@ -609,7 +683,8 @@ class Comment_show_window:
         self.scroll.pack(side=RIGHT, fill=Y)
 
     def label(self):
-        self.label1 = Label(self.frame1, text=f'Comentários do dia {self.actual_day}', font=('Calibri', 13, 'bold'), bg=colors(2),
+        self.label1 = Label(self.frame1, text=f'Comentários do dia {self.actual_day}', font=('Calibri', 13, 'bold'),
+                            bg=colors(2),
                             fg=colors(1))
         self.label1.place(relx=0.20, rely=0.03, relwidth=0.60)
 
@@ -622,18 +697,20 @@ class Comment_show_window:
         self.scroll_bar()
         self.button = []
         rely, rely_button = 0.15, 0.15
-        #list to insert comments and working scrollbar
-        my_list = Text(self.frame1, yscrollcommand=self.scroll.set, bg=colors(3), fg=colors(1), font=('Calibri', 11), borderwidth=2, relief='groove', wrap=WORD)
+        # list to insert comments and working scrollbar
+        my_list = Text(self.frame1, yscrollcommand=self.scroll.set, bg=colors(3), fg=colors(1), font=('Calibri', 11),
+                       borderwidth=2, relief='groove', wrap=WORD)
         my_list.tag_configure('center', justify='center')
-        #-
+        # -
         if len(content) > 1:
             for item in range(0, len(content)):
                 # button for deletion of comment if actual month is same to system
                 if actual_month == month and dates.year == year:
-                    self.button.append(Button(my_list, text=f'{item + 1}', fg=colors(2), font=('calibri', 9), bg=colors(5),
-                                              command=lambda i=ids[item][0], p=item + 1: self.del_comments(i, p, class_month)))
+                    self.button.append(
+                        Button(my_list, text=f'{item + 1}', fg=colors(2), font=('calibri', 9), bg=colors(5),
+                               command=lambda i=ids[item][0], p=item + 1: self.del_comments(i, p, class_month)))
                     my_list.window_create('end', window=self.button[item])
-                #-
+                # -
                 else:
                     pass
                 my_list.insert(END, '° comentário:\n')
@@ -652,13 +729,15 @@ class Comment_show_window:
                 button.place(relx=0.06, relwidth=0.05, relheight=0.05, rely=rely + 0.18)
             else:
                 pass
-            #-
+            # -
         my_list.configure(state='disabled')
         self.scroll.config(command=my_list.yview)
         self.window.mainloop()
 
     def del_comments(self, ids, pos, class_up):
-        answer = messagebox.askyesno('Confirme a ação', f'Você tem certeza que deseja deletar o comentário de número {pos} deste dia?', parent=self.window)
+        answer = messagebox.askyesno('Confirme a ação',
+                                     f'Você tem certeza que deseja deletar o comentário de número {pos} deste dia?',
+                                     parent=self.window)
         if answer:
             bd.connect()
             bd.del_comment(ids)
@@ -700,7 +779,9 @@ class Days_month:
         bd.connect()
         check_scale = [bd.select_two_search('scale', 'week', actual_month[0], year, 'month', 'year'), False]
         if len(check_scale[0]) == 0:
-            messagebox.showinfo('Notificação', 'Você ainda não definiu uma escala de estudo, faça isso o quanto antes para melhor aproveitamento!', parent=self.window_parent)
+            messagebox.showinfo('Notificação',
+                                'Você ainda não definiu uma escala de estudo, faça isso o quanto antes para melhor aproveitamento!',
+                                parent=self.window_parent)
         else:
             check_scale[0] = bd.show_week_scale(check_scale[0][0])
             check_scale[1] = True
@@ -745,7 +826,9 @@ class Days_month:
                 break
             else:
                 if max_width >= 2:
-                    self.name_day[control] = Label(self.principal_frame, text=f'{self.week_day_name[self.week_day[control]]} - Dia {self.number_day[control]}', fg=colors(5),
+                    self.name_day[control] = Label(self.principal_frame,
+                                                   text=f'{self.week_day_name[self.week_day[control]]} - Dia {self.number_day[control]}',
+                                                   fg=colors(5),
                                                    bg=colors(3),
                                                    font=('Calibri', 10, 'bold'))
                     self.name_day[control].place(relx=relx + 0.035, rely=rely - 0.015, relheight=0.03)
@@ -753,7 +836,7 @@ class Days_month:
                     if check_scale[1] is True:
                         if sup_scale < 7:
                             if check_scale[0][0][sup_scale] == 1:
-                                self.all_days[control].configure(highlightbackground='black', highlightthickness=3)
+                                self.all_days[control].configure(highlightbackground='#3D5397', highlightthickness=3)
                                 sup_scale += 1
                             else:
                                 self.all_days[control].configure(highlightbackground='green', highlightthickness=3)
@@ -761,7 +844,7 @@ class Days_month:
                         else:
                             sup_scale = 0
                             if check_scale[0][0][sup_scale] == 1:
-                                self.all_days[control].configure(highlightbackground='black', highlightthickness=3)
+                                self.all_days[control].configure(highlightbackground='#3D5397', highlightthickness=3)
                                 sup_scale += 1
                             else:
                                 self.all_days[control].configure(highlightbackground='green', highlightthickness=3)
@@ -771,9 +854,10 @@ class Days_month:
                     if off_history[1] is True:
                         if off_history[2] < len(off_history[0]):
                             if off_history[0][off_history[2]][0] == control + 1:
-                                self.all_days[control].configure(background='green')
-                                self.rem_off.append(Button(self.all_days[control], text='X', bg='green', fg='white',
-                                                           command=lambda r=off_history[0][off_history[2]][0]: self.off_system.delete_off(r)))
+                                self.all_days[control].configure(background='#008080')
+                                self.rem_off.append(Button(self.all_days[control], text='X', bg='#008080', fg='white',
+                                                           command=lambda r=off_history[0][off_history[2]][
+                                                               0]: self.off_system.delete_off(r)))
                                 self.rem_off[off_history[2]].pack(side=BOTTOM, anchor=SE)
                                 off_history[2] += 1
                             else:
@@ -798,7 +882,9 @@ class Days_month:
                                 self.cal_reg.append(Label(self.all_days[control],
                                                           text=f'{verify_calendar[aux_cal][1]} - {verify_calendar[aux_cal][0]}',
                                                           font=('calibri', 10, 'bold'),
-                                                          fg=verify_calendar[aux_cal][2], bg=colors(4), anchor='center', highlightthickness=1, highlightbackground=verify_calendar[aux_cal][2]))
+                                                          fg=verify_calendar[aux_cal][2], bg=colors(4), anchor='center',
+                                                          highlightthickness=1,
+                                                          highlightbackground=verify_calendar[aux_cal][2]))
                                 self.cal_reg[self.control_cal].place(relx=0.005, rely=rely_cal, relwidth=0.99)
                                 self.control_cal += 1
                                 aux_cal += 1
@@ -825,6 +911,11 @@ class Days_month:
         bd.connect()
         aux_button = 0
         name_month = dates.date_month(back_time=changing)[0:4]
+        off_history = [bd.select_two_search('dayOff', 'day', name_month[0], dates.year, 'month', 'year', True), False, 0]
+        if len(off_history[0]) == 0:
+            pass
+        else:
+            off_history[1] = True
         verify_com = bd.view_day_comment(name_month[0], dates.year)
         calc_study.month = name_month[0]
         check_scale = [bd.select_two_search('scale', 'week', name_month[0], dates.year, 'month', 'year'), False]
@@ -878,7 +969,7 @@ class Days_month:
                     if check_scale[1] is True:
                         if sup_scale < 7:
                             if check_scale[0][0][sup_scale] == 1:
-                                self.all_days[control].configure(highlightbackground='black', highlightthickness=3)
+                                self.all_days[control].configure(highlightbackground='#3D5397', highlightthickness=3)
                                 sup_scale += 1
                             else:
                                 self.all_days[control].configure(highlightbackground='green', highlightthickness=3)
@@ -886,11 +977,26 @@ class Days_month:
                         else:
                             sup_scale = 0
                             if check_scale[0][0][sup_scale] == 1:
-                                self.all_days[control].configure(highlightbackground='black', highlightthickness=3)
+                                self.all_days[control].configure(highlightbackground='#3D5397', highlightthickness=3)
                                 sup_scale += 1
                             else:
                                 self.all_days[control].configure(highlightbackground='green', highlightthickness=3)
                                 sup_scale += 1
+                    else:
+                        pass
+                    if off_history[1] is True:
+                        if off_history[2] < len(off_history[0]):
+                            if off_history[0][off_history[2]][0] == control + 1:
+                                self.all_days[control].configure(background='#008080')
+                                self.rem_off.append(Button(self.all_days[control], text='X', bg='#008080', fg='white',
+                                                           command=lambda r=off_history[0][off_history[2]][
+                                                               0]: self.off_system.delete_off(r)))
+                                self.rem_off[off_history[2]].pack(side=BOTTOM, anchor=SE)
+                                off_history[2] += 1
+                            else:
+                                pass
+                        else:
+                            pass
                     else:
                         pass
                     if aux_button < len(unique_day) and len(unique_day) > 0:
@@ -925,7 +1031,7 @@ class Days_month:
                     max_width = 100
                     rely += 0.24
                     relx = 0.02
-        if dates.year == year and (dates.months + dates.future - dates.back) == month:
+        if (dates.year == year and (dates.months + dates.future - dates.back) == month) or (day < 3 and (dates.months + dates.future - dates.back) == month - 1):
             hidden_object[0].place(relx=0.85, rely=0.95, relwidth=0.03)
             hidden_object[1].place(relx=0.03, rely=0.945, relwidth=0.10)
             hidden_object[2].place(relx=0.89, rely=0.945, relwidth=0.08)
@@ -947,6 +1053,11 @@ class Days_month:
         bd.connect()
         aux_button = 0
         name_month = dates.date_month(advance_time=changing)[0:4]
+        off_history = [bd.select_two_search('dayOff', 'day', name_month[0], dates.year, 'month', 'year', True), False, 0]
+        if len(off_history[0]) == 0:
+            pass
+        else:
+            off_history[1] = True
         verify_com = bd.view_day_comment(name_month[0], dates.year)
         calc_study.month = name_month[0]
         check_scale = [bd.select_two_search('scale', 'week', name_month[0], dates.year, 'month', 'year'), False]
@@ -1000,7 +1111,7 @@ class Days_month:
                     if check_scale[1] is True:
                         if sup_scale < 7:
                             if check_scale[0][0][sup_scale] == 1:
-                                self.all_days[control].configure(highlightbackground='black', highlightthickness=3)
+                                self.all_days[control].configure(highlightbackground='#3D5397', highlightthickness=3)
                                 sup_scale += 1
                             else:
                                 self.all_days[control].configure(highlightbackground='green', highlightthickness=3)
@@ -1008,11 +1119,26 @@ class Days_month:
                         else:
                             sup_scale = 0
                             if check_scale[0][0][sup_scale] == 1:
-                                self.all_days[control].configure(highlightbackground='black', highlightthickness=3)
+                                self.all_days[control].configure(highlightbackground='#3D5397', highlightthickness=3)
                                 sup_scale += 1
                             else:
                                 self.all_days[control].configure(highlightbackground='green', highlightthickness=3)
                                 sup_scale += 1
+                    else:
+                        pass
+                    if off_history[1] is True:
+                        if off_history[2] < len(off_history[0]):
+                            if off_history[0][off_history[2]][0] == control + 1:
+                                self.all_days[control].configure(background='#008080')
+                                self.rem_off.append(Button(self.all_days[control], text='X', bg='#008080', fg='white',
+                                                           command=lambda r=off_history[0][off_history[2]][
+                                                               0]: self.off_system.delete_off(r)))
+                                self.rem_off[off_history[2]].pack(side=BOTTOM, anchor=SE)
+                                off_history[2] += 1
+                            else:
+                                pass
+                        else:
+                            pass
                     else:
                         pass
                     if aux_button < len(unique_day) and len(unique_day) > 0:
@@ -1047,7 +1173,7 @@ class Days_month:
                     max_width = 100
                     rely += 0.24
                     relx = 0.02
-        if dates.year == year and (dates.months + dates.future - dates.back) == month:
+        if dates.year == year and (dates.months + dates.future - dates.back) == month or (day < 3 and (dates.months + dates.future - dates.back) == month - 1):
             hidden_object[0].place(relx=0.85, rely=0.95, relwidth=0.03)
             hidden_object[1].place(relx=0.03, rely=0.945, relwidth=0.10)
             hidden_object[2].place(relx=0.89, rely=0.945, relwidth=0.08)
@@ -1064,15 +1190,17 @@ class Days_month:
 
 
 class content_schedule:
-    def __init__(self, base_obj):
+    def __init__(self, base_obj=None, goal_m=None):
         self.base = base_obj
+        self.goal_m = goal_m
         self.selection, self.search, self.current_day = None, None, None
 
-    def max_char(self, limit, arg, field, cat, days, parent):
+    def insert_study(self, limit, arg, field, cat, days, parent):
         arg = str(arg.get())
         if arg.isnumeric():
             if len(arg) >= limit:
-                messagebox.showerror('Erro', f'O campo em questão só permite {limit - 1} números (e do tipo inteiro)', parent=parent)
+                messagebox.showerror('Erro', f'O campo em questão só permite {limit - 1} números (e do tipo inteiro)',
+                                     parent=parent)
                 field.delete(0, END)
             else:
                 bd.connect()
@@ -1082,23 +1210,40 @@ class content_schedule:
                     field.delete(0, END)
                     bd.disconnect()
                 else:
-                    confirm = bd.insert_calendar(arg, days, dates.date_month()[0], year, cat, color[0][0])
-                    bd.disconnect()
-                    if confirm == 0:
-                        messagebox.showinfo('Sucesso!', f'Registro da categoria {cat} no dia {days} realizado com sucesso!',
-                                            parent=parent)
+                    search_off = bd.select_three_search('dayOff', 'id_day', days,
+                                                        dates.name_month_now[dates.choose_now - 1], dates.year, 'day',
+                                                        'month', 'year')
+                    if len(search_off) != 0:
+                        messagebox.showerror('Erro no cadastro', 'Para o dia escolhido existe uma folga, para continuar,'
+                                                                 ' por favor, remova a mesma e cadastre o estudo.',
+                                             parent=parent)
                         field.delete(0, END)
-                        self.base.day_month_system(original_obj=self.base)
-                    elif confirm == 1:
-                        messagebox.showinfo('Atualizado com sucesso',
-                                            f'O registro já existente para a categoria {cat} no dia {days} foi atualizado!',
-                                            parent=parent)
-                        field.delete(0, END)
-                        self.base.day_month_system(original_obj=self.base)
                     else:
-                        messagebox.showerror('Erro no registro', 'Para este dia, já existem 5 categorias cadastras, por esse motivo, '
-                                                                 'não será possível cadastrar outra sem remover algum registro.', parent=parent)
-                        field.delete(0, END)
+                        confirm = bd.insert_calendar(arg, days, dates.name_month_now[dates.choose_now - 1], dates.year, cat,
+                                                     color[0][0])
+                        bd.disconnect()
+                        if confirm == 0:
+                            messagebox.showinfo('Sucesso!',
+                                                f'Registro da categoria {cat} no dia {days} realizado com sucesso!',
+                                                parent=parent)
+                            field.delete(0, END)
+                            self.base.day_month_system(original_obj=self.base)
+                            self.goal_m.clear_frame()
+                            self.goal_m.show_data()
+                        elif confirm == 1:
+                            messagebox.showinfo('Atualizado com sucesso',
+                                                f'O registro já existente para a categoria {cat} no dia {days} foi atualizado!',
+                                                parent=parent)
+                            field.delete(0, END)
+                            self.base.day_month_system(original_obj=self.base)
+                            self.goal_m.clear_frame()
+                            self.goal_m.show_data()
+                        else:
+                            messagebox.showerror('Erro no registro',
+                                                 'Para este dia, já existem 5 categorias cadastras, por esse motivo, '
+                                                 'não será possível cadastrar outra sem remover algum registro.',
+                                                 parent=parent)
+                            field.delete(0, END)
 
         else:
             messagebox.showerror('Erro no campo', 'Só é permitido inserir valores numéricos', parent=parent)
@@ -1129,44 +1274,54 @@ class content_schedule:
                 field.delete(1.0, END)
                 self.base.day_month_system(original_obj=self.base)
 
-    def delete_registry(self, treeview, days, window):
+    def delete_study(self, treeview, days, window):
         try:
             self.selection = treeview.item(treeview.focus())
             bd.connect()
-            bd.del_registry(self.selection['tags'][0], days.get(), dates.date_month()[0], year)
+            bd.del_registry(self.selection['tags'][0], days.get(), dates.name_month_now[dates.choose_now - 1], dates.year)
             bd.disconnect()
         except IndexError:
             if self.selection is None:
                 messagebox.showerror('Erro', 'Nenhum registro selecionado para remoção.', parent=window)
                 self.selection = None
             else:
-                messagebox.showerror('Erro de execução', 'Ocorreu um pequeno erro na solicitação, por favor, feche e abra novamente esta janela.', parent=window)
+                messagebox.showerror('Erro de execução',
+                                     'Ocorreu um pequeno erro na solicitação, por favor, feche e abra novamente esta janela.',
+                                     parent=window)
                 self.selection = None
         else:
             messagebox.showinfo('Sucesso', 'Registro removido!', parent=window)
             treeview.delete(treeview.focus())
             self.selection = None
+            self.goal_m.clear_frame()
+            self.goal_m.show_data()
             self.base.day_month_system(original_obj=self.base)
 
-    def find_element(self, treeview, days, window):
+    def find_study(self, treeview, days, window):
+        view_off = 0
         if self.search == 1 and self.current_day == days:
-            messagebox.showerror('Ação repetida', f'Os registros do dia {days} já estão na tela (caso exista).', parent=window)
+            messagebox.showerror('Ação repetida', f'Os registros do dia {days} já estão na tela (caso exista).',
+                                 parent=window)
         else:
             self.search = None
             bd.connect()
             cat_day = bd.choose_three('calendar', 'time', 'cat_ref', 'color_cat', 'day', 'month', 'year', days,
-                                      dates.date_month()[0], year)
+                                      dates.name_month_now[dates.choose_now - 1], dates.year)
             bd.disconnect()
-            if len(cat_day) == 0:
+            for off in range(0, len(cat_day)):
+                if cat_day[off][1] == 'Folgas':
+                    view_off += 1
+            if len(cat_day) == 0 or view_off != 0:
                 for item in treeview.get_children():
                     treeview.delete(item)
                 messagebox.showerror('Retorno da busca',
-                                     f'Nenhum registro localizado para o dia {days} de {dates.date_month()[0]}.',
+                                     f'Nenhum registro localizado para o dia {days} de {dates.name_month_now[dates.choose_now - 1]}.',
                                      parent=window)
             else:
                 for item in range(0, len(cat_day)):
                     treeview.tag_configure(f'{cat_day[item][1]}', foreground=cat_day[item][2], background=colors(5))
-                    treeview.insert('', 'end', values=(cat_day[item][0], cat_day[item][1]), tags=(f'{cat_day[item][1]}',))
+                    treeview.insert('', 'end', values=(cat_day[item][0], cat_day[item][1]),
+                                    tags=(f'{cat_day[item][1]}',))
         self.search = 1
         self.current_day = days
 
@@ -1222,7 +1377,9 @@ class Goal_status_window:
         result = bd.search_goal(self.actual_m, dates.year)
         bd.disconnect()
         if len(result) == 0:
-            messagebox.showerror('Erro na execução', 'Para o mês e ano selecionados não há registros de meta para apresentar.', parent=self.parent)
+            messagebox.showerror('Erro na execução',
+                                 'Para o mês e ano selecionados não há registros de meta para apresentar.',
+                                 parent=self.parent)
         else:
             self.window = Toplevel()
             self.screen()
@@ -1232,7 +1389,8 @@ class Goal_status_window:
             style.configure('Treeview', fieldbackground=colors(1), font=('calibri', 12, 'bold'))
             style.map('Treeview', background=[('selected', colors(3))], foreground=[('selected', colors(1))])
             style.configure('Scrollbar')
-            tree = ttk.Treeview(self.frame1, height=2, columns=('Categoria', 'Meta', 'Estudado', '% completa'), selectmode='browse', show='headings')
+            tree = ttk.Treeview(self.frame1, height=2, columns=('Categoria', 'Meta', 'Estudado', '% completa'),
+                                selectmode='browse', show='headings')
             tree.heading('#0', text='')
             tree.heading('Categoria', text='Categoria')
             tree.heading('Meta', text='Meta')
@@ -1249,12 +1407,20 @@ class Goal_status_window:
                 calc_study.cat = result[item][1]
                 actual_time = calc_study.cal_study()
                 if result[item][1] == 'Folgas':
-                    tree.tag_configure(f'{result[item][1]}', foreground='black', background=result[item][2])
-                    tree.insert('', 'end', values=(result[item][1], result[item][0], actual_time[0], actual_time[1]),
-                                tags=(f'{result[item][1]}',))
+                    if actual_time[1] == '-':
+                        tree.tag_configure(f'{result[item][1]}', foreground='#A9A9A9', background='#8B0000')
+                        tree.insert('', 'end',
+                                    values=(result[item][1], result[item][0], actual_time[0], actual_time[1]),
+                                    tags=(f'{result[item][1]}',))
+                    else:
+                        tree.tag_configure(f'{result[item][1]}', foreground='black', background=result[item][2])
+                        tree.insert('', 'end',
+                                    values=(result[item][1], result[item][0], actual_time[0], actual_time[1]),
+                                    tags=(f'{result[item][1]}',))
                 else:
                     tree.tag_configure(f'{result[item][1]}', foreground='white', background=result[item][2])
-                    tree.insert('', 'end', values=(result[item][1], round(result[item][0] / 60, 1), actual_time[0], actual_time[1]), tags=(f'{result[item][1]}',))
+                    tree.insert('', 'end', values=(result[item][1], round(result[item][0] / 60, 1), actual_time[0], actual_time[1]),
+                                tags=(f'{result[item][1]}',))
             self.window.mainloop()
 
 
@@ -1296,7 +1462,8 @@ class Goal_main_view:
         bd.disconnect()
 
         if len(result) == 0:
-            label = Label(self.frame, text='Ainda não há metas para visualização, por favor, cadastre alguma!', bg=colors(2), fg=colors(5), font=('Calibri', 15, 'underline'),
+            label = Label(self.frame, text='Ainda não há metas para visualização, por favor, cadastre alguma!',
+                          bg=colors(2), fg=colors(5), font=('Calibri', 15, 'underline'),
                           wraplength=200)
             label.place(relx=0.10, rely=0.10)
         else:
@@ -1325,9 +1492,16 @@ class Goal_main_view:
                 calc_study.cat = result[item][1]
                 actual_time = calc_study.cal_study()
                 if result[item][1] == 'Folgas':
-                    tree.tag_configure(f'{result[item][1]}', foreground='black', background=result[item][2])
-                    tree.insert('', 'end', values=(result[item][1], result[item][0], actual_time[0], actual_time[1]),
-                                tags=(f'{result[item][1]}',))
+                    if actual_time[1] == '-':
+                        tree.tag_configure(f'{result[item][1]}', foreground='#A9A9A9', background='#8B0000')
+                        tree.insert('', 'end',
+                                    values=(result[item][1], result[item][0], actual_time[0], actual_time[1]),
+                                    tags=(f'{result[item][1]}',))
+                    else:
+                        tree.tag_configure(f'{result[item][1]}', foreground='black', background=result[item][2])
+                        tree.insert('', 'end',
+                                    values=(result[item][1], result[item][0], actual_time[0], actual_time[1]),
+                                    tags=(f'{result[item][1]}',))
                 else:
                     tree.tag_configure(f'{result[item][1]}', foreground='white', background=result[item][2])
                     tree.insert('', 'end', values=(result[item][1], round(result[item][0] / 60, 1), actual_time[0], actual_time[1]),

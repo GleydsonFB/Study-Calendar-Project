@@ -15,8 +15,25 @@ class Study_calc:
         search = aux_bd.select_three_search('calendar', 'time', self.cat, self.month, self.year, 'cat_ref', 'month', 'year')
         eff = aux_bd.select_three_search('effectivity', 'efficiency', self.cat, self.month, self.year, 'cat_ref', 'month', 'year')
         goal = aux_bd.select_three_search('goal', 'objective', self.cat, self.month, self.year, 'cat_ref', 'month', 'year')
+        off = aux_bd.select_two_search('dayOff', 'id_day', self.month, self.year, 'month', 'year')
         aux_bd.disconnect()
-        if len(eff) == 0:
+        if self.cat == 'Folgas':
+            if len(off) == 0:
+                answer = 'N/A'
+                percentual = 'N/A'
+                return answer, percentual
+            else:
+                answer = 0
+                for registry in off:
+                    answer += 1
+                if goal[0][0] == 0:
+                    percentual = '-'
+                else:
+                    percentual = answer * 100 / goal[0][0]
+                    if percentual > 100:
+                        percentual = '-'
+                return answer, percentual
+        elif len(eff) == 0:
             if len(search) != 0:
                 eff = 100
                 answer = 0

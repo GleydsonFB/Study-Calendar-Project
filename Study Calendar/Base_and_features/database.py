@@ -229,11 +229,10 @@ class Database:
     def insert_calendar(self, time, day, month, year, cat, color):
         sql = f'SELECT id_cal, time FROM calendar WHERE day = {day} AND month = "{month}" AND year = {year} AND cat_ref = "{cat}";'
         self.mouse.execute(sql)
-        unique, times, total = [], [], []
-        time = int(time)
-        for i, t in self.mouse:
+        unique, total, offs = [], [], []
+        for i, o in self.mouse:
             unique.append(i)
-            times.append(t)
+            offs.append(o)
         sql1 = f'SELECT id_cal FROM calendar WHERE day = {day} AND month = "{month}" AND year = {year};'
         self.mouse.execute(sql1)
         for i in self.mouse:
@@ -246,14 +245,12 @@ class Database:
         elif len(total) >= 5 and len(unique) == 0:
             return 2
         else:
-            new_time = 0
-            for t in times:
-                new_time += t
-            new_time += time
-            sql3 = f'UPDATE calendar SET time = {new_time} WHERE id_cal = {unique[0]};'
+            t_offs = 0
+            for off in offs:
+                t_offs += off
+            sql3 = f'UPDATE calendar SET time = {t_offs} WHERE id_cal = {unique[0]};'
             self.mouse.execute(sql3)
             self.con.commit()
-            return 1
 
     def del_registry(self, selection, day, month, year):
         sql = f'SELECT id_cal FROM calendar WHERE day = {day} AND month = "{month}" AND year = {year} AND cat_ref = "{selection}";'
@@ -317,15 +314,26 @@ class Database:
         for item in self.mouse:
             total.append(item)
         if len(total) == 0:
-            sql1 = f'INSERT INTO dayOff (day, month, year) VALUES ({day}, "{month}", {year});'
+            sql1 = f'SELECT id_cal FROM calendar WHERE day = {day} AND month = "{month}" AND year = {year};'
             self.mouse.execute(sql1)
-            self.con.commit()
+            for ids in self.mouse:
+                total.append(ids)
+            if len(total) == 0:
+                sql2 = f'INSERT INTO dayOff (day, month, year) VALUES ({day}, "{month}", {year});'
+                self.mouse.execute(sql2)
+                self.con.commit()
+                return 2
+            else:
+                return total
         else:
             return 1
 
     def del_off(self, day, month, year):
-        self.connect()
         sql = f'DELETE FROM dayOff WHERE day = {day} AND month = "{month}" AND year = {year};'
         self.mouse.execute(sql)
         self.con.commit()
-        self.disconnect()
+
+    def confirm_insert_off(self, day, month, year):
+        sql = f'INSERT INTO dayOff (day, month, year) VALUES ({day}, "{month}", {year});'
+        self.mouse.execute(sql)
+        self.con.commit()
