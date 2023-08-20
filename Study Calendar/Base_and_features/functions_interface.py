@@ -209,11 +209,18 @@ def year_combo():
 def insert_combo_choose(table, col):
     bd.connect()
     result = bd.simple_select(table, col)
+    data = []
     bd.disconnect()
     if result[0] == 0:
         pass
     else:
-        return result[1]
+        print(result)
+        for item in result[1]:
+            if item != 'Folgas':
+                data.append(item)
+            else:
+                pass
+        return data
 
 
 def insert_goal(arg, field, parent, months, years, category, goal_status, type='Auto'):
