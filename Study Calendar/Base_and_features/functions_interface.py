@@ -214,7 +214,6 @@ def insert_combo_choose(table, col):
     if result[0] == 0:
         pass
     else:
-        print(result)
         for item in result[1]:
             if item != 'Folgas':
                 data.append(item)

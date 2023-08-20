@@ -245,12 +245,18 @@ class Database:
         elif len(total) >= 5 and len(unique) == 0:
             return 2
         else:
-            t_offs = 0
-            for off in offs:
-                t_offs += off
-            sql3 = f'UPDATE calendar SET time = {t_offs} WHERE id_cal = {unique[0]};'
-            self.mouse.execute(sql3)
-            self.con.commit()
+            if cat == 'Folgas':
+                t_offs = 0
+                for off in offs:
+                    t_offs += off
+                sql3 = f'UPDATE calendar SET time = {t_offs} WHERE id_cal = {unique[0]};'
+                self.mouse.execute(sql3)
+                self.con.commit()
+            else:
+                sql4 = f'UPDATE calendar SET time = {time} WHERE id_cal = {unique[0]};'
+                self.mouse.execute(sql4)
+                self.con.commit()
+                return 1
 
     def del_registry(self, selection, day, month, year):
         sql = f'SELECT id_cal FROM calendar WHERE day = {day} AND month = "{month}" AND year = {year} AND cat_ref = "{selection}";'
