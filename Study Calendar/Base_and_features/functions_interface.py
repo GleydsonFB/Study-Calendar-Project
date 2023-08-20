@@ -216,13 +216,14 @@ def insert_combo_choose(table, col):
         return result[1]
 
 
-def insert_goal(arg, field, parent, months, years, category, goal_status):
+def insert_goal(arg, field, parent, months, years, category, goal_status, type='Auto'):
     ctg = str(arg.get())
     if ctg.isnumeric():
         bd.connect()
         cat = bd.choose_two('category', 'color', 'name', 'name', category)
         if len(cat) == 0:
             messagebox.showerror('Erro no registro', 'Escolha uma categoria para receber a meta.', parent=parent)
+            field.delete(0, END)
             bd.disconnect()
         else:
             search_scale = bd.select_two_search('scale', 'week', months, years, 'month', 'year')
@@ -232,30 +233,56 @@ def insert_goal(arg, field, parent, months, years, category, goal_status):
                                      parent=parent)
                 field.delete(0, END)
             else:
-                total_days = calc_study.cal_goal(search_scale)
-                ctg = int(ctg)
-                insert = bd.insert_goal(ctg * total_days, months, years, cat[1], cat[0])
-                if insert == 0:
-                    messagebox.showinfo('Sucesso!',
-                                        f'meta para a categoria {category} no mês {months} de {years} foi definida como'
-                                        f' sendo {round((ctg * total_days) / 60, 1)} hora(s).', parent=parent)
-                    field.delete(0, END)
-                    bd.disconnect()
-                    goal_status.clear_frame()
-                    goal_status.show_data()
-                elif insert == 1:
-                    messagebox.showinfo('Sucesso!',
-                                        f'meta para a categoria {category} no mês {months} de {years} foi atualizada para'
-                                        f' {round((ctg * total_days) / 60, 1)} hora(s).', parent=parent)
-                    field.delete(0, END)
-                    bd.disconnect()
-                    goal_status.clear_frame()
-                    goal_status.show_data()
+                if type == 'Auto':
+                    total_days = calc_study.cal_goal(search_scale)
+                    ctg = int(ctg)
+                    insert = bd.insert_goal(ctg * total_days, months, years, cat[1], cat[0])
+                    if insert == 0:
+                        messagebox.showinfo('Sucesso!',
+                                            f'meta para a categoria {category} no mês {months} de {years} foi definida como'
+                                            f' sendo {round((ctg * total_days) / 60, 1)} hora(s).', parent=parent)
+                        field.delete(0, END)
+                        bd.disconnect()
+                        goal_status.clear_frame()
+                        goal_status.show_data()
+                    elif insert == 1:
+                        messagebox.showinfo('Sucesso!',
+                                            f'meta para a categoria {category} no mês {months} de {years} foi atualizada para'
+                                            f' {round((ctg * total_days) / 60, 1)} hora(s).', parent=parent)
+                        field.delete(0, END)
+                        bd.disconnect()
+                        goal_status.clear_frame()
+                        goal_status.show_data()
+                    else:
+                        messagebox.showerror('Erro no registro de meta',
+                                             'As informações preenchidas no campo "em minutos" estão inválidas.', parent=parent)
+                        field.delete(0, END)
+                        bd.disconnect()
                 else:
-                    messagebox.showerror('Erro no registro de meta',
-                                         'As informações preenchidas no campo "em minutos" estão inválidas.', parent=parent)
-                    field.delete(0, END)
-                    bd.disconnect()
+                    insert = bd.insert_goal(ctg, months, years, cat[1], cat[0])
+                    ctg = int(ctg)
+                    if insert == 0:
+                        messagebox.showinfo('Sucesso!',
+                                            f'meta para a categoria {category} no mês {months} de {years} foi definida como'
+                                            f' sendo {round(ctg / 60, 1)} hora(s).', parent=parent)
+                        field.delete(0, END)
+                        bd.disconnect()
+                        goal_status.clear_frame()
+                        goal_status.show_data()
+                    elif insert == 1:
+                        messagebox.showinfo('Sucesso!',
+                                            f'meta para a categoria {category} no mês {months} de {years} foi atualizada para'
+                                            f' {round(ctg / 60, 1)} hora(s).', parent=parent)
+                        field.delete(0, END)
+                        bd.disconnect()
+                        goal_status.clear_frame()
+                        goal_status.show_data()
+                    else:
+                        messagebox.showerror('Erro no registro de meta',
+                                             'As informações preenchidas no campo "em minutos" estão inválidas.',
+                                             parent=parent)
+                        field.delete(0, END)
+                        bd.disconnect()
     else:
         messagebox.showerror('Erro no registro dos minutos', 'Valor passado não é composto por um número inteiro.',
                              parent=parent)
