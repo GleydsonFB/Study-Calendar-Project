@@ -36,20 +36,22 @@ class Study_calc:
         elif len(eff) == 0:
             if len(search) != 0:
                 eff = 100
-                answer = 0
+                answer, answer_cal = 0, 0
                 for data in range(0, len(search)):
                     answer += ((search[data][0] * eff) / 100) / 60
-                percentual = answer * 100 / goal[0][0]
+                    answer_cal += search[data][0] * eff / 100
+                percentual = answer_cal * 100 / goal[0][0]
             else:
                 answer = 'N/A'
                 percentual = 'N/A'
                 return answer, percentual
         else:
             if len(search) != 0:
-                answer = 0
+                answer, answer_cal = 0, 0
                 for data in range(0, len(search)):
                     answer += ((search[data][0] * eff[0][0]) / 100) / 60
-                percentual = answer * 100 / goal[0][0]
+                    answer_cal += search[data][0] * eff / 100
+                percentual = answer_cal * 100 / goal[0][0]
             else:
                 answer = 'N/A'
                 percentual = 'N/A'

@@ -23,37 +23,37 @@ class Issue_date:
         self.name_month_now = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro',
                                'outubro', 'novembro', 'dezembro']
 
-    def date_month(self, back_time=0, advance_time=0, change_or_not=False):
+    def date_month(self, back_time=0, advance_time=0, change_or_not=False, month_actual=month):
         self.change_or_not = change_or_not
         if back_time == 0 and advance_time == 0:
-            match self.months:
+            match month_actual:
                 case 1:
-                    return 'janeiro', 31, day, self.months
+                    return 'janeiro', 31, day, month_actual
                 case 2:
                     if (self.year % 4 == 0 and self.year % 100 != 0) or self.year % 4 == 0:
-                        return 'fevereiro', 29, day, self.months
+                        return 'fevereiro', 29, day, month_actual
                     else:
-                        return 'fevereiro', 28, day, self.months
+                        return 'fevereiro', 28, day, month_actual
                 case 3:
-                    return 'março', 31, day, self.months
+                    return 'março', 31, day, month_actual
                 case 4:
-                    return 'abril', 30, day, self.months
+                    return 'abril', 30, day, month_actual
                 case 5:
-                    return 'maio', 31, day, self.months
+                    return 'maio', 31, day, month_actual
                 case 6:
-                    return 'junho', 30, day, self.months
+                    return 'junho', 30, day, month_actual
                 case 7:
-                    return 'julho', 31, day, self.months
+                    return 'julho', 31, day, month_actual
                 case 8:
-                    return 'agosto', 31, day, self.months
+                    return 'agosto', 31, day, month_actual
                 case 9:
-                    return 'setembro', 30, day, self.months
+                    return 'setembro', 30, day, month_actual
                 case 10:
-                    return 'outubro', 31, day, self.months
+                    return 'outubro', 31, day, month_actual
                 case 11:
-                    return 'novembro', 30, day, self.months
+                    return 'novembro', 30, day, month_actual
                 case 12:
-                    return 'dezembro', 31, day, self.months
+                    return 'dezembro', 31, day, month_actual
         elif back_time >= 1 and advance_time == 0:
             if self.change_or_not is True:
                 self.back += back_time
@@ -453,7 +453,35 @@ class Registry_rule:
     def open_scale(self, parent, new_window, mon, yea):
         self.month = mon.get()
         self.year = yea.get()
-        if self.choose_s == 7:
+
+        control_scale = 0
+        match self.month:
+            case 'janeiro':
+                control_scale = 1
+            case 'fevereiro':
+                control_scale = 2
+            case 'março':
+                control_scale = 3
+            case 'abril':
+                control_scale = 4
+            case 'maio':
+                control_scale = 5
+            case 'junho':
+                control_scale = 6
+            case 'julho':
+                control_scale = 7
+            case 'agosto':
+                control_scale = 8
+            case 'setembro':
+                control_scale = 9
+            case 'outubro':
+                control_scale = 10
+            case 'novembro':
+                control_scale = 11
+            case 'dezembro':
+                control_scale = 12
+
+        if self.choose_s == 7 and control_scale >= month:
             messagebox.showinfo('Escala definida!',
                                 'Tudo certo agora, aproveite seus estudos (7 dias direto é para pessoas estudiosas mesmo hein!)',
                                 parent=parent)
@@ -467,7 +495,9 @@ class Registry_rule:
             self.goal_m.clear_frame()
             self.goal_m.show_data()
         elif self.choose_s is None or self.choose_d is None:
-            messagebox.showerror('Erro', 'Escolha primeiro a quantia de dias para estudo e folga', parent=parent)
+            messagebox.showerror('Erro', 'Escolha primeiro a quantia de dias para estudo e folga.', parent=parent)
+        elif control_scale < month:
+            messagebox.showerror('Erro na escolha do mês', 'Defina um mês igual ou futuro ao mês atual.', parent=parent)
         else:
             new_window()
 
@@ -738,11 +768,14 @@ class Comment_show_window:
         if len(content) > 1:
             for item in range(0, len(content)):
                 # button for deletion of comment if actual month is same to system
-                if actual_month == month and dates.year == year:
-                    self.button.append(
-                        Button(my_list, text=f'{item + 1}', fg=colors(2), font=('calibri', 9), bg=colors(5),
-                               command=lambda i=ids[item][0], p=item + 1: self.del_comments(i, p, class_month)))
-                    my_list.window_create('end', window=self.button[item])
+                if (actual_month == month and dates.year == year) or (day < 3 and dates.choose_now == month - 1 and (dates.year == year or dates.year == year - 1)):
+                    if actual_month != 12 and dates.year == year - 1:
+                        pass
+                    else:
+                        self.button.append(
+                            Button(my_list, text=f'{item + 1}', fg=colors(2), font=('calibri', 9), bg=colors(5),
+                                   command=lambda i=ids[item][0], p=item + 1: self.del_comments(i, p, class_month)))
+                        my_list.window_create('end', window=self.button[item])
                 # -
                 else:
                     pass
@@ -756,10 +789,13 @@ class Comment_show_window:
             my_list.place(relx=0.125, rely=rely + 0.175, relwidth=0.75, relheight=0.35)
             my_list.tag_add('center', 1.0, 'end')
             # button for deletion of comment if actual month is same to system
-            if actual_month == month and dates.year == year:
-                button = Button(self.frame1, text='x', fg=colors(2), font=('calibri', 9), bg=colors(5),
-                                command=lambda i=ids[0][0], p=1: self.del_comments(i, p, class_month))
-                button.place(relx=0.06, relwidth=0.05, relheight=0.05, rely=rely + 0.18)
+            if (actual_month == month and dates.year == year) or (day < 3 and dates.choose_now == month - 1 and (dates.year == year or dates.year == year - 1)):
+                if actual_month != 12 and dates.year == year - 1:
+                    pass
+                else:
+                    button = Button(self.frame1, text='x', fg=colors(2), font=('calibri', 9), bg=colors(5),
+                                    command=lambda i=ids[0][0], p=1: self.del_comments(i, p, class_month))
+                    button.place(relx=0.06, relwidth=0.05, relheight=0.05, rely=rely + 0.18)
             else:
                 pass
             # -
@@ -808,9 +844,9 @@ class Days_month:
         max_width = 100
         aux_button = 0
         unique_day, sup_unique = [], 0
-        actual_month = dates.date_month()[0:4]
+        actual_month = dates.date_month(month_actual=dates.choose_now)[0:4]
         bd.connect()
-        check_scale = [bd.select_two_search('scale', 'week', actual_month[0], year, 'month', 'year'), False]
+        check_scale = [bd.select_two_search('scale', 'week', actual_month[0], dates.year, 'month', 'year'), False]
         if len(check_scale[0]) == 0:
             messagebox.showinfo('Notificação',
                                 'Você ainda não definiu uma escala de estudo, faça isso o quanto antes para melhor aproveitamento!',
@@ -819,13 +855,13 @@ class Days_month:
             check_scale[0] = bd.show_week_scale(check_scale[0][0])
             check_scale[1] = True
         calc_study.month = actual_month[0]
-        off_history = [bd.select_two_search('dayOff', 'day', actual_month[0], year, 'month', 'year', True), False, 0]
+        off_history = [bd.select_two_search('dayOff', 'day', actual_month[0], dates.year, 'month', 'year', True), False, 0]
         if len(off_history[0]) == 0:
             pass
         else:
             off_history[1] = True
         calc_study.year = year
-        verify_com = bd.view_day_comment(dates.date_month()[0], year)
+        verify_com = bd.view_day_comment(dates.date_month()[0], dates.year)
         bd.disconnect()
         img = Image.open('images/comentary_ico.png')
         img_res = img.resize((10, 10))
@@ -841,15 +877,15 @@ class Days_month:
                     sup_unique += 1
             for item in range(0, len(unique_day)):
                 bd.connect()
-                desc = bd.view_content_comment(unique_day[item], actual_month[0], year)
-                ids = bd.view_id_com(unique_day[item], actual_month[0], year)
+                desc = bd.view_content_comment(unique_day[item], actual_month[0], dates.year)
+                ids = bd.view_id_com(unique_day[item], actual_month[0], dates.year)
                 bd.disconnect()
                 self.com_button.append(Button(self.principal_frame, image=self.img_view, bg=colors(3), borderwidth=0,
                                               command=lambda c=desc, i=ids, d=unique_day[item]: window_aux.editable_label(c, i, actual_month[3], d, self.base_obj)))
         for days in range(1, dates.date_month()[1] + 1):
             self.number_day.append(days)
             self.name_day.append(days)
-            self.week_day.append(datetime.date(year, actual_month[3], days).weekday())
+            self.week_day.append(datetime.date(dates.year, actual_month[3], days).weekday())
         for number in range(len(self.number_day)):
             self.all_days.append(number)
             self.all_days[number] = Frame(self.principal_frame, bd=1, bg=colors(4))
@@ -906,7 +942,7 @@ class Days_month:
                     bd.connect()
                     verify_calendar = bd.choose_three('calendar', 'time', 'cat_ref', 'color_cat', 'day', 'month',
                                                       'year',
-                                                      self.number_day[control], actual_month[0], year)
+                                                      self.number_day[control], actual_month[0], dates.year)
                     bd.disconnect()
                     rely_cal, aux_cal = 0, 0
                     if len(verify_calendar) != 0:
@@ -931,7 +967,6 @@ class Days_month:
                     max_width = 100
                     rely += 0.24
                     relx = 0.02
-        dates.reset_all()
 
     def change_month_back(self, hidden_object, label):
         self.clear_frame()
@@ -1034,7 +1069,7 @@ class Days_month:
                         pass
                     if aux_button < len(unique_day) and len(unique_day) > 0:
                         if self.number_day[control] == unique_day[aux_button]:
-                            self.com_button[aux_button].place(relx=relx - 0.10, rely=rely - 0.010)
+                            self.com_button[aux_button].place(relx=relx + 0.02, rely=rely - 0.010)
                             aux_button += 1
                     bd.connect()
                     verify_calendar = bd.choose_three('calendar', 'time', 'cat_ref', 'color_cat', 'day', 'month',
@@ -1064,13 +1099,21 @@ class Days_month:
                     max_width = 100
                     rely += 0.24
                     relx = 0.02
-        if (dates.year == year and (dates.months + dates.future - dates.back) == month) or (day < 3 and (dates.months + dates.future - dates.back) == month - 1):
-            hidden_object[0].place(relx=0.85, rely=0.95, relwidth=0.03)
-            hidden_object[1].place(relx=0.03, rely=0.945, relwidth=0.10)
-            hidden_object[2].place(relx=0.89, rely=0.945, relwidth=0.08)
-            hidden_object[3].place(relx=0.50, rely=0.945, relwidth=0.10)
-            hidden_object[4].place(relx=0.40, rely=0.945, relwidth=0.10)
-            hidden_object[5].place(relx=0.70, rely=0.945)
+        if (dates.year == year and dates.choose_now == month) or (day < 3 and dates.choose_now == month - 1 and (dates.year == year or dates.year == year - 1)):
+            if dates.choose_now == month - 1:
+                hidden_object[0].set(1)
+            else:
+                hidden_object[0].set(day)
+            if name_month[0] != 'dezembro' and dates.year == year - 1:
+                for item in range(0, len(hidden_object)):
+                    hidden_object[item].place_forget()
+            else:
+                hidden_object[0].place(relx=0.85, rely=0.95, relwidth=0.03)
+                hidden_object[1].place(relx=0.03, rely=0.945, relwidth=0.10)
+                hidden_object[2].place(relx=0.89, rely=0.945, relwidth=0.08)
+                hidden_object[3].place(relx=0.50, rely=0.945, relwidth=0.10)
+                hidden_object[4].place(relx=0.40, rely=0.945, relwidth=0.10)
+                hidden_object[5].place(relx=0.70, rely=0.945)
         else:
             for item in range(0, len(hidden_object)):
                 hidden_object[item].place_forget()
@@ -1176,7 +1219,7 @@ class Days_month:
                         pass
                     if aux_button < len(unique_day) and len(unique_day) > 0:
                         if self.number_day[control] == unique_day[aux_button]:
-                            self.com_button[aux_button].place(relx=relx - 0.10, rely=rely - 0.010)
+                            self.com_button[aux_button].place(relx=relx + 0.02, rely=rely - 0.010)
                             aux_button += 1
                     bd.connect()
                     verify_calendar = bd.choose_three('calendar', 'time', 'cat_ref', 'color_cat', 'day', 'month',
@@ -1206,13 +1249,21 @@ class Days_month:
                     max_width = 100
                     rely += 0.24
                     relx = 0.02
-        if dates.year == year and (dates.months + dates.future - dates.back) == month or (day < 3 and (dates.months + dates.future - dates.back) == month - 1):
-            hidden_object[0].place(relx=0.85, rely=0.95, relwidth=0.03)
-            hidden_object[1].place(relx=0.03, rely=0.945, relwidth=0.10)
-            hidden_object[2].place(relx=0.89, rely=0.945, relwidth=0.08)
-            hidden_object[3].place(relx=0.50, rely=0.945, relwidth=0.10)
-            hidden_object[4].place(relx=0.40, rely=0.945, relwidth=0.10)
-            hidden_object[5].place(relx=0.70, rely=0.945)
+        if (dates.year == year and dates.choose_now == month) or (day < 3 and dates.choose_now == month - 1 and (dates.year == year or dates.year == year - 1)):
+            if dates.choose_now == month - 1:
+                hidden_object[0].set(1)
+            else:
+                hidden_object[0].set(day)
+            if name_month[0] != 'dezembro' and dates.year == year - 1:
+                for item in range(0, len(hidden_object)):
+                    hidden_object[item].place_forget()
+            else:
+                hidden_object[0].place(relx=0.85, rely=0.95, relwidth=0.03)
+                hidden_object[1].place(relx=0.03, rely=0.945, relwidth=0.10)
+                hidden_object[2].place(relx=0.89, rely=0.945, relwidth=0.08)
+                hidden_object[3].place(relx=0.50, rely=0.945, relwidth=0.10)
+                hidden_object[4].place(relx=0.40, rely=0.945, relwidth=0.10)
+                hidden_object[5].place(relx=0.70, rely=0.945)
         else:
             for item in range(0, len(hidden_object)):
                 hidden_object[item].place_forget()

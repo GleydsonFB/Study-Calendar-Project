@@ -9,7 +9,7 @@ color_helper = Complementar_tree()
 base = Database()
 base.connect()
 base.table_create()
-dates = Issue_date()
+dats = Issue_date()
 rr = Registry_rule()
 cs = Choose_scale()
 dm = Days_month()
@@ -97,6 +97,7 @@ class Schedule_window:
         self.label()
         dm.window_parent = self.window
         dm.principal_frame = self.frame2
+        dates.reset_all()
         dm.day_month_system(dm)
         cs.parent = self.window
         cs.base = dm
@@ -123,7 +124,7 @@ class Schedule_window:
         self.frame2.place(relx=0.04, rely=0.06, relwidth=0.92, relheight=0.88)
 
     def label(self):
-        self.label1 = Label(self.frame1, text=f'Agenda de {dates.date_month()[0]}/{year}!', fg=colors(5),
+        self.label1 = Label(self.frame1, text=f'Agenda de {dats.date_month()[0]}/{year}!', fg=colors(5),
                             font=('Calibri', 15, 'bold'),
                             bg=colors(2))
         self.label1.place(relx=0.35, relwidth=0.30)
@@ -164,9 +165,9 @@ class Schedule_window:
         button4.place(relx=0.925, rely=0.042)
 
         # combo days for day offs
-        list_day = dates.day_registry()
+        list_day = dats.day_registry()
         combo = ttk.Combobox(self.frame1, values=list_day, state='readonly', background=colors(5))
-        combo.set(list_day[dates.date_month()[2] - 1])
+        combo.set(list_day[dats.date_month()[2] - 1])
         combo.place(relx=0.85, rely=0.95, relwidth=0.03)
 
 
@@ -241,6 +242,7 @@ class Registry_window:
         self.window = window3
         self.screen()
         self.frame()
+        dats.months = dates.choose_now
         self.insert_time()
         self.label()
         self.window.mainloop()
@@ -271,9 +273,12 @@ class Registry_window:
         entry.place(relx=0.375, rely=0.38, relwidth=0.25)
 
         #date registry
-        list_day = dates.day_registry()
+        list_day = dats.day_registry()
         combo1 = ttk.Combobox(self.frame1, values=list_day, state='readonly', background=colors(5))
-        combo1.set(list_day[dates.date_month()[2] - 1])
+        if dats.months == month:
+            combo1.set(list_day[dats.date_month()[2] - 1])
+        else:
+            combo1.set(1)
         combo1.place(relx=0.25, rely=0.60, relwidth=0.15)
 
         button = Button(self.frame1, text='Inserir',
@@ -289,7 +294,7 @@ class Registry_window:
         label2.place(relx=0.05, rely=0.30, relwidth=0.90)
         label3 = Label(self.frame1, text='Determine a data do estudo', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
         label3.place(relx=0.15, rely=0.50)
-        label4 = Label(self.frame1, text=f'/{dates.date_month()[0]}/{year}', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
+        label4 = Label(self.frame1, text=f'/{dats.date_month()[0]}/{dates.year}', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
         label4.place(relx=0.40, rely=0.60)
 
 
@@ -301,6 +306,7 @@ class Commentary_window:
         self.window = window3
         self.screen()
         self.frame()
+        dats.months = dates.choose_now
         self.insert_comment()
         self.label()
         self.window.mainloop()
@@ -321,14 +327,14 @@ class Commentary_window:
 
     def insert_comment(self):
         #combo and entry
-        day_list = dates.day_registry()
+        day_list = dats.day_registry()
         combo = ttk.Combobox(self.frame1, values=day_list, state='readonly', background=colors(5))
-        combo.set(dates.day_registry()[day - 1])
+        combo.set(dats.day_registry()[day - 1])
         combo.place(relx=0.425, rely=0.18, relwidth=0.15)
         comment_text = Text(self.frame1, bg=colors(5), font=('calibri', 10), foreground='green')
         comment_text.place(relx=0.10, rely=0.38, relwidth=0.80, relheight=0.41)
         button = Button(self.frame1, text='Inserir',
-                        command=lambda: content_s.max_comment(254, comment_text.get(1.0, 'end-1c'), comment_text, self.window, combo.get(), dates.date_month()[0], year),
+                        command=lambda: content_s.max_comment(254, comment_text.get(1.0, 'end-1c'), comment_text, self.window, combo.get(), dats.date_month()[0], dates.year),
                         bg=colors(2), fg=colors(5), font=('Calibri', 13, 'bold'))
         button.place(relx=0.375, rely=0.80, relwidth=0.25)
 
@@ -348,6 +354,7 @@ class Remove_elem_window:
         self.window = window4
         self.screen()
         self.frame()
+        dats.months = dates.choose_now
         self.label_button()
         self.tree_view()
         content_s.search = None
@@ -370,12 +377,12 @@ class Remove_elem_window:
     def label_button(self):
         label = Label(self.frame1, text='escolha o dia do mês', font=('Calibri', 12, 'bold'), fg=colors(5), bg=colors(2))
         label.place(relx=0.25, rely=0.06, relwidth=0.50)
-        label1 = Label(self.frame1, text=f'/{dates.date_month()[0]}/{year}', font=('Calibri', 12, 'bold'), fg=colors(5),
+        label1 = Label(self.frame1, text=f'/{dats.date_month()[0]}/{year}', font=('Calibri', 12, 'bold'), fg=colors(5),
                        bg=colors(2))
         label1.place(relx=0.40, rely=0.20)
-        list_day = dates.day_registry()
+        list_day = dats.day_registry()
         self.combo = ttk.Combobox(self.frame1, values=list_day, state='readonly', background=colors(5))
-        self.combo.set(list_day[dates.date_month()[2] - 1])
+        self.combo.set(list_day[dats.date_month()[2] - 1])
         self.combo.place(relx=0.25, rely=0.20, relwidth=0.15)
         button = Button(self.frame1, text='Buscar', bg=colors(2), fg=colors(5), font=('Calibri', 10, 'bold'),
                         command=lambda: content_s.find_study(self.tree, self.combo.get(), self.window))
