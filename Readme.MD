@@ -18,5 +18,5 @@ Installation can be easily done by downloading this file from my drive.
 
 ## How to use
 
-With the collaboration of <a href="https://github.com/ralfwalker">Revson</a>, a page with a FAQ on how to use the project properly has been created; you can read it here. There is also a mini tutorial inside the program folder.
+With the collaboration of <a href="https://github.com/ralfwalker" target="_blank">Revson</a>, a page with a FAQ on how to use the project properly has been created, you can read it <a href="https://calendario-estudos.netlify.app/" target="_blank">here</a>. There is also a more information inside the program folder.
 

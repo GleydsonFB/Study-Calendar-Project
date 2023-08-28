@@ -76,7 +76,7 @@ class Main_window:
                                font=('Calibri', 10, 'bold'), command=Rule_window)
         self.category.place(relx=0.225, rely=0.70, relwidth=0.55)
         self.category = Button(self.frame1, text='Feedback/FAQ', bd=2, bg=colors(4), fg=colors(1),
-                               font=('Calibri', 10, 'bold'))
+                               font=('Calibri', 10, 'bold'), command=lambda: webbrowser.open('https://calendario-estudos.netlify.app/', new=2))
         self.category.place(relx=0.225, rely=0.80, relwidth=0.55)
         self.category = Button(self.frame1, text='LinkedIn do desenvolvedor', bd=2, bg=colors(4), fg=colors(1),
                                font=('Calibri', 10, 'bold'),
@@ -824,4 +824,4 @@ class Scale_off_window:
 a = Main_window()
 base.disconnect()
 
-# if u feel missing some explains in this module, please contact me thought:
+# if u feel missing some explains in this module, please contact me thought: https://calendario-estudos.netlify.app/

@@ -1,6 +1,6 @@
 import sqlite3
 # this module is about SQL queries and the construction of SQLite3 DB
-# if u feel missing some explains in this module, please contact me thought:
+# if u feel missing some explains in this module, please contact me thought: https://calendario-estudos.netlify.app/
 
 
 class Database:

@@ -1,7 +1,7 @@
 from database import *
 # This module work at support for classes in "function_interface.py".
 aux_bd = Database()
-# if u feel missing some explains in this module, please contact me thought:
+# if u feel missing some explains in this module, please contact me thought: https://calendario-estudos.netlify.app/
 
 
 class Study_calc:

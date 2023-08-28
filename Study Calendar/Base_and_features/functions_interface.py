@@ -7,15 +7,16 @@ from PIL import Image, ImageTk
 from auxiliar_math import *
 
 # Functions_interface is a core module of back end.
-# if u feel missing some explains in this module, please contact me thought:
+# if u feel missing some explains in this module, please contact me thought: https://calendario-estudos.netlify.app/
 
+# this block helps to work all classes.
 date = datetime.datetime.now()
 month = date.month
 year = date.year
 day = date.day
 bd = Database()
 calc_study = Study_calc(None, None, None, None)
-
+# -
 
 class Issue_date:
     """
