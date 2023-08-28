@@ -6,6 +6,9 @@ from tkinter import colorchooser
 from PIL import Image, ImageTk
 from auxiliar_math import *
 
+# Functions_interface is a core module of back end.
+# if u feel missing some explains in this module, please contact me thought:
+
 date = datetime.datetime.now()
 month = date.month
 year = date.year
@@ -15,6 +18,9 @@ calc_study = Study_calc(None, None, None, None)
 
 
 class Issue_date:
+    """
+    Issue_date helps to define who is a month/year we must use.
+    """
     def __init__(self):
         self.months = month
         self.future, self.back, self.name_month_back, self.name_month_future = 0, 0, 0, 0
@@ -24,6 +30,15 @@ class Issue_date:
                                'outubro', 'novembro', 'dezembro']
 
     def date_month(self, back_time=0, advance_time=0, change_or_not=False, month_actual=month):
+        """
+        Principal method of this class
+        :param back_time: back_time is about how many months we have gone to past;
+        :param advance_time: similar to back_time, he defines how many months we will go to future;
+        :param change_or_not: this parameter applies or not one change in self variables (back and future)
+        default is False;
+        :param month_actual: define actual month, default is the system month.
+        :return: name, number of days, day actual and number of month.
+        """
         self.change_or_not = change_or_not
         if back_time == 0 and advance_time == 0:
             match month_actual:
@@ -144,19 +159,32 @@ class Issue_date:
                 return 'janeiro', 31, day, self.months
 
     def day_registry(self):
+        """
+        This method helps to create schedule window
+        :return: one list with same number of days at slots.
+        """
         list_day = []
         for days in range(1, self.date_month()[1] + 1):
             list_day.append(str(days))
         return list_day
 
     def reset_all(self):
+        """
+        :return: reset all dates variables (self).
+        """
         self.__init__()
 
 
+# we need create one object for this class.
 dates = Issue_date()
 
 
 def colors(scale):
+    """
+    Simple function for helps standardization of colors
+    :param scale: for choose one of default colors.
+    :return: color in hexadecimal.
+    """
     match scale:
         case 1:
             return '#224459'
@@ -171,6 +199,11 @@ def colors(scale):
 
 
 def show_tree(treeview):
+    """
+    Simple function for construction one treeview
+    :param treeview: write the treeview object.
+    :return: treeview completed.
+    """
     bd.connect()
     total = bd.simple_select('CATEGORY', 'id_cat')
     if total[0] == 0:
@@ -184,6 +217,9 @@ def show_tree(treeview):
 
 
 def insert_combo():
+    """
+    :return: one list of categories created.
+    """
     bd.connect()
     total = bd.simple_select('CATEGORY', 'name')
     if total[0] == 0:
@@ -194,12 +230,18 @@ def insert_combo():
 
 
 def month_combo():
+    """
+    :return: one list of name months.
+    """
     mon = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro',
            'outubro', 'novembro', 'dezembro']
     return mon
 
 
 def year_combo():
+    """
+    :return: one list of years.
+    """
     y = []
     for i in range(year, year + 51):
         y.append(i)
@@ -207,6 +249,12 @@ def year_combo():
 
 
 def insert_combo_choose(table, col):
+    """
+    This function can insert content in a combo class
+    :param table: write one table existing in db;
+    :param col: define the column.
+    :return: a list with elements.
+    """
     bd.connect()
     result = bd.simple_select(table, col)
     data = []
@@ -223,6 +271,18 @@ def insert_combo_choose(table, col):
 
 
 def insert_goal(arg, field, parent, months, years, category, goal_status, type='Auto'):
+    """
+    Function for insert goal in database
+    :param arg: arg is the objetive of goal;
+    :param field: field is only for clean entry in interface;
+    :param parent: window that contain the frame;
+    :param months: month actual or chosen;
+    :param years: year actual or chosen;
+    :param category: name of category that receive the goal;
+    :param goal_status: object of "Goal_main_window";
+    :param type: type allows to choose if the goal it will be automatic or manual calculated, default is auto.
+    :return: one pop-up with result and also insert goal or not in db.
+    """
     ctg = str(arg.get())
     if ctg.isnumeric():
         bd.connect()
@@ -235,7 +295,8 @@ def insert_goal(arg, field, parent, months, years, category, goal_status, type='
             search_scale = bd.select_two_search('scale', 'week', months, years, 'month', 'year')
             if len(search_scale) == 0:
                 messagebox.showerror('Erro na criação da meta', 'Ainda não foi definida uma escala de estudo'
-                                                                ' para que possamos calcular sua meta. Por favor, insira uma!',
+                                                                ' para que possamos calcular sua meta. '
+                                                                'Por favor, insira uma!',
                                      parent=parent)
                 field.delete(0, END)
             else:
@@ -245,7 +306,8 @@ def insert_goal(arg, field, parent, months, years, category, goal_status, type='
                     insert = bd.insert_goal(ctg * total_days, months, years, cat[1], cat[0])
                     if insert == 0:
                         messagebox.showinfo('Sucesso!',
-                                            f'meta para a categoria {category} no mês {months} de {years} foi definida como'
+                                            f'meta para a categoria {category} no mês {months} de {years} foi '
+                                            f'definida como'
                                             f' sendo {round((ctg * total_days) / 60, 1)} hora(s).', parent=parent)
                         field.delete(0, END)
                         bd.disconnect()
@@ -253,7 +315,8 @@ def insert_goal(arg, field, parent, months, years, category, goal_status, type='
                         goal_status.show_data()
                     elif insert == 1:
                         messagebox.showinfo('Sucesso!',
-                                            f'meta para a categoria {category} no mês {months} de {years} foi atualizada para'
+                                            f'meta para a categoria {category} no mês {months} de {years} foi'
+                                            f' atualizada para'
                                             f' {round((ctg * total_days) / 60, 1)} hora(s).', parent=parent)
                         field.delete(0, END)
                         bd.disconnect()
@@ -261,7 +324,8 @@ def insert_goal(arg, field, parent, months, years, category, goal_status, type='
                         goal_status.show_data()
                     else:
                         messagebox.showerror('Erro no registro de meta',
-                                             'As informações preenchidas no campo "em minutos" estão inválidas.', parent=parent)
+                                             'As informações preenchidas no campo "em minutos" estão inválidas.',
+                                             parent=parent)
                         field.delete(0, END)
                         bd.disconnect()
                 else:
@@ -269,7 +333,8 @@ def insert_goal(arg, field, parent, months, years, category, goal_status, type='
                     ctg = int(ctg)
                     if insert == 0:
                         messagebox.showinfo('Sucesso!',
-                                            f'meta para a categoria {category} no mês {months} de {years} foi definida como'
+                                            f'meta para a categoria {category} no mês {months} de {years} foi '
+                                            f'definida como'
                                             f' sendo {round(ctg / 60, 1)} hora(s).', parent=parent)
                         field.delete(0, END)
                         bd.disconnect()
@@ -277,7 +342,8 @@ def insert_goal(arg, field, parent, months, years, category, goal_status, type='
                         goal_status.show_data()
                     elif insert == 1:
                         messagebox.showinfo('Sucesso!',
-                                            f'meta para a categoria {category} no mês {months} de {years} foi atualizada para'
+                                            f'meta para a categoria {category} no mês {months} de {years} foi '
+                                            f'atualizada para'
                                             f' {round(ctg / 60, 1)} hora(s).', parent=parent)
                         field.delete(0, END)
                         bd.disconnect()
@@ -297,6 +363,15 @@ def insert_goal(arg, field, parent, months, years, category, goal_status, type='
 
 
 def delete_goal(parent, months, years, category, goal_status):
+    """
+    Function to delete one goal
+    :param parent: window that contain the frame;
+    :param months: month actual or chosen;
+    :param years: year actual or chosen;
+    :param category: name of category that receive the goal;
+    :param goal_status: object of "Goal_main_window";
+    :return: one pop-up with result and also delete or not goal from database.
+    """
     bd.connect()
     registries = bd.select_three_search('goal', 'id_goa', category, months, years, 'cat_ref', 'month', 'year')
     if len(registries) == 0:
@@ -315,14 +390,30 @@ def delete_goal(parent, months, years, category, goal_status):
 
 
 class Complementar_tree:
+    """
+    Class support to work with treeviews.
+    """
     def __init__(self):
         self.hex_col, self.selection = None, None
 
     def tree_color(self):
+        """
+        Method to choose one color for a category.
+        :return: don't have, only updated self.hex_col variable.
+        """
         color = colorchooser.askcolor()
         self.hex_col = color[1]
 
     def tree_insert(self, limit, arg, field, parent, treeview):
+        """
+        Method allows to add categories to database
+        :param limit: limit max characters of name category;
+        :param arg: name of category;
+        :param field: helps clean entry class in interface;
+        :param parent: window that contain the frame;
+        :param treeview: object of treeview class;
+        :return: pop-up with result and also add or not the category.
+        """
         arg = arg.get()
         if len(arg) >= limit:
             messagebox.showerror('Erro', f'O campo em questão só permite {limit - 1} caracteres.', parent=parent)
@@ -369,6 +460,12 @@ class Complementar_tree:
                 pass
 
     def delete_tree(self, treeview, parent):
+        """
+        Method to delete any category from database
+        :param treeview: object of treeview class;
+        :param parent: window that contain the frame.
+        :return: pop-up with result and also remove or not the category.
+        """
         try:
             self.selection = treeview.item(treeview.focus())
             bd.connect()
@@ -380,24 +477,35 @@ class Complementar_tree:
                 self.selection = None
             else:
                 messagebox.showerror('Erro de execução',
-                                     'Ocorreu um pequeno erro na solicitação, por favor, feche e abra novamente esta janela.',
+                                     'Ocorreu um pequeno erro na solicitação, por favor, feche e abra'
+                                     ' novamente esta janela.',
                                      parent=parent)
                 self.selection = None
         else:
             messagebox.showinfo('Sucesso!',
-                                'Categoria selecionada foi removida, o histórico dela no calendário será preservado (se houver)',
+                                'Categoria selecionada foi removida, o histórico dela no calendário será'
+                                ' preservado (se houver)',
                                 parent=parent)
             treeview.delete(treeview.focus())
             self.selection = None
 
 
 class Registry_rule:
+    """
+    Class to help in "Rule_window".
+    """
     def __init__(self, goal_m=None):
         self.choose_s, self.choose_d = None, None
         self.year, self.month = None, None
         self.goal_m = goal_m
 
     def collect_option_default(self, option, parent):
+        """
+        This method can save to choose of scale (default options with radio button)
+        :param option: result of radio button class in interface;
+        :param parent: window that contain the frame.
+        :return: pop-up with result and save variables self to use after.
+        """
         op = str(option.get())
         if op.isnumeric():
             op = int(op)
@@ -424,6 +532,15 @@ class Registry_rule:
                 option.set(0)
 
     def collect_option_style(self, option1, option2, parent, field1, field2):
+        """
+        Method to help custom choose scale
+        :param option1: content of entry object (field of study);
+        :param option2: content of entry object (field of day off);
+        :param parent: window that contain the frame;
+        :param field1: field of option1 to clean;
+        :param field2: field of option2 to clean.
+        :return: pop-up with result.
+        """
         op1 = str(option1.get())
         op2 = str(option2.get())
         if op1.isnumeric() and op2.isnumeric():
@@ -448,9 +565,20 @@ class Registry_rule:
             field2.delete(0, END)
 
     def return_choose(self):
+        """
+        :return: return actual choose of scale.
+        """
         return self.choose_s, self.choose_d, self.month, self.year
 
     def open_scale(self, parent, new_window, mon, yea):
+        """
+        This method can open a new window to finish the scale
+        :param parent: window that contain the frame;
+        :param new_window: new object window type;
+        :param mon: month actual or chosen;
+        :param yea: year actual or chosen.
+        :return: pop-up with result or one new window.
+        """
         self.month = mon.get()
         self.year = yea.get()
 
@@ -483,7 +611,8 @@ class Registry_rule:
 
         if self.choose_s == 7 and control_scale >= month:
             messagebox.showinfo('Escala definida!',
-                                'Tudo certo agora, aproveite seus estudos (7 dias direto é para pessoas estudiosas mesmo hein!)',
+                                'Tudo certo agora, aproveite seus estudos (7 dias direto é para pessoas '
+                                'estudiosas mesmo hein!)',
                                 parent=parent)
             week = [1, 1, 1, 1, 1, 1, 1]
             bd.connect()
@@ -503,6 +632,9 @@ class Registry_rule:
 
 
 class Choose_scale:
+    """
+    This class work together with "Registry_rule".
+    """
     def __init__(self, parent=None, base_obj=None, goal_main=None):
         self.study, self.check = [], []
         self.variables, self.days = [], ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom']
@@ -512,6 +644,11 @@ class Choose_scale:
         self.goal_m = goal_main
 
     def scale_default(self, parent):
+        """
+        Create checkbutton for define studies day
+        :param parent: window that contain the frame.
+        :return: Widget apply in frame.
+        """
         move_button = 0.04
         move_days = 0
         for item in range(0, 7):
@@ -526,6 +663,15 @@ class Choose_scale:
             move_days += 1
 
     def set_study(self, parent, choose_s, choose_d, choose_m, choose_y):
+        """
+        Method for choose studies day (through checkbutton)
+        :param parent: window that contain the frame;
+        :param choose_s: study variable defined in "Registry_rule";
+        :param choose_d: day off variable defined in "Registry_rule";
+        :param choose_m: actual or chosen month;
+        :param choose_y: actual or chosen year.
+        :return: pop-up with result and also add or not in goal table.
+        """
         for variable in range(0, len(self.variables)):
             if self.variables[variable].get() == 0:
                 self.week.append(0)
@@ -569,11 +715,19 @@ class Choose_scale:
             self.goal_m.show_data()
 
     def insert_off(self, c_day):
+        """
+        Method to insert day off through "Schedule_window"
+        :param c_day: day chosen.
+        :return: pop-up with result and also add or not day off in calendar table.
+        """
         bd.connect()
-        id_scale = bd.select_two_search('scale', 'week', dates.name_month_now[dates.choose_now - 1], dates.year, 'month', 'year')
+        id_scale = bd.select_two_search('scale', 'week', dates.name_month_now[dates.choose_now - 1], dates.year,
+                                        'month', 'year')
         if len(id_scale) == 0:
-            messagebox.showerror('Erro ao inserir folga', 'Ainda não foi definida uma escala para ser usada como base de '
-                                                          'cálculo para as folgas. Por favor, insira uma para continuar.'
+            messagebox.showerror('Erro ao inserir folga', 'Ainda não foi definida uma escala para ser usada como base'
+                                                          ' de '
+                                                          'cálculo para as folgas. Por favor, insira uma para '
+                                                          'continuar.'
                                  , parent=self.parent)
         else:
             scale_now = bd.show_week_scale(id_scale[0])
@@ -584,7 +738,8 @@ class Choose_scale:
             choose_day = datetime.date(year, dates.choose_now, c_day).weekday()
             if check_day_off[0][choose_day] == 1:
                 answer = messagebox.askyesno('Confirme a folga',
-                                             'O dia escolhido é uma data de estudo e não de folga, tem certeza que deseja inserir a folga?',
+                                             'O dia escolhido é uma data de estudo e não de folga, '
+                                             'tem certeza que deseja inserir a folga?',
                                              parent=self.parent)
                 if answer:
                     bd.connect()
@@ -592,7 +747,8 @@ class Choose_scale:
                     bd.disconnect()
                     if result != 1 and result != 2:
                         answer = messagebox.askyesno('Confirme a opção',
-                                                     'Ao inserir esta folga, todos os registros do dia em questão serão removidos. Deseja seguir?',
+                                                     'Ao inserir esta folga, todos os registros do dia em '
+                                                     'questão serão removidos. Deseja seguir?',
                                                      parent=self.parent)
                         if answer:
                             messagebox.showinfo('Sucesso!',
@@ -608,10 +764,12 @@ class Choose_scale:
                             bd.disconnect()
                         else:
                             messagebox.showinfo('Opção definida',
-                                                'A folga não foi inserida e, por tanto, os registros do dia foram preservados!',
+                                                'A folga não foi inserida e, por tanto, os registros do dia'
+                                                ' foram preservados!',
                                                 parent=self.parent)
                     elif result == 1:
-                        messagebox.showerror('Erro no registro da folga', 'O dia em questão já tem uma folga cadastrada.',
+                        messagebox.showerror('Erro no registro da folga', 'O dia em questão já tem uma '
+                                                                          'folga cadastrada.',
                                              parent=self.parent)
                     else:
                         messagebox.showinfo('Sucesso!',
@@ -630,11 +788,13 @@ class Choose_scale:
                 bd.disconnect()
                 if result != 1 and result != 2:
                     answer = messagebox.askyesno('Confirme a opção',
-                                                 'Ao inserir esta folga, todos os registros do dia em questão serão removidos. Deseja seguir?',
+                                                 'Ao inserir esta folga, todos os registros do dia em '
+                                                 'questão serão removidos. Deseja seguir?',
                                                  parent=self.parent)
                     if answer:
                         messagebox.showinfo('Sucesso!',
-                                            f'Uma folga foi registrada para o dia {c_day} respeitando a escala definida.',
+                                            f'Uma folga foi registrada para o dia {c_day} respeitando a'
+                                            f' escala definida.',
                                             parent=self.parent)
                         bd.connect()
                         for registry in result:
@@ -646,7 +806,8 @@ class Choose_scale:
                         bd.disconnect()
                     else:
                         messagebox.showinfo('Opção definida',
-                                            'A folga não foi inserida e, por tanto, os registros do dia foram preservados!',
+                                            'A folga não foi inserida e, por tanto, os registros do dia'
+                                            ' foram preservados!',
                                             parent=self.parent)
                 elif result == 1:
                     messagebox.showerror('Erro no registro da folga', 'O dia em questão já tem uma folga cadastrada.',
@@ -660,6 +821,11 @@ class Choose_scale:
                     self.base.day_month_system(original_obj=self.base)
 
     def delete_off(self, c_day):
+        """
+        Method for remove one day off
+        :param c_day: day chosen.
+        :return: pop-up with result and also remove or not day off from calendar table.
+        """
         answer = messagebox.askyesno('Confirme a escolha', f'Deseja mesmo remover a folga do dia {c_day}?',
                                      parent=self.parent)
         if answer:
@@ -675,6 +841,16 @@ class Choose_scale:
 
 
 def registry_condition(parent, mon, yea, eff, field, cat):
+    """
+    Function to apply efficiency in one category
+    :param parent: window that contain the frame;
+    :param mon: actual or chosen month;
+    :param yea: actual or chosen year;
+    :param eff: number of efficiency (see database.py for more info);
+    :param field: entry class from interface;
+    :param cat: name of category.
+    :return: pop-up with result and add or not in effectivity table.
+    """
     if cat == '':
         messagebox.showerror('Erro no cadastro da condição',
                              'Não foi informada uma categoria para aplicar a efetividade.',
@@ -712,23 +888,31 @@ def registry_condition(parent, mon, yea, eff, field, cat):
                 bd.disconnect()
                 if confirm == 0:
                     messagebox.showinfo('Sucesso!',
-                                        f'Efetividade de {v_eff}% para a categoria {cat.upper()} durante o período do mês {mon.get()} de {yea.get()} inserida com sucesso!',
+                                        f'Efetividade de {v_eff}% para a categoria {cat.upper()} '
+                                        f'durante o período do mês {mon.get()} de {yea.get()} inserida com sucesso!',
                                         parent=parent)
                     field.delete(0, END)
                 else:
                     messagebox.showinfo('Sucesso!',
-                                        f'A efetividade para a categoria {cat.upper()} durante o período do mês {mon.get()} de {yea.get()} foi atualizad para {v_eff}%!',
+                                        f'A efetividade para a categoria {cat.upper()} durante o período '
+                                        f'do mês {mon.get()} de {yea.get()} foi atualizad para {v_eff}%!',
                                         parent=parent)
                     field.delete(0, END)
 
 
 class Comment_show_window:
+    """
+    Important class to show and remove content of commentaries.
+    """
     def __init__(self):
         self.window, self.frame1, self.scroll = None, None, None
         self.label1, self.actual_day = None, None
         self.button = []
 
     def screen(self):
+        """
+        :return: construction of base window.
+        """
         self.window.title('Comentários')
         self.window.configure(background=colors(1))
         self.window.geometry('300x300+400+50')
@@ -738,20 +922,38 @@ class Comment_show_window:
         self.window.iconbitmap('images/girl.ico')
 
     def frame(self):
+        """
+        :return: create a frame.
+        """
         self.frame1 = Frame(self.window, bg=colors(2))
         self.frame1.place(relx=0.04, rely=0.04, relwidth=0.92, relheight=0.92)
 
     def scroll_bar(self):
+        """
+        :return: set scrollbar to use in window.
+        """
         self.scroll = Scrollbar(self.frame1, orient=VERTICAL)
         self.scroll.pack(side=RIGHT, fill=Y)
 
     def label(self):
+        """
+        :return: create one label to show text.
+        """
         self.label1 = Label(self.frame1, text=f'Comentários do dia {self.actual_day}', font=('Calibri', 13, 'bold'),
                             bg=colors(2),
                             fg=colors(1))
         self.label1.place(relx=0.20, rely=0.03, relwidth=0.60)
 
     def editable_label(self, content, ids, actual_month, day_reg, class_month=None):
+        """
+        Editable_label method have some details, because this i add notes along code
+        :param content: content of commentary;
+        :param ids: id of commentary in table respective;
+        :param actual_month: actual or chosen month;
+        :param day_reg: day with commentary;
+        :param class_month: original object used in interface of "Days_month" class.
+        :return: create a button to open one window with content of commentary and option to remove him.
+        """
         self.window = Toplevel()
         self.actual_day = day_reg
         self.screen()
@@ -768,7 +970,8 @@ class Comment_show_window:
         if len(content) > 1:
             for item in range(0, len(content)):
                 # button for deletion of comment if actual month is same to system
-                if (actual_month == month and dates.year == year) or (day < 3 and dates.choose_now == month - 1 and (dates.year == year or dates.year == year - 1)):
+                if (actual_month == month and dates.year == year) or \
+                        (day < 3 and dates.choose_now == month - 1 and (dates.year == year or dates.year == year - 1)):
                     if actual_month != 12 and dates.year == year - 1:
                         pass
                     else:
@@ -789,7 +992,8 @@ class Comment_show_window:
             my_list.place(relx=0.125, rely=rely + 0.175, relwidth=0.75, relheight=0.35)
             my_list.tag_add('center', 1.0, 'end')
             # button for deletion of comment if actual month is same to system
-            if (actual_month == month and dates.year == year) or (day < 3 and dates.choose_now == month - 1 and (dates.year == year or dates.year == year - 1)):
+            if (actual_month == month and dates.year == year) or (day < 3 and dates.choose_now == month - 1
+                                                                  and (dates.year == year or dates.year == year - 1)):
                 if actual_month != 12 and dates.year == year - 1:
                     pass
                 else:
@@ -804,6 +1008,13 @@ class Comment_show_window:
         self.window.mainloop()
 
     def del_comments(self, ids, pos, class_up):
+        """
+        This method can remove commentary from "Editable_label"
+        :param ids: id from commentary;
+        :param pos: position of commentary in the window;
+        :param class_up: original object from "Days_month"
+        :return: pop-up with result and remove or not the commentary.
+        """
         answer = messagebox.askyesno('Confirme a ação',
                                      f'Você tem certeza que deseja deletar o comentário de número {pos} deste dia?',
                                      parent=self.window)
@@ -825,6 +1036,9 @@ window_aux = Comment_show_window()
 
 
 class Days_month:
+    """
+    Core class. Used for show calendar in "Schedule_window".
+    """
     def __init__(self, window=None, off_system=None, frame=None):
         self.window_parent = window
         self.principal_frame = frame
@@ -836,9 +1050,15 @@ class Days_month:
         self.off_system = off_system
 
     def day_month_system(self, original_obj):
+        """
+        Default method. He can show actual month in calendar
+        :param original_obj: receive same object (Date_month) used in interface to apply in another classes;
+        :return: don't have return, he shows datas in frame.
+        """
         self.clear_frame()
         self.base_obj = original_obj
-        self.all_days, self.number_day, self.name_day, self.com_button, self.cal_reg, self.control_cal = [], [], [], [], [], 0
+        self.all_days, self.number_day, self.name_day, self.com_button, self.cal_reg, self.control_cal = [], [], [], \
+                                                                                                         [], [], 0
         self.week_day, self.rem_off = [], []
         control, relx, rely = 0, 0.02, 0.02
         max_width = 100
@@ -849,13 +1069,15 @@ class Days_month:
         check_scale = [bd.select_two_search('scale', 'week', actual_month[0], dates.year, 'month', 'year'), False]
         if len(check_scale[0]) == 0:
             messagebox.showinfo('Notificação',
-                                'Você ainda não definiu uma escala de estudo, faça isso o quanto antes para melhor aproveitamento!',
+                                'Você ainda não definiu uma escala de estudo, faça isso o quanto antes para '
+                                'melhor aproveitamento!',
                                 parent=self.window_parent)
         else:
             check_scale[0] = bd.show_week_scale(check_scale[0][0])
             check_scale[1] = True
         calc_study.month = actual_month[0]
-        off_history = [bd.select_two_search('dayOff', 'day', actual_month[0], dates.year, 'month', 'year', True), False, 0]
+        off_history = [bd.select_two_search('dayOff', 'day', actual_month[0], dates.year, 'month', 'year', True),
+                       False, 0]
         if len(off_history[0]) == 0:
             pass
         else:
@@ -881,7 +1103,8 @@ class Days_month:
                 ids = bd.view_id_com(unique_day[item], actual_month[0], dates.year)
                 bd.disconnect()
                 self.com_button.append(Button(self.principal_frame, image=self.img_view, bg=colors(3), borderwidth=0,
-                                              command=lambda c=desc, i=ids, d=unique_day[item]: window_aux.editable_label(c, i, actual_month[3], d, self.base_obj)))
+                                              command=lambda c=desc, i=ids, d=unique_day[item]:
+                                              window_aux.editable_label(c, i, actual_month[3], d, self.base_obj)))
         for days in range(1, dates.date_month()[1] + 1):
             self.number_day.append(days)
             self.name_day.append(days)
@@ -896,7 +1119,8 @@ class Days_month:
             else:
                 if max_width >= 2:
                     self.name_day[control] = Label(self.principal_frame,
-                                                   text=f'{self.week_day_name[self.week_day[control]]} - Dia {self.number_day[control]}',
+                                                   text=f'{self.week_day_name[self.week_day[control]]} - Dia '
+                                                        f'{self.number_day[control]}',
                                                    fg=colors(5),
                                                    bg=colors(3),
                                                    font=('Calibri', 10, 'bold'))
@@ -949,7 +1173,8 @@ class Days_month:
                         while True:
                             if aux_cal < len(verify_calendar):
                                 self.cal_reg.append(Label(self.all_days[control],
-                                                          text=f'{verify_calendar[aux_cal][1]} - {verify_calendar[aux_cal][0]}',
+                                                          text=f'{verify_calendar[aux_cal][1]} - '
+                                                               f'{verify_calendar[aux_cal][0]}',
                                                           font=('calibri', 10, 'bold'),
                                                           fg=verify_calendar[aux_cal][2], bg=colors(4), anchor='center',
                                                           highlightthickness=1,
@@ -969,8 +1194,15 @@ class Days_month:
                     relx = 0.02
 
     def change_month_back(self, hidden_object, label):
+        """
+        Method used from back in months previous
+        :param hidden_object: receive all widget gifts in frame;
+        :param label: variable with label used in frame;
+        :return: don't have return, he updated frame to month chosen.
+        """
         self.clear_frame()
-        self.all_days, self.number_day, self.name_day, self.com_button, self.week_day, self.control_cal = [], [], [], [], [], 0
+        self.all_days, self.number_day, self.name_day, self.com_button, self.week_day, self.control_cal = [], [], [],\
+                                                                                                          [], [], 0
         self.rem_off, self.cal_reg = [], []
         control, relx, rely = 0, 0.02, 0.02
         unique_day, sup_unique = [], 0
@@ -979,7 +1211,8 @@ class Days_month:
         bd.connect()
         aux_button = 0
         name_month = dates.date_month(back_time=changing)[0:4]
-        off_history = [bd.select_two_search('dayOff', 'day', name_month[0], dates.year, 'month', 'year', True), False, 0]
+        off_history = [bd.select_two_search('dayOff', 'day', name_month[0], dates.year, 'month', 'year', True),
+                       False, 0]
         if len(off_history[0]) == 0:
             pass
         else:
@@ -1012,7 +1245,8 @@ class Days_month:
                 ids = bd.view_id_com(unique_day[item], name_month[0], dates.year)
                 bd.disconnect()
                 self.com_button.append(Button(self.principal_frame, image=self.img_view, bg=colors(3), borderwidth=0,
-                                              command=lambda c=desc, i=ids, d=unique_day[item]: window_aux.editable_label(c, i, name_month[3], d, self.base_obj)))
+                                              command=lambda c=desc, i=ids, d=unique_day[item]:
+                                              window_aux.editable_label(c, i, name_month[3], d, self.base_obj)))
         label.config(text=f'Agenda de {name_month[0]}/{dates.year}!')
         for days in range(1, dates.date_month(back_time=changing, change_or_not=True)[1] + 1):
             self.number_day.append(days)
@@ -1028,7 +1262,8 @@ class Days_month:
             else:
                 if max_width >= 2:
                     self.name_day[control] = Label(self.principal_frame,
-                                                   text=f'{self.week_day_name[self.week_day[control]]} - Dia {self.number_day[control]}',
+                                                   text=f'{self.week_day_name[self.week_day[control]]} - Dia '
+                                                        f'{self.number_day[control]}',
                                                    fg=colors(5),
                                                    bg=colors(3),
                                                    font=('Calibri', 10, 'bold'))
@@ -1081,7 +1316,8 @@ class Days_month:
                         while True:
                             if aux_cal < len(verify_calendar):
                                 self.cal_reg.append(Label(self.all_days[control],
-                                                          text=f'{verify_calendar[aux_cal][1]} - {verify_calendar[aux_cal][0]}',
+                                                          text=f'{verify_calendar[aux_cal][1]} - '
+                                                               f'{verify_calendar[aux_cal][0]}',
                                                           font=('calibri', 10, 'bold'),
                                                           fg=verify_calendar[aux_cal][2], bg=colors(4), anchor='center',
                                                           highlightthickness=1,
@@ -1099,7 +1335,8 @@ class Days_month:
                     max_width = 100
                     rely += 0.24
                     relx = 0.02
-        if (dates.year == year and dates.choose_now == month) or (day < 3 and dates.choose_now == month - 1 and (dates.year == year or dates.year == year - 1)):
+        if (dates.year == year and dates.choose_now == month) or (day < 3 and dates.choose_now == month - 1
+                                                                  and (dates.year == year or dates.year == year - 1)):
             if dates.choose_now == month - 1:
                 hidden_object[0].set(1)
             else:
@@ -1119,8 +1356,15 @@ class Days_month:
                 hidden_object[item].place_forget()
 
     def change_month_future(self, hidden_object, label):
+        """
+        Method used from advance in months future
+        :param hidden_object: receive all widget gifts in frame;
+        :param label: variable with label used in frame;
+        :return: don't have return, he updated frame to month chosen.
+        """
         self.clear_frame()
-        self.all_days, self.number_day, self.name_day, self.com_button, self.week_day, self.control_cal = [], [], [], [], [], 0
+        self.all_days, self.number_day, self.name_day, self.com_button, self.week_day, self.control_cal = [], [], \
+                                                                                                          [], [], [], 0
         self.rem_off, self.cal_reg = [], []
         control, relx, rely = 0, 0.02, 0.02
         max_width = 100
@@ -1129,7 +1373,8 @@ class Days_month:
         bd.connect()
         aux_button = 0
         name_month = dates.date_month(advance_time=changing)[0:4]
-        off_history = [bd.select_two_search('dayOff', 'day', name_month[0], dates.year, 'month', 'year', True), False, 0]
+        off_history = [bd.select_two_search('dayOff', 'day', name_month[0], dates.year, 'month', 'year', True),
+                       False, 0]
         if len(off_history[0]) == 0:
             pass
         else:
@@ -1162,7 +1407,8 @@ class Days_month:
                 ids = bd.view_id_com(unique_day[item], name_month[0], dates.year)
                 bd.disconnect()
                 self.com_button.append(Button(self.principal_frame, image=self.img_view, bg=colors(3), borderwidth=0,
-                                              command=lambda c=desc, i=ids, d=unique_day[item]: window_aux.editable_label(c, i, name_month[3], d, self.base_obj)))
+                                              command=lambda c=desc, i=ids, d=unique_day[item]:
+                                              window_aux.editable_label(c, i, name_month[3], d, self.base_obj)))
         label.config(text=f'Agenda de {name_month[0]}/{dates.year}!')
         for days in range(1, dates.date_month(advance_time=changing, change_or_not=True)[1] + 1):
             self.number_day.append(days)
@@ -1178,7 +1424,8 @@ class Days_month:
             else:
                 if max_width >= 2:
                     self.name_day[control] = Label(self.principal_frame,
-                                                   text=f'{self.week_day_name[self.week_day[control]]} - Dia {self.number_day[control]}',
+                                                   text=f'{self.week_day_name[self.week_day[control]]} - Dia '
+                                                        f'{self.number_day[control]}',
                                                    fg=colors(5),
                                                    bg=colors(3),
                                                    font=('Calibri', 10, 'bold'))
@@ -1231,7 +1478,8 @@ class Days_month:
                         while True:
                             if aux_cal < len(verify_calendar):
                                 self.cal_reg.append(Label(self.all_days[control],
-                                                          text=f'{verify_calendar[aux_cal][1]} - {verify_calendar[aux_cal][0]}',
+                                                          text=f'{verify_calendar[aux_cal][1]} - '
+                                                               f'{verify_calendar[aux_cal][0]}',
                                                           font=('calibri', 10, 'bold'),
                                                           fg=verify_calendar[aux_cal][2], bg=colors(4), anchor='center',
                                                           highlightthickness=1,
@@ -1249,7 +1497,8 @@ class Days_month:
                     max_width = 100
                     rely += 0.24
                     relx = 0.02
-        if (dates.year == year and dates.choose_now == month) or (day < 3 and dates.choose_now == month - 1 and (dates.year == year or dates.year == year - 1)):
+        if (dates.year == year and dates.choose_now == month) or (day < 3 and dates.choose_now == month - 1
+                                                                  and (dates.year == year or dates.year == year - 1)):
             if dates.choose_now == month - 1:
                 hidden_object[0].set(1)
             else:
@@ -1269,17 +1518,33 @@ class Days_month:
                 hidden_object[item].place_forget()
 
     def clear_frame(self):
+        """
+        :return: clear all widgets in frame.
+        """
         for widget in self.principal_frame.winfo_children():
             widget.destroy()
 
 
 class content_schedule:
+    """
+    Class auxiliar to "Schedule_window" and other classes used in calendar.
+    """
     def __init__(self, base_obj=None, goal_m=None):
         self.base = base_obj
         self.goal_m = goal_m
         self.selection, self.search, self.current_day = None, None, None
 
     def insert_study(self, limit, arg, field, cat, days, parent):
+        """
+        Method used in "Registry_window" to insert studies
+        :param limit: limit of numbers;
+        :param arg: entry object used to capture numbers;
+        :param field: field of this entry;
+        :param cat: name of category;
+        :param days: day chosen;
+        :param parent: window that contain the frame.
+        :return: pop-up with result and add or not study in calendar table.
+        """
         arg = str(arg.get())
         if arg.isnumeric():
             if len(arg) >= limit:
@@ -1298,12 +1563,14 @@ class content_schedule:
                                                         dates.name_month_now[dates.choose_now - 1], dates.year, 'day',
                                                         'month', 'year')
                     if len(search_off) != 0:
-                        messagebox.showerror('Erro no cadastro', 'Para o dia escolhido existe uma folga, para continuar,'
+                        messagebox.showerror('Erro no cadastro', 'Para o dia escolhido existe uma folga, para '
+                                                                 'continuar,'
                                                                  ' por favor, remova a mesma e cadastre o estudo.',
                                              parent=parent)
                         field.delete(0, END)
                     else:
-                        confirm = bd.insert_calendar(arg, days, dates.name_month_now[dates.choose_now - 1], dates.year, cat,
+                        confirm = bd.insert_calendar(arg, days, dates.name_month_now[dates.choose_now - 1], dates.year,
+                                                     cat,
                                                      color[0][0])
                         bd.disconnect()
                         if confirm == 0:
@@ -1316,7 +1583,8 @@ class content_schedule:
                             self.goal_m.show_data()
                         elif confirm == 1:
                             messagebox.showinfo('Atualizado com sucesso',
-                                                f'O registro já existente para a categoria {cat} no dia {days} foi atualizado!',
+                                                f'O registro já existente para a categoria {cat} no dia {days} foi '
+                                                f'atualizado!',
                                                 parent=parent)
                             field.delete(0, END)
                             self.base.day_month_system(original_obj=self.base)
@@ -1334,6 +1602,17 @@ class content_schedule:
             field.delete(0, END)
 
     def max_comment(self, limit, arg, field, parent, days, months, years):
+        """
+        Method used in "Commentary_window", he can add the content to commentary
+        :param limit: limit of characters for better work in database;
+        :param arg: entry class with content;
+        :param field: field of this entry;
+        :param parent: window that contain the frame;
+        :param days: day chosen;
+        :param months: month chosen;
+        :param years: year chosen;
+        :return: pop-up with result and add or not commentary to table respective.
+        """
         verify_content = ''
         if len(arg) == 0 or arg == '':
             messagebox.showerror('Erro', 'O campo está vazio', parent=parent)
@@ -1359,10 +1638,18 @@ class content_schedule:
                 self.base.day_month_system(original_obj=self.base)
 
     def delete_study(self, treeview, days, window):
+        """
+        Method to remove one study
+        :param treeview: object of treeview class;
+        :param days: day chosen;
+        :param window: window that contain the frame.
+        :return: pop-up with result and remove or not the study from calendar table.
+        """
         try:
             self.selection = treeview.item(treeview.focus())
             bd.connect()
-            bd.del_registry(self.selection['tags'][0], days.get(), dates.name_month_now[dates.choose_now - 1], dates.year)
+            bd.del_registry(self.selection['tags'][0], days.get(), dates.name_month_now[dates.choose_now - 1],
+                            dates.year)
             bd.disconnect()
         except IndexError:
             if self.selection is None:
@@ -1370,7 +1657,8 @@ class content_schedule:
                 self.selection = None
             else:
                 messagebox.showerror('Erro de execução',
-                                     'Ocorreu um pequeno erro na solicitação, por favor, feche e abra novamente esta janela.',
+                                     'Ocorreu um pequeno erro na solicitação, por favor, feche e abra novamente '
+                                     'esta janela.',
                                      parent=window)
                 self.selection = None
         else:
@@ -1382,6 +1670,13 @@ class content_schedule:
             self.base.day_month_system(original_obj=self.base)
 
     def find_study(self, treeview, days, window):
+        """
+        Method to filter studies with treeview
+        :param treeview: object of treeview class;
+        :param days: day chosen;
+        :param window: window that contain the frame.
+        :return: pop-up with result or show treeview content.
+        """
         view_off = 0
         if self.search == 1 and self.current_day == days:
             messagebox.showerror('Ação repetida', f'Os registros do dia {days} já estão na tela (caso exista).',
@@ -1399,7 +1694,8 @@ class content_schedule:
                 for item in treeview.get_children():
                     treeview.delete(item)
                 messagebox.showerror('Retorno da busca',
-                                     f'Nenhum registro localizado para o dia {days} de {dates.name_month_now[dates.choose_now - 1]}.',
+                                     f'Nenhum registro localizado para o dia {days} de '
+                                     f'{dates.name_month_now[dates.choose_now - 1]}.',
                                      parent=window)
             else:
                 for item in range(0, len(cat_day)):
@@ -1411,6 +1707,9 @@ class content_schedule:
 
 
 class Goal_status_window:
+    """
+    Class to goal window visible in "Schedule_window"
+    """
     def __init__(self, parent):
         self.frame1, self.label1 = None, None
         self.actual_m, self.window = None, None
@@ -1418,6 +1717,9 @@ class Goal_status_window:
         self.view_status()
 
     def screen(self):
+        """
+        :return: construction of base window.
+        """
         self.window.title('Status das metas do mês')
         self.window.configure(background=colors(1))
         self.window.geometry('500x300+700+100')
@@ -1427,10 +1729,16 @@ class Goal_status_window:
         self.window.iconbitmap('images/girl.ico')
 
     def frame(self):
+        """
+        :return: create a frame.
+        """
         self.frame1 = Frame(self.window, background=colors(2))
         self.frame1.place(relx=0.04, rely=0.04, relwidth=0.92, relheight=0.92)
 
     def view_status(self):
+        """
+        :return: datas applies in one treeview or show a pop-up in place if don't exist data.
+        """
         match dates.choose_now:
             case 1:
                 self.actual_m = 'janeiro'
@@ -1503,18 +1811,25 @@ class Goal_status_window:
                                     tags=(f'{result[item][1]}',))
                 else:
                     tree.tag_configure(f'{result[item][1]}', foreground='white', background=result[item][2])
-                    tree.insert('', 'end', values=(result[item][1], round(result[item][0] / 60, 1), actual_time[0], actual_time[1]),
+                    tree.insert('', 'end', values=(result[item][1], round(result[item][0] / 60, 1), actual_time[0],
+                                                   actual_time[1]),
                                 tags=(f'{result[item][1]}',))
             self.window.mainloop()
 
 
 class Goal_main_view:
+    """
+    Class used for shows datas of goal in "Main_window".
+    """
     def __init__(self, frame, a_month):
         self.frame = frame
         self.a_month = a_month
         self.actual_m = None
 
     def show_data(self):
+        """
+        :return: datas applies in one treeview or show a message in place if don't exist data.
+        """
         match self.a_month:
             case 1:
                 self.actual_m = 'janeiro'
@@ -1588,9 +1903,15 @@ class Goal_main_view:
                                     tags=(f'{result[item][1]}',))
                 else:
                     tree.tag_configure(f'{result[item][1]}', foreground='white', background=result[item][2])
-                    tree.insert('', 'end', values=(result[item][1], round(result[item][0] / 60, 1), actual_time[0], actual_time[1]),
+                    tree.insert('', 'end', values=(result[item][1], round(result[item][0] / 60, 1), actual_time[0],
+                                                   actual_time[1]),
                                 tags=(f'{result[item][1]}',))
 
     def clear_frame(self):
+        """
+        :return: clear all objects in frame.
+        """
         for widget in self.frame.winfo_children():
             widget.destroy()
+
+
